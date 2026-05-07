@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+
+# cputh.py
+
+import re
+import sys
+import argparse
+from dataclasses import dataclass
+from typing import NoReturn
+from pathlib import Path
+
+CPUTH_MAP: dict[str, str] = {
+    # imports
+    "way_back": "from",
+    "get_it_now": "import",
+
+    # conditionals
+    "attention": "if",
+    "left_out": "elif",
+    "i_dont_care": "else",
+
+    # membership / logic
+    "hold_you_tight": "in",
+    "no_more": "not",
+
+    # loops
+    "how_long": "while",
+    "left_right": "for",
+    "repeat_it": "continue",
+    "we_dont_talk_anymore": "break",
+    "slow_dance": "pass",
+
+    # functions / classes
+    "one_call_away": "class",
+    "say_something": "def",
+    "done_for_me": "return",
+    "cheating_on_you": "yield",
+
+    # exceptions
+    "dangerously": "try",
+    "is_it_too_late": "except",
+    "clean_slate": "finally",
+    "blame_it_on_me": "raise",
+
+    # booleans
+    "TheWayIAm": "True",
+    "ForgetAboutYou": "False",
+    "Maybe": "None",
+
+    # i/o
+    "talk_to_me": "print",
+    "listen": "input",
+
+    # data structures
+    "lightswitch": "bool",
+    "album": "list",
+    "playlist": "dict",
+}
+
+# Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences
+TOKEN_RE = re.compile(r'\w+|[^\w\s]|\s+')
+
+@dataclass(frozen=True)
+class Args:
+    input_path: Path   # .cputh
+    output_path: Path  # .py
+    force: bool        # overwrite the output file if it already exists
+
+def die(msg: str) -> NoReturn:
+    print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+def compile_cputh_to_py(text: str) -> str:
+    # This assumes TOKEN_RE captures everything, including whitespace/newlines
+    tokens = TOKEN_RE.findall(text)
+
+    # Map tokens: If it's a Puth-lyric, swap it.
+    # If it's whitespace or unknown, keep it exactly as it was.
+    translated = [
+        CPUTH_MAP.get(tok, tok)
+        for tok in tokens
+        if tok is not None
+    ]
+
+    # Join them with NO extra logic.
+    # The original spaces/newlines from the input are tokens too!
+    return "".join(translated)  # type: ignore
+
+def parse_args() -> Args:
+    parser = argparse.ArgumentParser(
+        description="Compile Charlie Puth code to Python.",
+        usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force]"
+    )
+
+    parser.add_argument("input_path", type=Path, help="Path to the .cputh file")
+    parser.add_argument("output_path", type=Path, help="Path to the output .py file")
+    parser.add_argument(
+        "-f", "--force",
+        action="store_true",
+        help="Overwrite the output file if it already exists"
+    )
+
+    # Note: parse_args() handles --help and missing args automatically
+    args_raw = parser.parse_args()
+
+    # Input path validation
+    if not args_raw.input_path.exists():
+        die(f"cannot read from input: no such file: {args_raw.input_path}")
+    if not args_raw.input_path.is_file():
+        die(f"cannot read from input: invalid file: {args_raw.input_path}")
+
+    # Output parent directory validation
+    if not args_raw.output_path.parent.exists():
+        die(f"invalid output file: no such parent directory: {args_raw.output_path.parent}")
+
+    # Force flag logic
+    if args_raw.output_path.exists():
+        if args_raw.force:
+            print(f"Warning: Overwriting existing file '{args_raw.output_path}'", file=sys.stderr)
+        else:
+            die(f"output file '{args_raw.output_path}' already exists. Use -f or --force to overwrite.")
+
+    return Args(
+        input_path=args_raw.input_path,
+        output_path=args_raw.output_path,
+        force=args_raw.force
+    )
+
+def main() -> None:
+    args = parse_args()
+
+    with open(args.input_path, "r") as f:
+        cputh = f.read()
+
+    py = compile_cputh_to_py(cputh)
+
+    with open(args.output_path, "w") as f:
+        f.write(py)
+
+if __name__ == "__main__":
+    main()
