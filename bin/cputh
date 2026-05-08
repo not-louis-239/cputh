@@ -80,7 +80,7 @@ CPUTH_MAP: dict[str, str] = {
     # data structures
     "lightswitch": "bool",
     "memories": "list",
-    "nine_track_mind": "dict",
+    "mind": "dict",
 
     # context
     "stay_with_me": "with",
@@ -101,6 +101,8 @@ def die(msg: str) -> NoReturn:
     sys.exit(1)
 
 def compile_cputh_to_py(text: str) -> str:
+    """Compile CPuth source to Python."""
+
     # This assumes TOKEN_RE captures everything, including whitespace/newlines
     tokens = TOKEN_RE.findall(text)
 
@@ -118,7 +120,7 @@ def compile_cputh_to_py(text: str) -> str:
 
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
-        description="Compile Charlie Puth code to Python.",
+        description ="Compile Charlie Puth source to Python.",
         usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force]"
     )
 

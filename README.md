@@ -67,7 +67,7 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 ### Data Structures
 - `lightswitch` -> `bool` (Light Switch)
 - `memories` -> `list` (Left and Right)
-- `nine_track_mind` -> `dict` (Nine Track Mind)
+- `mind` -> `dict` (Nine Track Mind)
 
 ### Context
 - `stay_with_me` -> `with` (Stay)
