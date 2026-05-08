@@ -134,6 +134,30 @@ def compile_cputh_to_py(text: str) -> str:
     # The original spaces/newlines from the input are tokens too!
     return "".join(translated)  # type: ignore
 
+def format_code_view(code: str, lineno: int, view_range: int) -> str:
+    """Return a formatted compiler error message
+
+    Display only the lines from lineno - view_range to lineno + view_range."""
+
+    lineno -= 1  # SyntaxError line numbers are 1-based
+
+    code_split = code.splitlines()
+    start_line: int = max(0, lineno - view_range)
+    end_line: int = min(len(code_split), lineno + view_range + 1)
+    lines = code_split[start_line:end_line]
+
+    out = []
+    max_len = len(str(end_line - 1))
+    for n, line in enumerate(lines, start=start_line):
+        line = f"{n:>{max_len}} | {line}"
+
+        if n == lineno:
+            line = "\033[95m" + line + "\033[0m"
+
+        out.append(line)
+
+    return "\n".join(out)
+
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
         description ="Compile Charlie Puth code to Python.",
@@ -164,7 +188,7 @@ def parse_args() -> Args:
     # Force flag logic
     if args_raw.output_path.exists():
         if args_raw.force:
-            print(f"Warning: Overwriting existing file '{args_raw.output_path}'", file=sys.stderr)
+            print(f"\033[93m\033[1mwarning\033[0m\033[33m: overwriting existing file '{args_raw.output_path}'\033[0m", file=sys.stderr)
         else:
             die(f"output file '{args_raw.output_path}' already exists. Use -f or --force to overwrite.")
 
@@ -182,14 +206,16 @@ def main() -> None:
 
     py = compile_cputh_to_py(cputh)
 
-    # Validate the compiled Python and return
-    # an exit code of 1 if there is a syntax error
+    # Validate the compiled Python
+    # If the Python is syntactically incorrect, don't write to the output file
     try:
-        compile(py, "<cputh>", mode="exec")
+        compile(py, args.input_path.name, mode="exec")
     except SyntaxError as exc:
         print(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
+        print(f"Code was not written to output file.")
         print("\nPython output:\n")
-        print(py)
+        if exc.lineno is not None:
+            print(format_code_view(py, lineno=exc.lineno, view_range=2))
         sys.exit(1)
 
     with open(args.output_path, "w") as f:
