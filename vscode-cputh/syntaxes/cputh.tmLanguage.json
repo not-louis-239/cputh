@@ -1,0 +1,18 @@
+{
+    "name": "cputh",
+    "scopeName": "source.cputh",
+    "patterns": [
+        { "include": "#variables" },
+        { "include": "#keywords" },
+        { "include": "#strings" },
+        { "include": "#comments" },
+        { "include": "#punctuation" }
+    ],
+    "repository": {
+        "variables": {},
+        "keywords": {},
+        "strings": {},
+        "comments": {},
+        "punctuation": {}
+    }
+}

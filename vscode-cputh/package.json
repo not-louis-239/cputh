@@ -1,0 +1,19 @@
+{
+    "name": "cputh",
+    "displayName": "Charlie Puth Syntax Highlighting",
+    "version": "0.1.0",
+    "engines": { "vscode": "^1.60.0" },
+    "contributes": {
+        "languages": [{
+            "id": "cputh",
+            "aliases": ["Charlie Puth", "cputh"],
+            "extensions": [".cputh"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "cputh",
+            "scopeName": "source.cputh",
+            "path": "./syntaxes/cputh.tmLanguage.json"
+        }]
+    }
+}
