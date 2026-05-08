@@ -11,6 +11,20 @@ Free syntax highlighting extension for VS Code included!
 
 The compiler is written in CPuth itself. `src/compiler.cputh` compiles to `src/compiler.py`, which is what actually runs. You might interpret this as a cry for help.
 
+## Standard Library
+
+Yes. There is a standard library now.
+
+Originally this project was just a token substitution joke. Then it became self-hosted. Then it became emotionally unstable. Now it has a standard library. Nobody voted on this.
+
+The CPuth standard library is a thinly disguised rewrite of Python's stdlib, where modules have been translated into lyrical, emotional syntax.
+- functools
+- random
+- threading
+- types
+
+CPuth is now officially an ecosystem of unresolved feelings that just happen to compile to Python.
+
 ## Mapping
 
 ### Imports
