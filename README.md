@@ -104,6 +104,12 @@ no_matter_where_you_go:
 
 I made this as a joke. It is not affiliated with, endorsed by, or known to Charlie Puth. If something explodes, open an issue (at `https://github.com/not-louis-239/cputh/issues`) — I'll admit it's my fault, but you gotta believe me when I say it only happened once.
 
+## Requirements
+
+- Python 3.x (tested on 3.14.0)
+- `pip install requirements.txt`
+  - Note: `pygame` is included in `requirements.txt`, but is **not** required except for the `snek.cputh` example in `examples/snek/snek.cputh`.
+
 ## Installation & Usage
 
 1. Clone this repository
