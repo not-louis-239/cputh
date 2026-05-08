@@ -6,11 +6,11 @@
         { "include": "#keywords" },
         { "include": "#comments" },
         { "include": "#strings" },
+        { "include": "#constants" },
         { "include": "#types" },
         { "include": "#params" },
         { "include": "#variables" },
-        { "include": "#operators" },
-        { "include": "#constants" }
+        { "include": "#operators" }
     ],
     "repository": {
         "keywords": {
@@ -51,11 +51,6 @@
                     "match": "(\\+=|-=|\\*=|/=|//=|%=|\\*\\*=|&=|\\|=|\\^=|>>=|<<=)"
                 },
                 {
-                    "comment": "annotations",
-                    "name": "punctuation.separator.annotation.result.cputh",
-                    "match": "->"
-                },
-                {
                     "comment": "ellipsis",
                     "name": "constant.other.ellipsis.cputh",
                     "match": "\\.\\.\\."
@@ -74,6 +69,11 @@
                     "comment": "anonymous function",
                     "name": "storage.type.function.anonymous.cputh",
                     "match": "\\bsmaller_talks\\b"
+                },
+                {
+                    "comment": "logical operators",
+                    "name": "keyword.operator.logical.cputh",
+                    "match": "\\b(i_still_look_at_you_the_same|all_up_on_ya|nothing_left|come_along_with_me|share_our_fears)\\b"
                 },
                 {
                     "comment": "function definition: keyword, name, and opening paren",
@@ -142,6 +142,124 @@
                     "patterns": [
                         { "name": "constant.character.escape.cputh", "match": "\\\\." }
                     ]
+                },
+                {
+                    "comment": "f-string double quoted",
+                    "name": "string.quoted.double.cputh",
+                    "begin": "(f)(\")",
+                    "end": "\"",
+                    "beginCaptures": {
+                        "1": { "name": "storage.type.string.cputh" },
+                        "2": { "name": "punctuation.definition.string.begin.cputh" }
+                    },
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.string.end.cputh" }
+                    },
+                    "patterns": [
+                        {
+                            "comment": "escape sequences",
+                            "name": "constant.character.escape.cputh",
+                            "match": "\\\\."
+                        },
+                        {
+                            "comment": "interpolated expression",
+                            "name": "meta.interpolation.cputh",
+                            "begin": "\\{",
+                            "end": "\\}",
+                            "beginCaptures": {
+                                "0": { "name": "punctuation.definition.template.begin.cputh" }
+                            },
+                            "endCaptures": {
+                                "0": { "name": "punctuation.definition.template.end.cputh" }
+                            },
+                            "patterns": [
+                                { "include": "#keywords" },
+                                { "include": "#variables" },
+                                { "include": "#operators" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "comment": "f-string single quoted",
+                    "name": "string.quoted.single.cputh",
+                    "begin": "(f)(')",
+                    "end": "'",
+                    "beginCaptures": {
+                        "1": { "name": "storage.type.string.cputh" },
+                        "2": { "name": "punctuation.definition.string.begin.cputh" }
+                    },
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.string.end.cputh" }
+                    },
+                    "patterns": [
+                        {
+                            "comment": "escape sequences",
+                            "name": "constant.character.escape.cputh",
+                            "match": "\\\\."
+                        },
+                        {
+                            "comment": "interpolated expression",
+                            "name": "meta.interpolation.cputh",
+                            "begin": "\\{",
+                            "end": "\\}",
+                            "beginCaptures": {
+                                "0": { "name": "punctuation.definition.template.begin.cputh" }
+                            },
+                            "endCaptures": {
+                                "0": { "name": "punctuation.definition.template.end.cputh" }
+                            },
+                            "patterns": [
+                                { "include": "#keywords" },
+                                { "include": "#variables" },
+                                { "include": "#operators" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "constants": {
+            "patterns": [
+                {
+                    "comment": "language-specific constants",
+                    "name": "constant.language.cputh",
+                    "match": "\\b(TheWayIAm|ShouldveKnown|Nothing)\\b"
+                },
+                {
+                    "comment": "SCREAMING_SNAKE_CASE constants",
+                    "name": "constant.other.caps.cputh",
+                    "match": "\\b[A-Z][A-Z0-9_]+\\b"
+                },
+                {
+                    "comment": "float — scientific notation",
+                    "name": "constant.numeric.float.scientific.cputh",
+                    "match": "\\b([0-9][0-9_]*\\.?[0-9_]*)([eE][+-]?[0-9][0-9_]*)\\b"
+                },
+                {
+                    "comment": "float — decimal",
+                    "name": "constant.numeric.float.cputh",
+                    "match": "\\b([0-9][0-9_]*\\.[0-9_]*)\\b|\\b(\\.[0-9][0-9_]*)\\b"
+                },
+                {
+                    "comment": "integer — hexadecimal",
+                    "name": "constant.numeric.integer.hexadecimal.cputh",
+                    "match": "\\b(0[xX][0-9a-fA-F][0-9a-fA-F_]*)\\b"
+                },
+                {
+                    "comment": "integer — octal",
+                    "name": "constant.numeric.integer.octal.cputh",
+                    "match": "\\b(0[oO][0-7][0-7_]*)\\b"
+                },
+                {
+                    "comment": "integer — binary",
+                    "name": "constant.numeric.integer.binary.cputh",
+                    "match": "\\b(0[bB][01][01_]*)\\b"
+                },
+                {
+                    "comment": "integer — decimal",
+                    "name": "constant.numeric.integer.cputh",
+                    "match": "\\b([0-9][0-9_]*)\\b"
                 }
             ]
         },
@@ -190,14 +308,19 @@
         "operators": {
             "patterns": [
                 {
+                    "comment": "annotations",
+                    "name": "punctuation.separator.annotation.result.cputh",
+                    "match": "->"
+                },
+                {
                     "comment": "assignment operators",
                     "name": "keyword.operator.assignment.cputh",
                     "match": "(?<![=!<>])=(?!=)"
                 },
                 {
-                    "comment": "logical operators",
-                    "name": "keyword.operator.logical.cputh",
-                    "match": "\\b(==|!=|<=|>=|<|>|i_still_look_at_you_the_same|all_up_on_ya|nothing_left|come_along_with_me|share_our_fears)\\b"
+                    "comment": "comparison operators - match 2-char patterns first, then 1-char patterns",
+                    "name": "keyword.operator.comparison.cputh",
+                    "match": "==|!=|<=|>=|<|>"
                 },
                 {
                     "comment": "arithmetic operators",
@@ -208,6 +331,11 @@
                     "comment": "bitwise operators",
                     "name": "keyword.operator.bitwise.cputh",
                     "match": "(&|\\||\\^|~|<<|>>)"
+                },
+                {
+                    "comment": "punctuation - decorator or matmul",
+                    "name": "punctuation.definition.decorator.cputh",
+                    "match": "@"
                 },
                 {
                     "comment": "punctuation — separators",
@@ -228,50 +356,6 @@
                     "comment": "punctuation — brackets",
                     "name": "punctuation.brackets.cputh",
                     "match": "[\\(\\)\\[\\]\\{\\}]"
-                }
-            ]
-        },
-        "constants": {
-            "patterns": [
-                {
-                    "comment": "language-specific constants",
-                    "name": "constant.language.cputh",
-                    "match": "\\b(TheWayIAm|ShouldveKnown|Nothing)\\b"
-                },
-                {
-                    "comment": "SCREAMING_SNAKE_CASE constants",
-                    "name": "constant.other.caps.cputh",
-                    "match": "\\b[A-Z][A-Z0-9_]+\\b"
-                },
-                {
-                    "comment": "float — scientific notation",
-                    "name": "constant.numeric.float.scientific.cputh",
-                    "match": "\\b([0-9][0-9_]*\\.?[0-9_]*)([eE][+-]?[0-9][0-9_]*)\\b"
-                },
-                {
-                    "comment": "float — decimal",
-                    "name": "constant.numeric.float.cputh",
-                    "match": "\\b([0-9][0-9_]*\\.[0-9_]*)\\b|\\b(\\.[0-9][0-9_]*)\\b"
-                },
-                {
-                    "comment": "integer — hexadecimal",
-                    "name": "constant.numeric.integer.hexadecimal.cputh",
-                    "match": "\\b(0[xX][0-9a-fA-F][0-9a-fA-F_]*)\\b"
-                },
-                {
-                    "comment": "integer — octal",
-                    "name": "constant.numeric.integer.octal.cputh",
-                    "match": "\\b(0[oO][0-7][0-7_]*)\\b"
-                },
-                {
-                    "comment": "integer — binary",
-                    "name": "constant.numeric.integer.binary.cputh",
-                    "match": "\\b(0[bB][01][01_]*)\\b"
-                },
-                {
-                    "comment": "integer — decimal",
-                    "name": "constant.numeric.integer.cputh",
-                    "match": "\\b([0-9][0-9_]*)\\b"
                 }
             ]
         }
