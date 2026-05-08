@@ -23,50 +23,68 @@ from pathlib import Path
 
 CPUTH_MAP: dict[str, str] = {
     # imports
-    "way_back": "from",
-    "get_it_now": "import",
+    "from_where_we_began": "from",
+    "get_it_on": "import",
 
     # conditionals
     "attention": "if",
-    "left_out": "elif",
-    "i_dont_care": "else",
+    "left_right_left": "elif",
+    "no_matter_where_you_go": "else",
 
     # membership / logic
-    "hold_you_tight": "in",
-    "no_more": "not",
+    "i_still_look_at_you_the_same": "is",
+    "all_up_on_ya": "in",
+    "nothing_left": "not",
+    "come_along_with_me": "and",
+    "share_our_fears": "or",
 
     # loops
     "how_long": "while",
-    "left_right": "for",
-    "repeat_it": "continue",
+    "goin_round": "for",
+    "move_on": "continue",
     "we_dont_talk_anymore": "break",
-    "slow_dance": "pass",
+    "slow_it_down": "pass",
 
     # functions / classes
     "one_call_away": "class",
-    "say_something": "def",
+    "then_theres_you": "def",
+    "smaller_talks": "lambda",
     "done_for_me": "return",
     "cheating_on_you": "yield",
 
-    # exceptions
-    "dangerously": "try",
-    "is_it_too_late": "except",
-    "clean_slate": "finally",
-    "blame_it_on_me": "raise",
+    # scope
+    "this_whole_world": "global",
+    "not_alone": "nonlocal",
+    "erase": "del",
 
-    # booleans
+    # async
+    "i_still_can_hear_you": "async",
+    "it_wont_be_long": "await",
+
+    # exceptions
+    "promise_me": "assert",
+    "dangerously": "try",
+    "please_forgive_me": "except",
+    "see_you_again": "finally",
+    "blame_myself": "raise",
+
+    # constants
     "TheWayIAm": "True",
-    "ForgetAboutYou": "False",
-    "Maybe": "None",
+    "ShouldveKnown": "False",
+    "Nothing": "None",
 
     # i/o
-    "talk_to_me": "print",
-    "listen": "input",
+    "everyone_knows": "print",
+    "tell_me_honestly": "input",
 
     # data structures
     "lightswitch": "bool",
-    "album": "list",
-    "playlist": "dict",
+    "memories": "list",
+    "nine_track_mind": "dict",
+
+    # context
+    "stay_with_me": "with",
+    "call_me": "as",
 }
 
 # Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences

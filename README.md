@@ -25,22 +25,6 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 - `come_along_with_me` -> `and` (One Call Away)
 - `share_our_fears` -> `or` (Changes)
 
-### Imports
-- `from_where_we_began` -> `from` (See You Again)
-- `get_it_on` -> `import` (Marvin Gaye)
-
-### Conditionals
-- `attention` -> `if` (Attention)
-- `left_right_left` -> `elif` (album: Nine Track Mind)
-- `no_matter_where_you_go` -> `else` (One Call Away)
-
-### Membership, Logical Operators
-- `i_still_look_at_you_the_same` -> `is` (Hey Brother)
-- `all_up_on_ya` -> `in` (Attention)
-- `nothing_left` -> `not` (Dangerously)
-- `come_along_with_me` -> `and` (One Call Away)
-- `share_our_fears` -> `or` (Changes)
-
 ### Loops
 - `how_long` -> `while` (How Long)
 - `goin_round` -> `for` (Left and Right)
@@ -75,6 +59,10 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 - `TheWayIAm` -> `True` (album: Voicenotes)
 - `ShouldveKnown` -> `False` (We Don't Talk Anymore)
 - `Nothing` -> `None` (One Call Away)
+
+### I/O
+- `everyone_knows` -> `print` (My Gospel)
+- `tell_me_honestly` -> `input` (How Long)
 
 ### Data Structures
 - `lightswitch` -> `bool` (Light Switch)
