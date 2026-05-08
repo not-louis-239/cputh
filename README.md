@@ -1,6 +1,6 @@
 # cputh compiler
 
-Simple joke compiler to compile Charlie Puth source to Python.
+Simple compiler to compile Charlie Puth source to Python.
 Why? Because now you can sing your source code!
 
 `cputh` is a soulful, rhythmic transpiler that converts Charlie Puth lyrics to working Python code. Why use boring keywords like `if` and `while` when you could be demanding `attention` or asking `how_long` your loop has been running?
@@ -10,50 +10,80 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 ## Mapping
 
 ### Imports
-- `way_back` -> `from`
-- `get_it_now` -> `import`
+- `from_where_we_began` -> `from` (See You Again)
+- `get_it_on` -> `import` (Marvin Gaye)
 
 ### Conditionals
-- `attention` -> `if`
-- `left_out` -> `elif`
-- `i_dont_care` -> `else`
+- `attention` -> `if` (Attention)
+- `left_right_left` -> `elif` (album: Nine Track Mind)
+- `no_matter_where_you_go` -> `else` (One Call Away)
 
 ### Membership, Logical Operators
-- `hold_you_tight` -> `in`
-- `no_more` -> `not`
+- `i_still_look_at_you_the_same` -> `is` (Hey Brother)
+- `all_up_on_ya` -> `in` (Attention)
+- `nothing_left` -> `not` (Dangerously)
+- `come_along_with_me` -> `and` (One Call Away)
+- `share_our_fears` -> `or` (Changes)
+
+### Imports
+- `from_where_we_began` -> `from` (See You Again)
+- `get_it_on` -> `import` (Marvin Gaye)
+
+### Conditionals
+- `attention` -> `if` (Attention)
+- `left_right_left` -> `elif` (album: Nine Track Mind)
+- `no_matter_where_you_go` -> `else` (One Call Away)
+
+### Membership, Logical Operators
+- `i_still_look_at_you_the_same` -> `is` (Hey Brother)
+- `all_up_on_ya` -> `in` (Attention)
+- `nothing_left` -> `not` (Dangerously)
+- `come_along_with_me` -> `and` (One Call Away)
+- `share_our_fears` -> `or` (Changes)
 
 ### Loops
-- `how_long` -> `while`
-- `left_right` -> `for`
-- `repeat_it` -> `continue`
-- `we_dont_talk_anymore` -> `break`
-- `slow_dance` -> `pass`
+- `how_long` -> `while` (How Long)
+- `goin_round` -> `for` (Left and Right)
+- `move_on` -> `continue` (We Don’t Talk Anymore)
+- `we_dont_talk_anymore` -> `break` (We Don't Talk Anymore)
+- `slow_it_down` -> `pass` (album: Voicenotes)
 
 ### Functions and Classes
-- `one_call_away` -> `class`
-- `say_something` -> `def`
-- `done_for_me` -> `return`
-- `cheating_on_you` -> `yield`
+- `one_call_away` -> `class` (One Call Away)
+- `then_theres_you` -> `def` (Then There’s You)
+- `smaller_talks` -> `lambda` (Changes)
+- `done_for_me` -> `return` (Done for Me)
+- `cheating_on_you` -> `yield` (Cheating on You)
+
+### Scope Management
+- `this_whole_world` -> `global` (My Gospel)
+- `not_alone` -> `nonlocal` (One Call Away)
+- `erase` -> `del` (Left and Right)
+
+### Async Execution
+- `i_still_can_hear_you` -> `async` (Changes)
+- `it_wont_be_long` -> `await` (One Call Away)
 
 ### Exception Handling
-- `dangerously` -> `try`
-- `is_it_too_late` -> `except`
-- `clean_slate` -> `finally`
-- `blame_it_on_me` -> `raise`
+- `promise_me` -> `assert` (I'll Be There For You)
+- `dangerously` -> `try` (Dangerously)
+- `please_forgive_me` -> `except` (I Used to Be Cringe)
+- `see_you_again` -> `finally` (See You Again)
+- `blame_myself` -> `raise`(Dangerously)
 
 ### Constants
-- `TheWayIAm` -> `True`
-- `ForgetAboutYou` -> `False`
-- `Maybe` -> `None`
-
-### I/O
-- `talk_to_me` -> `print`
-- `listen` -> `input`
+- `TheWayIAm` -> `True` (album: Voicenotes)
+- `ShouldveKnown` -> `False` (We Don't Talk Anymore)
+- `Nothing` -> `None` (One Call Away)
 
 ### Data Structures
-- `lightswitch` -> `bool`
-- `album` -> `list`
-- `playlist` -> `dict`
+- `lightswitch` -> `bool` (Light Switch)
+- `memories` -> `list` (Left and Right)
+- `nine_track_mind` -> `dict` (Nine Track Mind)
+
+### Context
+- `stay_with_me` -> `with` (Stay)
+- `call_me` -> `as` (One Call Away)
 
 ## Development Status
 
@@ -67,6 +97,6 @@ I made this as a joke, but if something explodes, start an issue.
 
 ## Licence
 
-Apache 2.0. Read it for more details.
+Apache 2.0. See LICENCE for more details.
 
 **Disclaimer**: This project is not affiliated with Charlie Puth, though we suspect he'd appreciate the variable naming conventions. Please do not sue Monkey.
