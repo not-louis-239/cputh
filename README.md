@@ -9,6 +9,8 @@ Inspired by ArnoldC. Same energy, different discography. Arnold lifts. Charlie c
 
 Free syntax highlighting extension for VS Code included!
 
+The compiler is written in CPuth itself. `src/compiler.cputh` compiles to `src/compiler.py`, which is what actually runs. You might interpret this as a cry for help.
+
 ## Mapping
 
 ### Imports
