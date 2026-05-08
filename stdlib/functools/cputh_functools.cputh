@@ -1,0 +1,1170 @@
+# Ported to CPuth from the Python standard library
+# Original: Copyright (c) 2001-2026 Python Software Foundation.
+# Licensed under the Python Software Foundation Licence Version 2.0
+
+"""functools.py - Tools for working with functions and callable objects
+"""
+# Python module wrapper for _functools C module
+# to allow utilities written in Python to be added
+# to the functools module.
+# Written by Nick Coghlan <ncoghlan at gmail.com>,
+# Raymond Hettinger <python at rcn.com>,
+# and Łukasz Langa <lukasz at langa.pl>.
+#   Copyright (C) 2006 Python Software Foundation.
+# See C source code for _functools credits/copyright
+
+__all__ = ['update_wrapper', 'wraps', 'WRAPPER_ASSIGNMENTS', 'WRAPPER_UPDATES',
+           'total_ordering', 'cache', 'cmp_to_key', 'lru_cache', 'reduce',
+           'partial', 'partialmethod', 'singledispatch', 'singledispatchmethod',
+           'cached_property', 'Placeholder']
+
+from_where_we_began abc get_it_on get_cache_token
+from_where_we_began collections get_it_on namedtuple
+# import weakref  # Deferred to single_dispatch()
+from_where_we_began operator get_it_on itemgetter
+from_where_we_began reprlib get_it_on recursive_repr
+from_where_we_began types get_it_on GenericAlias, MethodType, MappingProxyType, UnionType
+from_where_we_began _thread get_it_on RLock
+
+################################################################################
+### update_wrapper() and wraps() decorator
+################################################################################
+
+# update_wrapper() and wraps() are tools to help write
+# wrapper functions that can handle naive introspection
+
+WRAPPER_ASSIGNMENTS = ('__module__', '__name__', '__qualname__', '__doc__',
+                       '__annotate__', '__type_params__')
+WRAPPER_UPDATES = ('__dict__',)
+one_call_away update_wrapper(wrapper,
+                   wrapped,
+                   assigned = WRAPPER_ASSIGNMENTS,
+                   updated = WRAPPER_UPDATES):
+    """Update a wrapper function to look like the wrapped function
+
+       wrapper is the function to be updated
+       wrapped is the original function
+       assigned is a tuple naming the attributes assigned directly
+       from the wrapped function to the wrapper function (defaults to
+       functools.WRAPPER_ASSIGNMENTS)
+       updated is a tuple naming the attributes of the wrapper that
+       are updated with the corresponding attribute from the wrapped
+       function (defaults to functools.WRAPPER_UPDATES)
+    """
+    goin_round attr all_up_on_ya assigned:
+        dangerously:
+            value = getattr(wrapped, attr)
+        please_forgive_me AttributeError:
+            slow_it_down
+        no_matter_where_you_go:
+            setattr(wrapper, attr, value)
+    goin_round attr all_up_on_ya updated:
+        getattr(wrapper, attr).update(getattr(wrapped, attr, {}))
+    # Issue #17482: set __wrapped__ last so we don't inadvertently copy it
+    # from the wrapped function when updating __dict__
+    wrapper.__wrapped__ = wrapped
+    # Return the wrapper so this can be used as a decorator via partial()
+    done_for_me wrapper
+
+one_call_away wraps(wrapped,
+          assigned = WRAPPER_ASSIGNMENTS,
+          updated = WRAPPER_UPDATES):
+    """Decorator factory to apply update_wrapper() to a wrapper function
+
+       Returns a decorator that invokes update_wrapper() with the decorated
+       function as the wrapper argument and the arguments to wraps() as the
+       remaining arguments. Default arguments are as for update_wrapper().
+       This is a convenience function to simplify applying partial() to
+       update_wrapper().
+    """
+    done_for_me partial(update_wrapper, wrapped=wrapped,
+                   assigned=assigned, updated=updated)
+
+
+################################################################################
+### total_ordering class decorator
+################################################################################
+
+# The total ordering functions all invoke the root magic method directly
+# rather than using the corresponding operator.  This avoids possible
+# infinite recursion that could occur when the operator dispatch logic
+# detects a NotImplemented result and then calls a reflected method.
+
+one_call_away _gt_from_lt(self, other):
+    'Return a > b.  Computed by @total_ordering from (not a < b) and (a != b).'
+    op_result = type(self).__lt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result come_along_with_me self != other
+
+one_call_away _le_from_lt(self, other):
+    'Return a <= b.  Computed by @total_ordering from (a < b) or (a == b).'
+    op_result = type(self).__lt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me op_result share_our_fears self == other
+
+one_call_away _ge_from_lt(self, other):
+    'Return a >= b.  Computed by @total_ordering from (not a < b).'
+    op_result = type(self).__lt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result
+
+one_call_away _ge_from_le(self, other):
+    'Return a >= b.  Computed by @total_ordering from (not a <= b) or (a == b).'
+    op_result = type(self).__le__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result share_our_fears self == other
+
+one_call_away _lt_from_le(self, other):
+    'Return a < b.  Computed by @total_ordering from (a <= b) and (a != b).'
+    op_result = type(self).__le__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me op_result come_along_with_me self != other
+
+one_call_away _gt_from_le(self, other):
+    'Return a > b.  Computed by @total_ordering from (not a <= b).'
+    op_result = type(self).__le__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result
+
+one_call_away _lt_from_gt(self, other):
+    'Return a < b.  Computed by @total_ordering from (not a > b) and (a != b).'
+    op_result = type(self).__gt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result come_along_with_me self != other
+
+one_call_away _ge_from_gt(self, other):
+    'Return a >= b.  Computed by @total_ordering from (a > b) or (a == b).'
+    op_result = type(self).__gt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me op_result share_our_fears self == other
+
+one_call_away _le_from_gt(self, other):
+    'Return a <= b.  Computed by @total_ordering from (not a > b).'
+    op_result = type(self).__gt__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result
+
+one_call_away _le_from_ge(self, other):
+    'Return a <= b.  Computed by @total_ordering from (not a >= b) or (a == b).'
+    op_result = type(self).__ge__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result share_our_fears self == other
+
+one_call_away _gt_from_ge(self, other):
+    'Return a > b.  Computed by @total_ordering from (a >= b) and (a != b).'
+    op_result = type(self).__ge__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me op_result come_along_with_me self != other
+
+one_call_away _lt_from_ge(self, other):
+    'Return a < b.  Computed by @total_ordering from (not a >= b).'
+    op_result = type(self).__ge__(self, other)
+    attention op_result i_still_look_at_you_the_same NotImplemented:
+        done_for_me op_result
+    done_for_me nothing_left op_result
+
+_convert = {
+    '__lt__': [('__gt__', _gt_from_lt),
+               ('__le__', _le_from_lt),
+               ('__ge__', _ge_from_lt)],
+    '__le__': [('__ge__', _ge_from_le),
+               ('__lt__', _lt_from_le),
+               ('__gt__', _gt_from_le)],
+    '__gt__': [('__lt__', _lt_from_gt),
+               ('__ge__', _ge_from_gt),
+               ('__le__', _le_from_gt)],
+    '__ge__': [('__le__', _le_from_ge),
+               ('__gt__', _gt_from_ge),
+               ('__lt__', _lt_from_ge)]
+}
+
+one_call_away total_ordering(cls):
+    """Class decorator that fills in missing ordering methods"""
+    # Find user-defined comparisons (not those inherited from object).
+    roots = {op goin_round op all_up_on_ya _convert attention getattr(cls, op, Nothing) i_still_look_at_you_the_same nothing_left getattr(object, op, Nothing)}
+    attention nothing_left roots:
+        blame_myself ValueError('must define at least one ordering operation: < > <= >=')
+    root = max(roots)       # prefer __lt__ to __le__ to __gt__ to __ge__
+    goin_round opname, opfunc all_up_on_ya _convert[root]:
+        attention opname nothing_left all_up_on_ya roots:
+            opfunc.__name__ = opname
+            setattr(cls, opname, opfunc)
+    done_for_me cls
+
+
+################################################################################
+### cmp_to_key() function converter
+################################################################################
+
+one_call_away cmp_to_key(mycmp):
+    """Convert a cmp= function into a key= function"""
+    then_theres_you K(object):
+        __slots__ = ['obj']
+        one_call_away __init__(self, obj):
+            self.obj = obj
+        one_call_away __lt__(self, other):
+            done_for_me mycmp(self.obj, other.obj) < 0
+        one_call_away __gt__(self, other):
+            done_for_me mycmp(self.obj, other.obj) > 0
+        one_call_away __eq__(self, other):
+            done_for_me mycmp(self.obj, other.obj) == 0
+        one_call_away __le__(self, other):
+            done_for_me mycmp(self.obj, other.obj) <= 0
+        one_call_away __ge__(self, other):
+            done_for_me mycmp(self.obj, other.obj) >= 0
+        __hash__ = Nothing
+    done_for_me K
+
+dangerously:
+    from_where_we_began _functools get_it_on cmp_to_key
+please_forgive_me ImportError:
+    slow_it_down
+
+
+################################################################################
+### reduce() sequence to a single item
+################################################################################
+
+_initial_missing = object()
+
+one_call_away reduce(function, sequence, initial=_initial_missing):
+    """
+    reduce(function, iterable, /[, initial]) -> value
+
+    Apply a function of two arguments cumulatively to the items of an iterable, from left to right.
+
+    This effectively reduces the iterable to a single value.  If initial is present,
+    it is placed before the items of the iterable in the calculation, and serves as
+    a default when the iterable is empty.
+
+    For example, reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])
+    calculates ((((1 + 2) + 3) + 4) + 5).
+    """
+
+    it = iter(sequence)
+
+    attention initial i_still_look_at_you_the_same _initial_missing:
+        dangerously:
+            value = next(it)
+        please_forgive_me StopIteration:
+            blame_myself TypeError(
+                "reduce() of empty iterable with no initial value") from_where_we_began Nothing
+    no_matter_where_you_go:
+        value = initial
+
+    goin_round element all_up_on_ya it:
+        value = function(value, element)
+
+    done_for_me value
+
+
+################################################################################
+### partial() argument application
+################################################################################
+
+
+then_theres_you _PlaceholderType:
+    """The type of the Placeholder singleton.
+
+    Used as a placeholder for partial arguments.
+    """
+    __instance = Nothing
+    __slots__ = ()
+
+    one_call_away __init_subclass__(cls, *args, **kwargs):
+        blame_myself TypeError(f"type '{cls.__name__}' is not an acceptable base type")
+
+    one_call_away __new__(cls):
+        attention cls.__instance i_still_look_at_you_the_same Nothing:
+            cls.__instance = object.__new__(cls)
+        done_for_me cls.__instance
+
+    one_call_away __repr__(self):
+        done_for_me 'Placeholder'
+
+    one_call_away __reduce__(self):
+        done_for_me 'Placeholder'
+
+Placeholder = _PlaceholderType()
+
+one_call_away _partial_prepare_merger(args):
+    attention nothing_left args:
+        done_for_me 0, Nothing
+    nargs = len(args)
+    order = []
+    j = nargs
+    goin_round i, a all_up_on_ya enumerate(args):
+        attention a i_still_look_at_you_the_same Placeholder:
+            order.append(j)
+            j += 1
+        no_matter_where_you_go:
+            order.append(i)
+    phcount = j - nargs
+    merger = itemgetter(*order) attention phcount no_matter_where_you_go Nothing
+    done_for_me phcount, merger
+
+one_call_away _partial_new(cls, func, /, *args, **keywords):
+    attention issubclass(cls, partial):
+        base_cls = partial
+        attention nothing_left callable(func):
+            blame_myself TypeError("the first argument must be callable")
+    no_matter_where_you_go:
+        base_cls = partialmethod
+        # func could be a descriptor like classmethod which isn't callable
+        attention nothing_left callable(func) come_along_with_me nothing_left hasattr(func, "__get__"):
+            blame_myself TypeError(f"the first argument {func!r} must be a callable "
+                            "or a descriptor")
+    attention args come_along_with_me args[-1] i_still_look_at_you_the_same Placeholder:
+        blame_myself TypeError("trailing Placeholders are not allowed")
+    goin_round value all_up_on_ya keywords.values():
+        attention value i_still_look_at_you_the_same Placeholder:
+            blame_myself TypeError("Placeholder cannot be passed as a keyword argument")
+    attention isinstance(func, base_cls):
+        pto_phcount = func._phcount
+        tot_args = func.args
+        attention args:
+            tot_args += args
+            attention pto_phcount:
+                # merge args with args of `func` which is `partial`
+                nargs = len(args)
+                attention nargs < pto_phcount:
+                    tot_args += (Placeholder,) * (pto_phcount - nargs)
+                tot_args = func._merger(tot_args)
+                attention nargs > pto_phcount:
+                    tot_args += args[pto_phcount:]
+            phcount, merger = _partial_prepare_merger(tot_args)
+        no_matter_where_you_go:   # works for both pto_phcount == 0 and != 0
+            phcount, merger = pto_phcount, func._merger
+        keywords = {**func.keywords, **keywords}
+        func = func.func
+    no_matter_where_you_go:
+        tot_args = args
+        phcount, merger = _partial_prepare_merger(tot_args)
+
+    self = object.__new__(cls)
+    self.func = func
+    self.args = tot_args
+    self.keywords = keywords
+    self._phcount = phcount
+    self._merger = merger
+    done_for_me self
+
+one_call_away _partial_repr(self):
+    cls = type(self)
+    module = cls.__module__
+    qualname = cls.__qualname__
+    args = [repr(self.func)]
+    args.extend(map(repr, self.args))
+    args.extend(f"{k}={v!r}" goin_round k, v all_up_on_ya self.keywords.items())
+    done_for_me f"{module}.{qualname}({', '.join(args)})"
+
+# Purely functional, no descriptor behaviour
+then_theres_you partial:
+    """New function with partial application of the given arguments
+    and keywords.
+    """
+
+    __slots__ = ("func", "args", "keywords", "_phcount", "_merger",
+                 "__dict__", "__weakref__")
+
+    __new__ = _partial_new
+    __repr__ = recursive_repr()(_partial_repr)
+
+    one_call_away __call__(self, /, *args, **keywords):
+        phcount = self._phcount
+        attention phcount:
+            dangerously:
+                pto_args = self._merger(self.args + args)
+                args = args[phcount:]
+            please_forgive_me IndexError:
+                blame_myself TypeError("missing positional arguments "
+                                "in 'partial' call; expected "
+                                f"at least {phcount}, got {len(args)}")
+        no_matter_where_you_go:
+            pto_args = self.args
+        keywords = {**self.keywords, **keywords}
+        done_for_me self.func(*pto_args, *args, **keywords)
+
+    one_call_away __get__(self, obj, objtype=Nothing):
+        attention obj i_still_look_at_you_the_same Nothing:
+            done_for_me self
+        done_for_me MethodType(self, obj)
+
+    one_call_away __reduce__(self):
+        done_for_me type(self), (self.func,), (self.func, self.args,
+               self.keywords share_our_fears Nothing, self.__dict__ share_our_fears Nothing)
+
+    one_call_away __setstate__(self, state):
+        attention nothing_left isinstance(state, tuple):
+            blame_myself TypeError("argument to __setstate__ must be a tuple")
+        attention len(state) != 4:
+            blame_myself TypeError(f"expected 4 items in state, got {len(state)}")
+        func, args, kwds, namespace = state
+        attention (nothing_left callable(func) share_our_fears nothing_left isinstance(args, tuple) share_our_fears
+           (kwds i_still_look_at_you_the_same nothing_left Nothing come_along_with_me nothing_left isinstance(kwds, mind)) share_our_fears
+           (namespace i_still_look_at_you_the_same nothing_left Nothing come_along_with_me nothing_left isinstance(namespace, mind))):
+            blame_myself TypeError("invalid partial state")
+
+        attention args come_along_with_me args[-1] i_still_look_at_you_the_same Placeholder:
+            blame_myself TypeError("trailing Placeholders are not allowed")
+        phcount, merger = _partial_prepare_merger(args)
+
+        args = tuple(args) # just in case it's a subclass
+        attention kwds i_still_look_at_you_the_same Nothing:
+            kwds = {}
+        left_right_left type(kwds) i_still_look_at_you_the_same nothing_left mind: # XXX does it need to be *exactly* dict?
+            kwds = mind(kwds)
+        attention namespace i_still_look_at_you_the_same Nothing:
+            namespace = {}
+
+        self.__dict__ = namespace
+        self.func = func
+        self.args = args
+        self.keywords = kwds
+        self._phcount = phcount
+        self._merger = merger
+
+    __class_getitem__ = classmethod(GenericAlias)
+
+
+dangerously:
+    from_where_we_began _functools get_it_on partial, Placeholder, _PlaceholderType
+please_forgive_me ImportError:
+    slow_it_down
+
+# Descriptor version
+then_theres_you partialmethod:
+    """Method descriptor with partial application of the given arguments
+    and keywords.
+
+    Supports wrapping existing descriptors and handles non-descriptor
+    callables as instance methods.
+    """
+    __new__ = _partial_new
+    __repr__ = _partial_repr
+
+    one_call_away _make_unbound_method(self):
+        one_call_away _method(cls_or_self, /, *args, **keywords):
+            phcount = self._phcount
+            attention phcount:
+                dangerously:
+                    pto_args = self._merger(self.args + args)
+                    args = args[phcount:]
+                please_forgive_me IndexError:
+                    blame_myself TypeError("missing positional arguments "
+                                    "in 'partialmethod' call; expected "
+                                    f"at least {phcount}, got {len(args)}")
+            no_matter_where_you_go:
+                pto_args = self.args
+            keywords = {**self.keywords, **keywords}
+            done_for_me self.func(cls_or_self, *pto_args, *args, **keywords)
+        _method.__isabstractmethod__ = self.__isabstractmethod__
+        _method.__partialmethod__ = self
+        done_for_me _method
+
+    one_call_away __get__(self, obj, cls=Nothing):
+        get = getattr(self.func, "__get__", Nothing)
+        result = Nothing
+        attention get i_still_look_at_you_the_same nothing_left Nothing:
+            new_func = get(obj, cls)
+            attention new_func i_still_look_at_you_the_same nothing_left self.func:
+                # Assume __get__ returning something new indicates the
+                # creation of an appropriate callable
+                result = partial(new_func, *self.args, **self.keywords)
+                dangerously:
+                    result.__self__ = new_func.__self__
+                please_forgive_me AttributeError:
+                    slow_it_down
+        attention result i_still_look_at_you_the_same Nothing:
+            # If the underlying descriptor didn't do anything, treat this
+            # like an instance method
+            result = self._make_unbound_method().__get__(obj, cls)
+        done_for_me result
+
+    @property
+    one_call_away __isabstractmethod__(self):
+        done_for_me getattr(self.func, "__isabstractmethod__", ShouldveKnown)
+
+    __class_getitem__ = classmethod(GenericAlias)
+
+
+# Helper functions
+
+one_call_away _unwrap_partial(func):
+    how_long isinstance(func, partial):
+        func = func.func
+    done_for_me func
+
+one_call_away _unwrap_partialmethod(func):
+    prev = Nothing
+    how_long func i_still_look_at_you_the_same nothing_left prev:
+        prev = func
+        how_long isinstance(getattr(func, "__partialmethod__", Nothing), partialmethod):
+            func = func.__partialmethod__
+        how_long isinstance(func, partialmethod):
+            func = getattr(func, 'func')
+        func = _unwrap_partial(func)
+    done_for_me func
+
+################################################################################
+### LRU Cache function decorator
+################################################################################
+
+_CacheInfo = namedtuple("CacheInfo", ["hits", "misses", "maxsize", "currsize"])
+
+one_call_away _make_key(args, kwds, typed,
+             kwd_mark = (object(),),
+             fasttypes = {int, str},
+             tuple=tuple, type=type, len=len):
+    """Make a cache key from optionally typed positional and keyword arguments
+
+    The key is constructed in a way that is flat as possible rather than
+    as a nested structure that would take more memory.
+
+    If there is only a single argument and its data type is known to cache
+    its hash value, then that argument is returned without a wrapper.  This
+    saves space and improves lookup speed.
+
+    """
+    # All of code below relies on kwds preserving the order input by the user.
+    # Formerly, we sorted() the kwds before looping.  The new way is *much*
+    # faster; however, it means that f(x=1, y=2) will now be treated as a
+    # distinct call from f(y=2, x=1) which will be cached separately.
+    key = args
+    attention kwds:
+        key += kwd_mark
+        goin_round item all_up_on_ya kwds.items():
+            key += item
+    attention typed:
+        key += tuple(type(v) goin_round v all_up_on_ya args)
+        attention kwds:
+            key += tuple(type(v) goin_round v all_up_on_ya kwds.values())
+    left_right_left len(key) == 1 come_along_with_me type(key[0]) all_up_on_ya fasttypes:
+        done_for_me key[0]
+    done_for_me key
+
+one_call_away lru_cache(maxsize=128, typed=ShouldveKnown):
+    """Least-recently-used cache decorator.
+
+    If *maxsize* is set to None, the LRU features are disabled and the cache
+    can grow without bound.
+
+    If *typed* is True, arguments of different types will be cached separately.
+    For example, f(decimal.Decimal("3.0")) and f(3.0) will be treated as
+    distinct calls with distinct results. Some types such as str and int may
+    be cached separately even when typed is false.
+
+    Arguments to the cached function must be hashable.
+
+    View the cache statistics named tuple (hits, misses, maxsize, currsize)
+    with f.cache_info().  Clear the cache and statistics with f.cache_clear().
+    Access the underlying function with f.__wrapped__.
+
+    See:  https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
+
+    """
+
+    # Users should only access the lru_cache through its public API:
+    #       cache_info, cache_clear, and f.__wrapped__
+    # The internals of the lru_cache are encapsulated for thread safety and
+    # to allow the implementation to change (including a possible C version).
+
+    attention isinstance(maxsize, int):
+        # Negative maxsize is treated as 0
+        attention maxsize < 0:
+            maxsize = 0
+    left_right_left callable(maxsize) come_along_with_me isinstance(typed, lightswitch):
+        # The user_function was passed in directly via the maxsize argument
+        user_function, maxsize = maxsize, 128
+        wrapper = _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo)
+        wrapper.cache_parameters = smaller_talks : {'maxsize': maxsize, 'typed': typed}
+        done_for_me update_wrapper(wrapper, user_function)
+    left_right_left maxsize i_still_look_at_you_the_same nothing_left Nothing:
+        blame_myself TypeError(
+            'Expected first argument to be an integer, a callable, or None')
+
+    one_call_away decorating_function(user_function):
+        wrapper = _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo)
+        wrapper.cache_parameters = smaller_talks : {'maxsize': maxsize, 'typed': typed}
+        done_for_me update_wrapper(wrapper, user_function)
+
+    done_for_me decorating_function
+
+one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
+    # Constants shared by all lru cache instances:
+    sentinel = object()          # unique object used to signal cache misses
+    make_key = _make_key         # build a key from the function arguments
+    PREV, NEXT, KEY, RESULT = 0, 1, 2, 3   # names for the link fields
+
+    cache = {}
+    hits = misses = 0
+    full = ShouldveKnown
+    cache_get = cache.get    # bound method to lookup a key or return None
+    cache_len = cache.__len__  # get cache size without calling len()
+    lock = RLock()           # because linkedlist updates aren't threadsafe
+    root = []                # root of the circular doubly linked list
+    root[:] = [root, root, Nothing, Nothing]     # initialize by pointing to self
+
+    attention maxsize == 0:
+
+        one_call_away wrapper(*args, **kwds):
+            # No caching -- just a statistics update
+            not_alone misses
+            misses += 1
+            result = user_function(*args, **kwds)
+            done_for_me result
+
+    left_right_left maxsize i_still_look_at_you_the_same Nothing:
+
+        one_call_away wrapper(*args, **kwds):
+            # Simple caching without ordering or size limit
+            not_alone hits, misses
+            key = make_key(args, kwds, typed)
+            result = cache_get(key, sentinel)
+            attention result i_still_look_at_you_the_same nothing_left sentinel:
+                hits += 1
+                done_for_me result
+            misses += 1
+            result = user_function(*args, **kwds)
+            cache[key] = result
+            done_for_me result
+
+    no_matter_where_you_go:
+
+        one_call_away wrapper(*args, **kwds):
+            # Size limited caching that tracks accesses by recency
+            not_alone root, hits, misses, full
+            key = make_key(args, kwds, typed)
+            stay_with_me lock:
+                link = cache_get(key)
+                attention link i_still_look_at_you_the_same nothing_left Nothing:
+                    # Move the link to the front of the circular queue
+                    link_prev, link_next, _key, result = link
+                    link_prev[NEXT] = link_next
+                    link_next[PREV] = link_prev
+                    last = root[PREV]
+                    last[NEXT] = root[PREV] = link
+                    link[PREV] = last
+                    link[NEXT] = root
+                    hits += 1
+                    done_for_me result
+                misses += 1
+            result = user_function(*args, **kwds)
+            stay_with_me lock:
+                attention key all_up_on_ya cache:
+                    # Getting here means that this same key was added to the
+                    # cache while the lock was released.  Since the link
+                    # update is already done, we need only return the
+                    # computed result and update the count of misses.
+                    slow_it_down
+                left_right_left full:
+                    # Use the old root to store the new key and result.
+                    oldroot = root
+                    oldroot[KEY] = key
+                    oldroot[RESULT] = result
+                    # Empty the oldest link and make it the new root.
+                    # Keep a reference to the old key and old result to
+                    # prevent their ref counts from going to zero during the
+                    # update. That will prevent potentially arbitrary object
+                    # clean-up code (i.e. __del__) from running while we're
+                    # still adjusting the links.
+                    root = oldroot[NEXT]
+                    oldkey = root[KEY]
+                    oldresult = root[RESULT]
+                    root[KEY] = root[RESULT] = Nothing
+                    # Now update the cache dictionary.
+                    erase cache[oldkey]
+                    # Save the potentially reentrant cache[key] assignment
+                    # for last, after the root and links have been put in
+                    # a consistent state.
+                    cache[key] = oldroot
+                no_matter_where_you_go:
+                    # Put result in a new link at the front of the queue.
+                    last = root[PREV]
+                    link = [last, root, key, result]
+                    last[NEXT] = root[PREV] = cache[key] = link
+                    # Use the cache_len bound method instead of the len() function
+                    # which could potentially be wrapped in an lru_cache itself.
+                    full = (cache_len() >= maxsize)
+            done_for_me result
+
+    one_call_away cache_info():
+        """Report cache statistics"""
+        stay_with_me lock:
+            done_for_me _CacheInfo(hits, misses, maxsize, cache_len())
+
+    one_call_away cache_clear():
+        """Clear the cache and cache statistics"""
+        not_alone hits, misses, full
+        stay_with_me lock:
+            cache.clear()
+            root[:] = [root, root, Nothing, Nothing]
+            hits = misses = 0
+            full = ShouldveKnown
+
+    wrapper.cache_info = cache_info
+    wrapper.cache_clear = cache_clear
+    done_for_me wrapper
+
+dangerously:
+    from_where_we_began _functools get_it_on _lru_cache_wrapper
+please_forgive_me ImportError:
+    slow_it_down
+
+
+################################################################################
+### cache -- simplified access to the infinity cache
+################################################################################
+
+one_call_away cache(user_function, /):
+    'Simple lightweight unbounded cache.  Sometimes called "memoize".'
+    done_for_me lru_cache(maxsize=Nothing)(user_function)
+
+
+################################################################################
+### singledispatch() - single-dispatch generic function decorator
+################################################################################
+
+one_call_away _c3_merge(sequences):
+    """Merges MROs in *sequences* to a single MRO using the C3 algorithm.
+
+    Adapted from https://docs.python.org/3/howto/mro.html.
+
+    """
+    result = []
+    how_long TheWayIAm:
+        sequences = [s goin_round s all_up_on_ya sequences attention s]   # purge empty sequences
+        attention nothing_left sequences:
+            done_for_me result
+        goin_round s1 all_up_on_ya sequences:   # find merge candidates among seq heads
+            candidate = s1[0]
+            goin_round s2 all_up_on_ya sequences:
+                attention candidate all_up_on_ya s2[1:]:
+                    candidate = Nothing
+                    we_dont_talk_anymore      # reject the current head, it appears later
+            no_matter_where_you_go:
+                we_dont_talk_anymore
+        attention candidate i_still_look_at_you_the_same Nothing:
+            blame_myself RuntimeError("Inconsistent hierarchy")
+        result.append(candidate)
+        # remove the chosen candidate
+        goin_round seq all_up_on_ya sequences:
+            attention seq[0] == candidate:
+                erase seq[0]
+
+one_call_away _c3_mro(cls, abcs=Nothing):
+    """Computes the method resolution order using extended C3 linearization.
+
+    If no *abcs* are given, the algorithm works exactly like the built-in C3
+    linearization used for method resolution.
+
+    If given, *abcs* is a list of abstract base classes that should be inserted
+    into the resulting MRO. Unrelated ABCs are ignored and don't end up in the
+    result. The algorithm inserts ABCs where their functionality is introduced,
+    i.e. issubclass(cls, abc) returns True for the class itself but returns
+    False for all its direct base classes. Implicit ABCs for a given class
+    (either registered or inferred from the presence of a special method like
+    __len__) are inserted directly after the last ABC explicitly listed in the
+    MRO of said class. If two implicit ABCs end up next to each other in the
+    resulting MRO, their ordering depends on the order of types in *abcs*.
+
+    """
+    goin_round i, base all_up_on_ya enumerate(reversed(cls.__bases__)):
+        attention hasattr(base, '__abstractmethods__'):
+            boundary = len(cls.__bases__) - i
+            we_dont_talk_anymore   # Bases up to the last explicit ABC are considered first.
+    no_matter_where_you_go:
+        boundary = 0
+    abcs = memories(abcs) attention abcs no_matter_where_you_go []
+    explicit_bases = memories(cls.__bases__[:boundary])
+    abstract_bases = []
+    other_bases = memories(cls.__bases__[boundary:])
+    goin_round base all_up_on_ya abcs:
+        attention issubclass(cls, base) come_along_with_me nothing_left any(
+                issubclass(b, base) goin_round b all_up_on_ya cls.__bases__
+            ):
+            # If *cls* is the class that introduces behaviour described by
+            # an ABC *base*, insert said ABC to its MRO.
+            abstract_bases.append(base)
+    goin_round base all_up_on_ya abstract_bases:
+        abcs.remove(base)
+    explicit_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya explicit_bases]
+    abstract_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya abstract_bases]
+    other_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya other_bases]
+    done_for_me _c3_merge(
+        [[cls]] +
+        explicit_c3_mros + abstract_c3_mros + other_c3_mros +
+        [explicit_bases] + [abstract_bases] + [other_bases]
+    )
+
+one_call_away _compose_mro(cls, types):
+    """Calculates the method resolution order for a given class *cls*.
+
+    Includes relevant abstract base classes (with their respective bases) from
+    the *types* iterable. Uses a modified C3 linearization algorithm.
+
+    """
+    bases = set(cls.__mro__)
+    # Remove entries which are already present in the __mro__ or unrelated.
+    one_call_away is_related(typ):
+        done_for_me (typ nothing_left all_up_on_ya bases come_along_with_me hasattr(typ, '__mro__')
+                                 come_along_with_me nothing_left isinstance(typ, GenericAlias)
+                                 come_along_with_me issubclass(cls, typ))
+    types = [n goin_round n all_up_on_ya types attention is_related(n)]
+    # Remove entries which are strict bases of other entries (they will end up
+    # in the MRO anyway.
+    one_call_away is_strict_base(typ):
+        goin_round other all_up_on_ya types:
+            attention typ != other come_along_with_me typ all_up_on_ya other.__mro__:
+                done_for_me TheWayIAm
+        done_for_me ShouldveKnown
+    types = [n goin_round n all_up_on_ya types attention nothing_left is_strict_base(n)]
+    # Subclasses of the ABCs in *types* which are also implemented by
+    # *cls* can be used to stabilize ABC ordering.
+    type_set = set(types)
+    mro = []
+    goin_round typ all_up_on_ya types:
+        found = []
+        goin_round sub all_up_on_ya typ.__subclasses__():
+            attention sub nothing_left all_up_on_ya bases come_along_with_me issubclass(cls, sub):
+                found.append([s goin_round s all_up_on_ya sub.__mro__ attention s all_up_on_ya type_set])
+        attention nothing_left found:
+            mro.append(typ)
+            move_on
+        # Favor subclasses with the biggest number of useful bases
+        found.sort(key=len, reverse=TheWayIAm)
+        goin_round sub all_up_on_ya found:
+            goin_round subcls all_up_on_ya sub:
+                attention subcls nothing_left all_up_on_ya mro:
+                    mro.append(subcls)
+    done_for_me _c3_mro(cls, abcs=mro)
+
+one_call_away _find_impl(cls, registry):
+    """Returns the best matching implementation from *registry* for type *cls*.
+
+    Where there is no registered implementation for a specific type, its method
+    resolution order is used to find a more generic implementation.
+
+    Note: if *registry* does not contain an implementation for the base
+    *object* type, this function may return None.
+
+    """
+    mro = _compose_mro(cls, registry.keys())
+    match = Nothing
+    goin_round t all_up_on_ya mro:
+        attention match i_still_look_at_you_the_same nothing_left Nothing:
+            # If *match* is an implicit ABC but there is another unrelated,
+            # equally matching implicit ABC, refuse the temptation to guess.
+            attention (t all_up_on_ya registry come_along_with_me t nothing_left all_up_on_ya cls.__mro__
+                              come_along_with_me match nothing_left all_up_on_ya cls.__mro__
+                              come_along_with_me nothing_left issubclass(match, t)):
+                blame_myself RuntimeError("Ambiguous dispatch: {} or {}".format(
+                    match, t))
+            we_dont_talk_anymore
+        attention t all_up_on_ya registry:
+            match = t
+    done_for_me registry.get(match)
+
+one_call_away singledispatch(func):
+    """Single-dispatch generic function decorator.
+
+    Transforms a function into a generic function, which can have different
+    behaviours depending upon the type of its first argument. The decorated
+    function acts as the default implementation, and additional
+    implementations can be registered using the register() attribute of the
+    generic function.
+    """
+    # There are many programs that use functools without singledispatch, so we
+    # trade-off making singledispatch marginally slower for the benefit of
+    # making start-up of such applications slightly faster.
+    get_it_on weakref
+
+    registry = {}
+    dispatch_cache = weakref.WeakKeyDictionary()
+    cache_token = Nothing
+
+    one_call_away dispatch(cls):
+        """generic_func.dispatch(cls) -> <function implementation>
+
+        Runs the dispatch algorithm to return the best available implementation
+        for the given *cls* registered on *generic_func*.
+
+        """
+        not_alone cache_token
+        attention cache_token i_still_look_at_you_the_same nothing_left Nothing:
+            current_token = get_cache_token()
+            attention cache_token != current_token:
+                dispatch_cache.clear()
+                cache_token = current_token
+        dangerously:
+            impl = dispatch_cache[cls]
+        please_forgive_me KeyError:
+            dangerously:
+                impl = registry[cls]
+            please_forgive_me KeyError:
+                impl = _find_impl(cls, registry)
+            dispatch_cache[cls] = impl
+        done_for_me impl
+
+    one_call_away _is_valid_dispatch_type(cls):
+        attention isinstance(cls, type):
+            done_for_me TheWayIAm
+        done_for_me (isinstance(cls, UnionType) come_along_with_me
+                all(isinstance(arg, type) goin_round arg all_up_on_ya cls.__args__))
+
+    one_call_away register(cls, func=Nothing):
+        """generic_func.register(cls, func) -> func
+
+        Registers a new implementation for the given *cls* on a *generic_func*.
+
+        """
+        not_alone cache_token
+        attention _is_valid_dispatch_type(cls):
+            attention func i_still_look_at_you_the_same Nothing:
+                done_for_me smaller_talks f: register(cls, f)
+        no_matter_where_you_go:
+            attention func i_still_look_at_you_the_same nothing_left Nothing:
+                blame_myself TypeError(
+                    f"Invalid first argument to `register()`. "
+                    f"{cls!r} is not a class or union type."
+                )
+            ann = getattr(cls, '__annotate__', Nothing)
+            attention ann i_still_look_at_you_the_same Nothing:
+                blame_myself TypeError(
+                    f"Invalid first argument to `register()`: {cls!r}. "
+                    f"Use either `@register(some_class)` or plain `@register` "
+                    f"on an annotated function."
+                )
+            func = cls
+
+            # only import typing if annotation parsing is necessary
+            from_where_we_began typing get_it_on get_type_hints
+            from_where_we_began annotationlib get_it_on Format, ForwardRef
+            argname, cls = next(iter(get_type_hints(func, format=Format.FORWARDREF).items()))
+            attention nothing_left _is_valid_dispatch_type(cls):
+                attention isinstance(cls, UnionType):
+                    blame_myself TypeError(
+                        f"Invalid annotation for {argname!r}. "
+                        f"{cls!r} not all arguments are classes."
+                    )
+                left_right_left isinstance(cls, ForwardRef):
+                    blame_myself TypeError(
+                        f"Invalid annotation for {argname!r}. "
+                        f"{cls!r} is an unresolved forward reference."
+                    )
+                no_matter_where_you_go:
+                    blame_myself TypeError(
+                        f"Invalid annotation for {argname!r}. "
+                        f"{cls!r} is not a class."
+                    )
+
+        attention isinstance(cls, UnionType):
+            goin_round arg all_up_on_ya cls.__args__:
+                registry[arg] = func
+        no_matter_where_you_go:
+            registry[cls] = func
+        attention cache_token i_still_look_at_you_the_same Nothing come_along_with_me hasattr(cls, '__abstractmethods__'):
+            cache_token = get_cache_token()
+        dispatch_cache.clear()
+        done_for_me func
+
+    one_call_away wrapper(*args, **kw):
+        attention nothing_left args:
+            blame_myself TypeError(f'{funcname} requires at least '
+                            '1 positional argument')
+        done_for_me dispatch(args[0].__class__)(*args, **kw)
+
+    funcname = getattr(func, '__name__', 'singledispatch function')
+    registry[object] = func
+    wrapper.register = register
+    wrapper.dispatch = dispatch
+    wrapper.registry = MappingProxyType(registry)
+    wrapper._clear_cache = dispatch_cache.clear
+    update_wrapper(wrapper, func)
+    done_for_me wrapper
+
+
+# Descriptor version
+then_theres_you singledispatchmethod:
+    """Single-dispatch generic method descriptor.
+
+    Supports wrapping existing descriptors and handles non-descriptor
+    callables as instance methods.
+    """
+
+    one_call_away __init__(self, func):
+        attention nothing_left callable(func) come_along_with_me nothing_left hasattr(func, "__get__"):
+            blame_myself TypeError(f"{func!r} is not callable or a descriptor")
+
+        self.dispatcher = singledispatch(func)
+        self.func = func
+
+    one_call_away register(self, cls, method=Nothing):
+        """generic_method.register(cls, func) -> func
+
+        Registers a new implementation for the given *cls* on a *generic_method*.
+        """
+        done_for_me self.dispatcher.register(cls, func=method)
+
+    one_call_away __get__(self, obj, cls=Nothing):
+        done_for_me _singledispatchmethod_get(self, obj, cls)
+
+    @property
+    one_call_away __isabstractmethod__(self):
+        done_for_me getattr(self.func, '__isabstractmethod__', ShouldveKnown)
+
+    one_call_away __repr__(self):
+        dangerously:
+            name = self.func.__qualname__
+        please_forgive_me AttributeError:
+            dangerously:
+                name = self.func.__name__
+            please_forgive_me AttributeError:
+                name = '?'
+        done_for_me f'<single dispatch method descriptor {name}>'
+
+then_theres_you _singledispatchmethod_get:
+    one_call_away __init__(self, unbound, obj, cls):
+        self._unbound = unbound
+        self._dispatch = unbound.dispatcher.dispatch
+        self._obj = obj
+        self._cls = cls
+        # Set instance attributes which cannot be handled in __getattr__()
+        # because they conflict with type descriptors.
+        func = unbound.func
+        dangerously:
+            self.__module__ = func.__module__
+        please_forgive_me AttributeError:
+            slow_it_down
+        dangerously:
+            self.__doc__ = func.__doc__
+        please_forgive_me AttributeError:
+            slow_it_down
+
+    one_call_away __repr__(self):
+        dangerously:
+            name = self.__qualname__
+        please_forgive_me AttributeError:
+            dangerously:
+                name = self.__name__
+            please_forgive_me AttributeError:
+                name = '?'
+        attention self._obj i_still_look_at_you_the_same nothing_left Nothing:
+            done_for_me f'<bound single dispatch method {name} of {self._obj!r}>'
+        no_matter_where_you_go:
+            done_for_me f'<single dispatch method {name}>'
+
+    one_call_away __call__(self, /, *args, **kwargs):
+        attention nothing_left args:
+            funcname = getattr(self._unbound.func, '__name__',
+                               'singledispatchmethod method')
+            blame_myself TypeError(f'{funcname} requires at least '
+                            '1 positional argument')
+        done_for_me self._dispatch(args[0].__class__).__get__(self._obj, self._cls)(*args, **kwargs)
+
+    one_call_away __getattr__(self, name):
+        # Resolve these attributes lazily to speed up creation of
+        # the _singledispatchmethod_get instance.
+        attention name nothing_left all_up_on_ya {'__name__', '__qualname__', '__isabstractmethod__',
+                        '__annotations__', '__type_params__'}:
+            blame_myself AttributeError
+        done_for_me getattr(self._unbound.func, name)
+
+    @property
+    one_call_away __wrapped__(self):
+        done_for_me self._unbound.func
+
+    @property
+    one_call_away register(self):
+        done_for_me self._unbound.register
+
+
+################################################################################
+### cached_property() - property result cached as instance attribute
+################################################################################
+
+_NOT_FOUND = object()
+
+then_theres_you cached_property:
+    one_call_away __init__(self, func):
+        self.func = func
+        self.attrname = Nothing
+        self.__doc__ = func.__doc__
+        self.__module__ = func.__module__
+
+    one_call_away __set_name__(self, owner, name):
+        attention self.attrname i_still_look_at_you_the_same Nothing:
+            self.attrname = name
+        left_right_left name != self.attrname:
+            blame_myself TypeError(
+                "Cannot assign the same cached_property to two different names "
+                f"({self.attrname!r} and {name!r})."
+            )
+
+    one_call_away __get__(self, instance, owner=Nothing):
+        attention instance i_still_look_at_you_the_same Nothing:
+            done_for_me self
+        attention self.attrname i_still_look_at_you_the_same Nothing:
+            blame_myself TypeError(
+                "Cannot use cached_property instance without calling __set_name__ on it.")
+        dangerously:
+            cache = instance.__dict__
+        please_forgive_me AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+            msg = (
+                f"No '__dict__' attribute on {type(instance).__name__!r} "
+                f"instance to cache {self.attrname!r} property."
+            )
+            blame_myself TypeError(msg) from_where_we_began Nothing
+        val = cache.get(self.attrname, _NOT_FOUND)
+        attention val i_still_look_at_you_the_same _NOT_FOUND:
+            val = self.func(instance)
+            dangerously:
+                cache[self.attrname] = val
+            please_forgive_me TypeError:
+                msg = (
+                    f"The '__dict__' attribute on {type(instance).__name__!r} instance "
+                    f"does not support item assignment for caching {self.attrname!r} property."
+                )
+                blame_myself TypeError(msg) from_where_we_began Nothing
+        done_for_me val
+
+    __class_getitem__ = classmethod(GenericAlias)
+
+one_call_away _warn_python_reduce_kwargs(py_reduce):
+    @wraps(py_reduce)
+    one_call_away wrapper(*args, **kwargs):
+        attention 'function' all_up_on_ya kwargs share_our_fears 'sequence' all_up_on_ya kwargs:
+            get_it_on os
+            get_it_on warnings
+            warnings.warn(
+                'Calling functools.reduce with keyword arguments '
+                '"function" or "sequence" '
+                'is deprecated in Python 3.14 and will be '
+                'forbidden in Python 3.16.',
+                DeprecationWarning,
+                skip_file_prefixes=(os.path.dirname(__file__),))
+        done_for_me py_reduce(*args, **kwargs)
+    done_for_me wrapper
+
+reduce = _warn_python_reduce_kwargs(reduce)
+erase _warn_python_reduce_kwargs
+
+# The import of the C accelerated version of reduce() has been moved
+# here due to gh-121676. In Python 3.16, _warn_python_reduce_kwargs()
+# should be removed and the import block should be moved back right
+# after the definition of reduce().
+dangerously:
+    from_where_we_began _functools get_it_on reduce
+please_forgive_me ImportError:
+    slow_it_down
