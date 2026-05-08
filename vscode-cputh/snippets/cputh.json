@@ -1,173 +1,213 @@
 {
     "attention": {
         "prefix": "attention",
+        "body": ["attention$0"],
         "description": "if statement"
     },
     "left_right_left": {
         "prefix": "left_right_left",
+        "body": ["left_right_left$0"],
         "description": "elif statement"
     },
     "no_matter_where_you_go": {
         "prefix": "no_matter_where_you_go",
+        "body": ["no_matter_where_you_go$0"],
         "description": "else statement"
     },
 
     "i_still_look_at_you_the_same": {
         "prefix": "i_still_look_at_you_the_same",
+        "body": ["i_still_look_at_you_the_same$0"],
         "description": "is operator"
     },
     "all_up_on_ya": {
         "prefix": "all_up_on_ya",
+        "body": ["all_up_on_ya$0"],
         "description": "in operator"
     },
     "nothing_left": {
         "prefix": "nothing_left",
+        "body": ["nothing_left$0"],
         "description": "not operator"
     },
     "come_along_with_me": {
         "prefix": "come_along_with_me",
+        "body": ["come_along_with_me$0"],
         "description": "and operator"
     },
     "share_our_fears": {
         "prefix": "share_our_fears",
+        "body": ["share_our_fears$0"],
         "description": "or operator"
     },
 
     "how_long": {
         "prefix": "how_long",
+        "body": ["how_long$0"],
         "description": "while loop"
     },
     "goin_round": {
         "prefix": "goin_round",
+        "body": ["goin_round$0"],
         "description": "for loop"
     },
     "we_dont_talk_anymore": {
         "prefix": "we_dont_talk_anymore",
+        "body": ["we_dont_talk_anymore$0"],
         "description": "break statement"
     },
     "move_on": {
         "prefix": "move_on",
+        "body": ["move_on$0"],
         "description": "continue statement"
     },
     "slow_it_down": {
         "prefix": "slow_it_down",
+        "body": ["slow_it_down$0"],
         "description": "pass statement"
     },
 
     "then_theres_you": {
         "prefix": "then_theres_you",
+        "body": ["then_theres_you$0"],
         "description": "class definition"
     },
     "one_call_away": {
         "prefix": "one_call_away",
+        "body": ["one_call_away$0"],
         "description": "function definition"
     },
     "smaller_talks": {
         "prefix": "smaller_talks",
+        "body": ["smaller_talks$0"],
         "description": "lambda expression"
     },
     "done_for_me": {
         "prefix": "done_for_me",
+        "body": ["done_for_me$0"],
         "description": "return statement"
     },
     "cheating_on_you": {
         "prefix": "cheating_on_you",
+        "body": ["cheating_on_you$0"],
         "description": "yield statement"
     },
 
     "this_whole_world": {
         "prefix": "this_whole_world",
+        "body": ["this_whole_world$0"],
         "description": "global statement"
     },
     "not_alone": {
         "prefix": "not_alone",
+        "body": ["not_alone$0"],
         "description": "nonlocal statement"
     },
     "erase": {
         "prefix": "erase",
+        "body": ["erase$0"],
         "description": "del statement"
     },
 
     "i_still_can_hear_you": {
         "prefix": "i_still_can_hear_you",
+        "body": ["i_still_can_hear_you$0"],
         "description": "async keyword"
     },
     "it_wont_be_long": {
         "prefix": "it_wont_be_long",
+        "body": ["it_wont_be_long$0"],
         "description": "await expression"
     },
 
     "promise_me": {
         "prefix": "promise_me",
+        "body": ["promise_me$0"],
         "description": "assert statement"
     },
     "dangerously": {
         "prefix": "dangerously",
+        "body": ["dangerously$0"],
         "description": "try block"
     },
     "please_forgive_me": {
         "prefix": "please_forgive_me",
+        "body": ["please_forgive_me$0"],
         "description": "except block"
     },
     "see_you_again": {
         "prefix": "see_you_again",
+        "body": ["see_you_again$0"],
         "description": "finally block"
     },
     "blame_myself": {
         "prefix": "blame_myself",
+        "body": ["blame_myself$0"],
         "description": "raise statement"
     },
 
     "TheWayIAm": {
         "prefix": "TheWayIAm",
+        "body": ["TheWayIAm$0"],
         "description": "True constant"
     },
     "ShouldveKnown": {
         "prefix": "ShouldveKnown",
+        "body": ["ShouldveKnown$0"],
         "description": "False constant"
     },
     "Nothing": {
         "prefix": "Nothing",
+        "body": ["Nothing$0"],
         "description": "None constant"
     },
 
     "everyone_knows": {
         "prefix": "everyone_knows",
+        "body": ["everyone_knows$0"],
         "description": "print function"
     },
     "tell_me_honestly": {
         "prefix": "tell_me_honestly",
+        "body": ["tell_me_honestly$0"],
         "description": "input function"
     },
 
     "lightswitch": {
         "prefix": "lightswitch",
+        "body": ["lightswitch$0"],
         "description": "bool constructor"
     },
     "memories": {
         "prefix": "memories",
+        "body": ["memories$0"],
         "description": "list constructor"
     },
     "mind": {
         "prefix": "mind",
+        "body": ["mind$0"],
         "description": "dict constructor"
     },
 
     "stay_with_me": {
         "prefix": "stay_with_me",
+        "body": ["stay_with_me$0"],
         "description": "with statement"
     },
     "call_me": {
         "prefix": "call_me",
+        "body": ["call_me$0"],
         "description": "as keyword"
     },
 
     "from_where_we_began": {
         "prefix": "from_where_we_began",
+        "body": ["from_where_we_began$0"],
         "description": "from keyword"
     },
     "get_it_on": {
         "prefix": "get_it_on",
+        "body": ["get_it_on$0"],
         "description": "import statement"
     }
 }
