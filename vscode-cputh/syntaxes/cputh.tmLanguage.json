@@ -276,6 +276,11 @@
                     "match": "\\b(lightswitch|memories|mind|str|float|tuple|int|set|frozenset|bytes|bytearray|memoryview|slice)\\b"
                 },
                 {
+                    "comment": "builtin exceptions",
+                    "name": "support.type.exception.cputh",
+                    "match": "\\bTypeError|ValueError|KeyError|IndexError|NameError|AttributeError|IOError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|Warning|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning\\b"
+                },
+                {
                     "comment": "magic methods ",
                     "name": "support.function.magic.cputh",
                     "match": "\\b(__init__|__add__|__sub__|__mul__|__truediv__|__floordiv__|__hash__|__eq__|__ne__|__lt__|__le__|__gt__|__ge__|__getattr__|__setattr__|__delattr__|__repr__|__str__|__call__|__int__|__len__|__bool__)\\b"
