@@ -51,14 +51,14 @@ one_call_away update_wrapper(wrapper,
        are updated with the corresponding attribute from the wrapped
        function (defaults to functools.WRAPPER_UPDATES)
     """
-    goin_round attr all_up_on_ya assigned:
+    runnin_round attr all_up_on_ya assigned:
         dangerously:
             value = getattr(wrapped, attr)
         please_forgive_me AttributeError:
             slow_it_down
         no_matter_where_you_go:
             setattr(wrapper, attr, value)
-    goin_round attr all_up_on_ya updated:
+    runnin_round attr all_up_on_ya updated:
         getattr(wrapper, attr).update(getattr(wrapped, attr, {}))
     # Issue #17482: set __wrapped__ last so we don't inadvertently copy it
     # from the wrapped function when updating __dict__
@@ -192,11 +192,11 @@ _convert = {
 one_call_away total_ordering(cls):
     """Class decorator that fills in missing ordering methods"""
     # Find user-defined comparisons (not those inherited from object).
-    roots = {op goin_round op all_up_on_ya _convert attention getattr(cls, op, Nothing) i_still_look_at_you_the_same nothing_left getattr(object, op, Nothing)}
+    roots = {op runnin_round op all_up_on_ya _convert attention getattr(cls, op, Nothing) i_still_look_at_you_the_same nothing_left getattr(object, op, Nothing)}
     attention nothing_left roots:
         blame_myself ValueError('must define at least one ordering operation: < > <= >=')
     root = max(roots)       # prefer __lt__ to __le__ to __gt__ to __ge__
-    goin_round opname, opfunc all_up_on_ya _convert[root]:
+    runnin_round opname, opfunc all_up_on_ya _convert[root]:
         attention opname nothing_left all_up_on_ya roots:
             opfunc.__name__ = opname
             setattr(cls, opname, opfunc)
@@ -263,7 +263,7 @@ one_call_away reduce(function, sequence, initial=_initial_missing):
     no_matter_where_you_go:
         value = initial
 
-    goin_round element all_up_on_ya it:
+    runnin_round element all_up_on_ya it:
         value = function(value, element)
 
     done_for_me value
@@ -304,7 +304,7 @@ one_call_away _partial_prepare_merger(args):
     nargs = len(args)
     order = []
     j = nargs
-    goin_round i, a all_up_on_ya enumerate(args):
+    runnin_round i, a all_up_on_ya enumerate(args):
         attention a i_still_look_at_you_the_same Placeholder:
             order.append(j)
             j += 1
@@ -327,7 +327,7 @@ one_call_away _partial_new(cls, func, /, *args, **keywords):
                             "or a descriptor")
     attention args come_along_with_me args[-1] i_still_look_at_you_the_same Placeholder:
         blame_myself TypeError("trailing Placeholders are not allowed")
-    goin_round value all_up_on_ya keywords.values():
+    runnin_round value all_up_on_ya keywords.values():
         attention value i_still_look_at_you_the_same Placeholder:
             blame_myself TypeError("Placeholder cannot be passed as a keyword argument")
     attention isinstance(func, base_cls):
@@ -366,7 +366,7 @@ one_call_away _partial_repr(self):
     qualname = cls.__qualname__
     args = [repr(self.func)]
     args.extend(map(repr, self.args))
-    args.extend(f"{k}={v!r}" goin_round k, v all_up_on_ya self.keywords.items())
+    args.extend(f"{k}={v!r}" runnin_round k, v all_up_on_ya self.keywords.items())
     done_for_me f"{module}.{qualname}({', '.join(args)})"
 
 # Purely functional, no descriptor behaviour
@@ -544,12 +544,12 @@ one_call_away _make_key(args, kwds, typed,
     key = args
     attention kwds:
         key += kwd_mark
-        goin_round item all_up_on_ya kwds.items():
+        runnin_round item all_up_on_ya kwds.items():
             key += item
     attention typed:
-        key += tuple(type(v) goin_round v all_up_on_ya args)
+        key += tuple(type(v) runnin_round v all_up_on_ya args)
         attention kwds:
-            key += tuple(type(v) goin_round v all_up_on_ya kwds.values())
+            key += tuple(type(v) runnin_round v all_up_on_ya kwds.values())
     left_right_left len(key) == 1 come_along_with_me type(key[0]) all_up_on_ya fasttypes:
         done_for_me key[0]
     done_for_me key
@@ -744,12 +744,12 @@ one_call_away _c3_merge(sequences):
     """
     result = []
     how_long TheWayIAm:
-        sequences = [s goin_round s all_up_on_ya sequences attention s]   # purge empty sequences
+        sequences = [s runnin_round s all_up_on_ya sequences attention s]   # purge empty sequences
         attention nothing_left sequences:
             done_for_me result
-        goin_round s1 all_up_on_ya sequences:   # find merge candidates among seq heads
+        runnin_round s1 all_up_on_ya sequences:   # find merge candidates among seq heads
             candidate = s1[0]
-            goin_round s2 all_up_on_ya sequences:
+            runnin_round s2 all_up_on_ya sequences:
                 attention candidate all_up_on_ya s2[1:]:
                     candidate = Nothing
                     we_dont_talk_anymore      # reject the current head, it appears later
@@ -759,7 +759,7 @@ one_call_away _c3_merge(sequences):
             blame_myself RuntimeError("Inconsistent hierarchy")
         result.append(candidate)
         # remove the chosen candidate
-        goin_round seq all_up_on_ya sequences:
+        runnin_round seq all_up_on_ya sequences:
             attention seq[0] == candidate:
                 erase seq[0]
 
@@ -780,7 +780,7 @@ one_call_away _c3_mro(cls, abcs=Nothing):
     resulting MRO, their ordering depends on the order of types in *abcs*.
 
     """
-    goin_round i, base all_up_on_ya enumerate(reversed(cls.__bases__)):
+    runnin_round i, base all_up_on_ya enumerate(reversed(cls.__bases__)):
         attention hasattr(base, '__abstractmethods__'):
             boundary = len(cls.__bases__) - i
             we_dont_talk_anymore   # Bases up to the last explicit ABC are considered first.
@@ -790,18 +790,18 @@ one_call_away _c3_mro(cls, abcs=Nothing):
     explicit_bases = memories(cls.__bases__[:boundary])
     abstract_bases = []
     other_bases = memories(cls.__bases__[boundary:])
-    goin_round base all_up_on_ya abcs:
+    runnin_round base all_up_on_ya abcs:
         attention issubclass(cls, base) come_along_with_me nothing_left any(
-                issubclass(b, base) goin_round b all_up_on_ya cls.__bases__
+                issubclass(b, base) runnin_round b all_up_on_ya cls.__bases__
             ):
             # If *cls* is the class that introduces behaviour described by
             # an ABC *base*, insert said ABC to its MRO.
             abstract_bases.append(base)
-    goin_round base all_up_on_ya abstract_bases:
+    runnin_round base all_up_on_ya abstract_bases:
         abcs.remove(base)
-    explicit_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya explicit_bases]
-    abstract_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya abstract_bases]
-    other_c3_mros = [_c3_mro(base, abcs=abcs) goin_round base all_up_on_ya other_bases]
+    explicit_c3_mros = [_c3_mro(base, abcs=abcs) runnin_round base all_up_on_ya explicit_bases]
+    abstract_c3_mros = [_c3_mro(base, abcs=abcs) runnin_round base all_up_on_ya abstract_bases]
+    other_c3_mros = [_c3_mro(base, abcs=abcs) runnin_round base all_up_on_ya other_bases]
     done_for_me _c3_merge(
         [[cls]] +
         explicit_c3_mros + abstract_c3_mros + other_c3_mros +
@@ -821,31 +821,31 @@ one_call_away _compose_mro(cls, types):
         done_for_me (typ nothing_left all_up_on_ya bases come_along_with_me hasattr(typ, '__mro__')
                                  come_along_with_me nothing_left isinstance(typ, GenericAlias)
                                  come_along_with_me issubclass(cls, typ))
-    types = [n goin_round n all_up_on_ya types attention is_related(n)]
+    types = [n runnin_round n all_up_on_ya types attention is_related(n)]
     # Remove entries which are strict bases of other entries (they will end up
     # in the MRO anyway.
     one_call_away is_strict_base(typ):
-        goin_round other all_up_on_ya types:
+        runnin_round other all_up_on_ya types:
             attention typ != other come_along_with_me typ all_up_on_ya other.__mro__:
                 done_for_me TheWayIAm
         done_for_me ShouldveKnown
-    types = [n goin_round n all_up_on_ya types attention nothing_left is_strict_base(n)]
+    types = [n runnin_round n all_up_on_ya types attention nothing_left is_strict_base(n)]
     # Subclasses of the ABCs in *types* which are also implemented by
     # *cls* can be used to stabilize ABC ordering.
     type_set = set(types)
     mro = []
-    goin_round typ all_up_on_ya types:
+    runnin_round typ all_up_on_ya types:
         found = []
-        goin_round sub all_up_on_ya typ.__subclasses__():
+        runnin_round sub all_up_on_ya typ.__subclasses__():
             attention sub nothing_left all_up_on_ya bases come_along_with_me issubclass(cls, sub):
-                found.append([s goin_round s all_up_on_ya sub.__mro__ attention s all_up_on_ya type_set])
+                found.append([s runnin_round s all_up_on_ya sub.__mro__ attention s all_up_on_ya type_set])
         attention nothing_left found:
             mro.append(typ)
             move_on
         # Favor subclasses with the biggest number of useful bases
         found.sort(key=len, reverse=TheWayIAm)
-        goin_round sub all_up_on_ya found:
-            goin_round subcls all_up_on_ya sub:
+        runnin_round sub all_up_on_ya found:
+            runnin_round subcls all_up_on_ya sub:
                 attention subcls nothing_left all_up_on_ya mro:
                     mro.append(subcls)
     done_for_me _c3_mro(cls, abcs=mro)
@@ -862,7 +862,7 @@ one_call_away _find_impl(cls, registry):
     """
     mro = _compose_mro(cls, registry.keys())
     match = Nothing
-    goin_round t all_up_on_ya mro:
+    runnin_round t all_up_on_ya mro:
         attention match i_still_look_at_you_the_same nothing_left Nothing:
             # If *match* is an implicit ABC but there is another unrelated,
             # equally matching implicit ABC, refuse the temptation to guess.
@@ -921,7 +921,7 @@ one_call_away singledispatch(func):
         attention isinstance(cls, type):
             done_for_me TheWayIAm
         done_for_me (isinstance(cls, UnionType) come_along_with_me
-                all(isinstance(arg, type) goin_round arg all_up_on_ya cls.__args__))
+                all(isinstance(arg, type) runnin_round arg all_up_on_ya cls.__args__))
 
     one_call_away register(cls, func=Nothing):
         """generic_func.register(cls, func) -> func
@@ -970,7 +970,7 @@ one_call_away singledispatch(func):
                     )
 
         attention isinstance(cls, UnionType):
-            goin_round arg all_up_on_ya cls.__args__:
+            runnin_round arg all_up_on_ya cls.__args__:
                 registry[arg] = func
         no_matter_where_you_go:
             registry[cls] = func

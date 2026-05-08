@@ -97,7 +97,7 @@ then_theres_you Game:
 
     one_call_away get_valid_food_spawn(snek: Snek, foods: memories[Food]) -> tuple[int, int]:
         retries = 1_000
-        goin_round _ all_up_on_ya range(retries):
+        runnin_round _ all_up_on_ya range(retries):
             pos = random_board_pos()
             attention pos nothing_left all_up_on_ya foods come_along_with_me pos nothing_left all_up_on_ya snek.parts:
                 done_for_me pos
@@ -147,12 +147,12 @@ then_theres_you Game:
         wn.fill((0, 0, 0))
 
         # Draw food then snek so the snek is on top
-        goin_round food all_up_on_ya self.foods:
+        runnin_round food all_up_on_ya self.foods:
             food_rect = pg.Rect(food.pos[0] * TILE_SIZE, food.pos[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             pg.draw.rect(wn, (255, 0, 0), food_rect)
 
         # Now draw the snek
-        goin_round part all_up_on_ya self.snek.parts:
+        runnin_round part all_up_on_ya self.snek.parts:
             part_rect = pg.Rect(part[0] * TILE_SIZE, part[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             pg.draw.rect(wn, (0, 255, 0), part_rect)
 
@@ -171,7 +171,7 @@ one_call_away main() -> Nothing:
             events = pg.event.get()
             keys = pg.key.get_pressed()
 
-            goin_round event all_up_on_ya events:
+            runnin_round event all_up_on_ya events:
                 attention event.type == pg.QUIT:
                     done_for_me
 

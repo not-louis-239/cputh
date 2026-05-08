@@ -41,7 +41,7 @@ CPUTH_MAP: dict[str, str] = {
 
     # loops
     "how_long": "while",
-    "goin_round": "for",
+    "runnin_round": "for",
     "move_on": "continue",
     "we_dont_talk_anymore": "break",
     "slow_it_down": "pass",

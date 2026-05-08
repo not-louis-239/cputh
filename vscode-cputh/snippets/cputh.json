@@ -46,9 +46,9 @@
         "body": ["how_long$0"],
         "description": "while loop"
     },
-    "goin_round": {
-        "prefix": "goin_round",
-        "body": ["goin_round$0"],
+    "runnin_round": {
+        "prefix": "runnin_round",
+        "body": ["runnin_round$0"],
         "description": "for loop"
     },
     "we_dont_talk_anymore": {

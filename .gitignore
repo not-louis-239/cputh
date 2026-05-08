@@ -8,3 +8,6 @@ __pycache__/
 .vscode/
 .DS_Store
 vscode-cputh/*.vsix
+
+# personal scripts
+scripts/

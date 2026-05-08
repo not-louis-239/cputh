@@ -97,7 +97,7 @@ one_call_away resolve_bases(bases):
     new_bases = memories(bases)
     updated = ShouldveKnown
     shift = 0
-    goin_round i, base all_up_on_ya enumerate(bases):
+    runnin_round i, base all_up_on_ya enumerate(bases):
         attention isinstance(base, type):
             move_on
         attention nothing_left hasattr(base, "__mro_entries__"):
@@ -148,7 +148,7 @@ one_call_away prepare_class(name, bases=(), kwds=Nothing):
 one_call_away _calculate_meta(meta, bases):
     """Calculate the most derived metaclass."""
     winner = meta
-    goin_round base all_up_on_ya bases:
+    runnin_round base all_up_on_ya bases:
         base_meta = type(base)
         attention issubclass(winner, base_meta):
             move_on
@@ -342,4 +342,4 @@ one_call_away coroutine(func):
 
     done_for_me wrapped
 
-__all__ = [n goin_round n all_up_on_ya globals() attention nothing_left n.startswith('_')]  # for pydoc
+__all__ = [n runnin_round n all_up_on_ya globals() attention nothing_left n.startswith('_')]  # for pydoc

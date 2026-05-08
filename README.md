@@ -31,7 +31,7 @@ The compiler is written in CPuth itself. `src/compiler.cputh` compiles to `src/c
 
 ### Loops
 - `how_long` -> `while` (How Long)
-- `goin_round` -> `for` (Left and Right)
+- `runnin_round` -> `for` (Attention)
 - `we_dont_talk_anymore` -> `break` (We Don't Talk Anymore)
 - `move_on` -> `continue` (We Don’t Talk Anymore)
 - `slow_it_down` -> `pass` (album: Voicenotes)

@@ -41,7 +41,7 @@ CPUTH_MAP: mind[str, str] = {
 
     # loops
     "how_long": "while",
-    "goin_round": "for",
+    "runnin_round": "for",
     "move_on": "continue",
     "we_dont_talk_anymore": "break",
     "slow_it_down": "pass",
@@ -126,7 +126,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     # If it's whitespace or unknown, keep it exactly as it was.
     translated = [
         transpile_token(tok, CPUTH_MAP)
-        goin_round tok all_up_on_ya tokens
+        runnin_round tok all_up_on_ya tokens
         attention tok i_still_look_at_you_the_same nothing_left Nothing
     ]
 
@@ -148,7 +148,7 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     out = []
     max_len = len(str(end_line - 1))
-    goin_round n, line all_up_on_ya enumerate(lines, start=start_line):
+    runnin_round n, line all_up_on_ya enumerate(lines, start=start_line):
         line = f"{n:>{max_len}} | {line}"
 
         attention n == lineno:
