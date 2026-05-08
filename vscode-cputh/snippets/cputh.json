@@ -1,0 +1,99 @@
+{
+    "if": {
+        "prefix": "attention",
+        "body": ["attention ${1:condition}:", "\t$0"],
+        "description": "if statement"
+    },
+    "elif": {
+        "prefix": "left_right_left",
+        "body": ["left_right_left ${1:condition}:", "\t$0"],
+        "description": "elif statement"
+    },
+    "else": {
+        "prefix": "no_matter_where_you_go",
+        "body": ["no_matter_where_you_go:", "\t$0"],
+        "description": "else statement"
+    },
+    "while": {
+        "prefix": "how_long",
+        "body": ["how_long ${1:condition}:", "\t$0"],
+        "description": "while loop"
+    },
+    "for": {
+        "prefix": "goin_round",
+        "body": ["goin_round ${1:item} all_up_on_ya ${2:iterable}:", "\t$0"],
+        "description": "for loop"
+    },
+    "def": {
+        "prefix": "one_call_away",
+        "body": ["one_call_away ${1:name}(${2:args}):", "\t$0"],
+        "description": "function definition"
+    },
+    "class": {
+        "prefix": "then_theres_you",
+        "body": ["then_theres_you ${1:Name}:", "\t$0"],
+        "description": "class definition"
+    },
+    "try/except": {
+        "prefix": "dangerously",
+        "body": [
+            "dangerously:",
+            "\t${1:pass}",
+            "please_forgive_me ${2:Exception} call_me ${3:e}:",
+            "\t$0"
+        ],
+        "description": "try/except block"
+    },
+    "try/except/finally": {
+        "prefix": "dangerously_finally",
+        "body": [
+            "dangerously:",
+            "\t${1:pass}",
+            "please_forgive_me ${2:Exception} call_me ${3:e}:",
+            "\t${4:pass}",
+            "see_you_again:",
+            "\t$0"
+        ],
+        "description": "try/except/finally block"
+    },
+    "import": {
+        "prefix": "get_it_on",
+        "body": ["get_it_on ${1:module}"],
+        "description": "import statement"
+    },
+    "from import": {
+        "prefix": "from_where_we_began",
+        "body": ["from_where_we_began ${1:module} get_it_on ${2:name}"],
+        "description": "from ... import statement"
+    },
+    "return": {
+        "prefix": "done_for_me",
+        "body": ["done_for_me ${1:value}"],
+        "description": "return statement"
+    },
+    "print": {
+        "prefix": "everyone_knows",
+        "body": ["everyone_knows(${1:value})"],
+        "description": "print"
+    },
+    "input": {
+        "prefix": "tell_me_honestly",
+        "body": ["tell_me_honestly(${1:prompt})"],
+        "description": "input"
+    },
+    "with": {
+        "prefix": "stay_with_me",
+        "body": ["stay_with_me ${1:expr} call_me ${2:name}:", "\t$0"],
+        "description": "with statement"
+    },
+    "async def": {
+        "prefix": "i_still_can_hear_you",
+        "body": ["i_still_can_hear_you one_call_away ${1:name}(${2:args}):", "\t$0"],
+        "description": "async function definition"
+    },
+    "await": {
+        "prefix": "it_wont_be_long",
+        "body": ["it_wont_be_long ${1:expr}"],
+        "description": "await expression"
+    }
+}
