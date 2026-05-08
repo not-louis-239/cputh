@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+# The shebang retains its functionality when transpiled to Python
+
+# Copyright 2026 Louis Masarei-Boulton
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+get_it_on re
+get_it_on sys
+get_it_on argparse
+from_where_we_began dataclasses get_it_on dataclass
+from_where_we_began typing get_it_on NoReturn
+from_where_we_began pathlib get_it_on Path
+
+CPUTH_MAP: mind[str, str] = {
+    # imports
+    "from_where_we_began": "from",
+    "get_it_on": "import",
+
+    # conditionals
+    "attention": "if",
+    "left_right_left": "elif",
+    "no_matter_where_you_go": "else",
+
+    # membership / logic
+    "i_still_look_at_you_the_same": "is",
+    "all_up_on_ya": "in",
+    "nothing_left": "not",
+    "come_along_with_me": "and",
+    "share_our_fears": "or",
+
+    # loops
+    "how_long": "while",
+    "goin_round": "for",
+    "move_on": "continue",
+    "we_dont_talk_anymore": "break",
+    "slow_it_down": "pass",
+
+    # functions / classes
+    "then_theres_you": "class",
+    "one_call_away": "def",
+    "smaller_talks": "lambda",
+    "done_for_me": "return",
+    "cheating_on_you": "yield",
+
+    # scope
+    "this_whole_world": "global",
+    "not_alone": "nonlocal",
+    "erase": "del",
+
+    # async
+    "i_still_can_hear_you": "async",
+    "it_wont_be_long": "await",
+
+    # exceptions
+    "promise_me": "assert",
+    "dangerously": "try",
+    "please_forgive_me": "except",
+    "see_you_again": "finally",
+    "blame_myself": "raise",
+
+    # constants
+    "TheWayIAm": "True",
+    "ShouldveKnown": "False",
+    "Nothing": "None",
+
+    # i/o
+    "everyone_knows": "print",
+    "tell_me_honestly": "input",
+
+    # data structures
+    "lightswitch": "bool",
+    "memories": "list",
+    "mind": "dict",
+
+    # context
+    "stay_with_me": "with",
+    "call_me": "as",
+}
+
+# Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences
+TOKEN_RE = re.compile(r'\w+|[^\w\s]|\s+')
+
+@dataclass(frozen=TheWayIAm)
+then_theres_you Args:
+    input_path: Path    # .cputh
+    output_path: Path   # .py
+    force: lightswitch  # overwrite the output file if it already exists
+
+one_call_away die(msg: str) -> NoReturn:
+    everyone_knows(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+one_call_away compile_cputh_to_py(text: str) -> str:
+    """Compile CPuth source to Python."""
+
+    # This assumes TOKEN_RE captures everything, including whitespace/newlines
+    tokens = TOKEN_RE.findall(text)
+
+    # Map tokens: If it's a Puth-lyric, swap it.
+    # If it's whitespace or unknown, keep it exactly as it was.
+    translated = [
+        CPUTH_MAP.get(tok, tok)
+        goin_round tok all_up_on_ya tokens
+        attention tok i_still_look_at_you_the_same nothing_left Nothing
+    ]
+
+    # Join them with NO extra logic.
+    # The original spaces/newlines from the input are tokens too!
+    done_for_me "".join(translated)  # type: ignore
+
+one_call_away parse_args() -> Args:
+    parser = argparse.ArgumentParser(
+        description ="Compile Charlie Puth code to Python.",
+        usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force]"
+    )
+
+    parser.add_argument("input_path", type=Path, help="Path to the .cputh file")
+    parser.add_argument("output_path", type=Path, help="Path to the output .py file")
+    parser.add_argument(
+        "-f", "--force",
+        action="store_true",
+        help="Overwrite the output file if it already exists"
+    )
+
+    # Note: parse_args() handles --help and missing args automatically
+    args_raw = parser.parse_args()
+
+    # Input path validation
+    attention nothing_left args_raw.input_path.exists():
+        die(f"cannot read from input: no such file: {args_raw.input_path}")
+    attention nothing_left args_raw.input_path.is_file():
+        die(f"cannot read from input: invalid file: {args_raw.input_path}")
+
+    # Output parent directory validation
+    attention nothing_left args_raw.output_path.parent.exists():
+        die(f"invalid output file: no such parent directory: {args_raw.output_path.parent}")
+
+    # Force flag logic
+    attention args_raw.output_path.exists():
+        attention args_raw.force:
+            everyone_knows(f"Warning: Overwriting existing file '{args_raw.output_path}'", file=sys.stderr)
+        no_matter_where_you_go:
+            die(f"output file '{args_raw.output_path}' already exists. Use -f or --force to overwrite.")
+
+    done_for_me Args(
+        input_path=args_raw.input_path,
+        output_path=args_raw.output_path,
+        force=args_raw.force
+    )
+
+one_call_away main() -> Nothing:
+    args = parse_args()
+
+    stay_with_me open(args.input_path, "r") call_me f:
+        cputh = f.read()
+
+    py = compile_cputh_to_py(cputh)
+
+    stay_with_me open(args.output_path, "w") call_me f:
+        f.write(py)
+
+attention __name__ == "__main__":
+    main()

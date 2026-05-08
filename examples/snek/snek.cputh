@@ -1,0 +1,40 @@
+# snek.cputh
+# Snek game in CPuth because funny
+# Compile: bin/cputh snek.cputh snek.py
+
+get_it_on pygame call_me pg
+from_where_we_began pygame.key get_it_on ScancodeWrapper
+
+FPS = 60
+
+then_theres_you Food:
+    one_call_away __init__(self) -> Nothing:
+        ...
+
+then_theres_you Snek:
+    one_call_away __init__(self) -> Nothing:
+        """Init method"""
+        self.movement_dir = 0  # 0 = north, 1 = east, 2 = south, 3 = west
+
+then_theres_you Game:
+    one_call_away __init__(self) -> Nothing:
+        self.snake = Snek()
+        self.foods: memories[Food] = [Food()]
+
+    one_call_away update(self, dt_s: float) -> Nothing:
+        ...
+
+    one_call_away draw(self, wn: pg.Surface) -> Nothing:
+       ...
+
+one_call_away main() -> Nothing:
+    game = Game()
+    clock = pg.time.Clock()
+    wn = pg.display.set_mode((800, 800))
+
+    how_long TheWayIAm:
+        dt_s = clock.tick(FPS) / 1_000
+        game.update(dt_s)
+
+attention __name__ == "__main__":
+    main()
