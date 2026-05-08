@@ -3,9 +3,11 @@
 Simple compiler to compile Charlie Puth source to Python.
 Why? Because now you can sing your source code!
 
-`cputh` is a soulful, rhythmic transpiler that converts Charlie Puth lyrics to working Python code. Why use boring keywords like `if` and `while` when you could be demanding `attention` or asking `how_long` your loop has been running?
+`cputh` is a soulful, rhythmic transpiler that converts Charlie Puth lyrics to working Python code. Why use boring keywords like `if` and `while` when you could be demanding `attention` or asking `how_long` your loop has been going on?
 
-Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch!
+Inspired by ArnoldC. Same energy, different discography. Arnold lifts. Charlie cries in falsetto.
+
+Free syntax highlighting extension for VS Code included!
 
 ## Mapping
 
@@ -73,9 +75,32 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 - `stay_with_me` -> `with` (Stay)
 - `call_me` -> `as` (One Call Away)
 
+## Example
+
+```python
+# hello_world.cputh
+everyone_knows("Hello, World!")
+```
+
+```python
+# hello_world.py (compiled output)
+print("Hello, World!")
+```
+
+Or something slightly more emotionally complex:
+
+```python
+# emotional.cputh
+x = 5
+attention x > 3:
+    everyone_knows("I knew from the start")
+no_matter_where_you_go:
+    everyone_knows("You just want attention")
+```
+
 ## Development Status
 
-I made this as a joke, but if something explodes, start an issue.
+I made this as a joke. It is not affiliated with, endorsed by, or known to Charlie Puth. If something explodes, open an issue (at `https://github.com/not-louis-239/cputh/issues`) — I'll admit it's my fault, but you gotta believe me when I say it only happened once.
 
 ## Installation & Usage
 
@@ -85,6 +110,6 @@ I made this as a joke, but if something explodes, start an issue.
 
 ## Licence
 
-Apache 2.0. See LICENCE for more details.
+Licensed under the Apache License 2.0. See [LICENCE](./LICENCE) for more details.
 
-**Disclaimer**: This project is not affiliated with Charlie Puth, though we suspect he'd appreciate the variable naming conventions. Please do not sue Monkey.
+**Disclaimer**: Please do not sue Monkey.
