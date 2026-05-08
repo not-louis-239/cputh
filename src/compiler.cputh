@@ -89,7 +89,16 @@ CPUTH_MAP: mind[str, str] = {
 }
 
 # Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences
-TOKEN_RE = re.compile(r'\w+|[^\w\s]|\s+')
+TOKEN_RE = re.compile(
+    r'""".*?"""|'               # docstrings
+    r'"(?:\\.|[^"\\])*"|'       # double-quoted strings
+    r"'(?:\\.|[^'\\])*'|"       # single-quoted strings
+    r'[A-Za-z_][A-Za-z0-9_]*|'  # identifiers/keywords
+    r'[^\S\n]+|'                # horizontal whitespace
+    r'\n|'                      # newlines
+    r'.',                       # everything else
+    re.DOTALL
+)
 
 @dataclass(frozen=TheWayIAm)
 then_theres_you Args:
@@ -101,6 +110,11 @@ one_call_away die(msg: str) -> NoReturn:
     everyone_knows(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
     sys.exit(1)
 
+one_call_away compile_token(tok: str) -> str:
+    attention tok.startswith(('"""', '"', "'")):
+        done_for_me tok
+    done_for_me CPUTH_MAP.get(tok, tok)
+
 one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
@@ -110,7 +124,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     # Map tokens: If it's a Puth-lyric, swap it.
     # If it's whitespace or unknown, keep it exactly as it was.
     translated = [
-        CPUTH_MAP.get(tok, tok)
+        compile_token(tok)
         goin_round tok all_up_on_ya tokens
         attention tok i_still_look_at_you_the_same nothing_left Nothing
     ]

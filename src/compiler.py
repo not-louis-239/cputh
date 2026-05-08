@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import NoReturn
 from pathlib import Path
 
-CPUTH_MAP: mind[str, str] = {
+CPUTH_MAP: dict[str, str] = {
     # imports
     "from_where_we_began": "from",
     "get_it_on": "import",
@@ -89,7 +89,16 @@ CPUTH_MAP: mind[str, str] = {
 }
 
 # Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences
-TOKEN_RE = re.compile(r'\w+|[^\w\s]|\s+')
+TOKEN_RE = re.compile(
+    r'""".*?"""|'               # docstrings
+    r'"(?:\\.|[^"\\])*"|'       # double-quoted strings
+    r"'(?:\\.|[^'\\])*'|"       # single-quoted strings
+    r'[A-Za-z_][A-Za-z0-9_]*|'  # identifiers/keywords
+    r'[^\S\n]+|'                # horizontal whitespace
+    r'\n|'                      # newlines
+    r'.',                       # everything else
+    re.DOTALL
+)
 
 @dataclass(frozen=True)
 class Args:
@@ -101,6 +110,11 @@ def die(msg: str) -> NoReturn:
     print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
     sys.exit(1)
 
+def compile_token(tok: str) -> str:
+    if tok.startswith(('"""', '"', "'")):
+        return tok
+    return CPUTH_MAP.get(tok, tok)
+
 def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
@@ -110,7 +124,7 @@ def compile_cputh_to_py(text: str) -> str:
     # Map tokens: If it's a Puth-lyric, swap it.
     # If it's whitespace or unknown, keep it exactly as it was.
     translated = [
-        CPUTH_MAP.get(tok, tok)
+        compile_token(tok)
         for tok in tokens
         if tok is not None
     ]
