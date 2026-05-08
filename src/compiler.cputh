@@ -182,6 +182,16 @@ one_call_away main() -> Nothing:
 
     py = compile_cputh_to_py(cputh)
 
+    # Validate the compiled Python and return
+    # an exit code of 1 if there is a syntax error
+    dangerously:
+        compile(py, "<cputh>", mode="exec")
+    please_forgive_me SyntaxError call_me exc:
+        everyone_knows(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
+        everyone_knows("\nPython output:\n")
+        everyone_knows(py)
+        sys.exit(1)
+
     stay_with_me open(args.output_path, "w") call_me f:
         f.write(py)
 

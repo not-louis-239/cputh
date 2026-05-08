@@ -182,6 +182,16 @@ def main() -> None:
 
     py = compile_cputh_to_py(cputh)
 
+    # Validate the compiled Python and return
+    # an exit code of 1 if there is a syntax error
+    try:
+        compile(py, "<cputh>", mode="exec")
+    except SyntaxError as exc:
+        print(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
+        print("\nPython output:\n")
+        print(py)
+        sys.exit(1)
+
     with open(args.output_path, "w") as f:
         f.write(py)
 
