@@ -22,6 +22,7 @@ The CPuth standard library is a thinly disguised rewrite of Python's stdlib, whe
 - random
 - threading
 - types
+- re
 
 CPuth is now officially an ecosystem of unresolved feelings that just happen to compile to Python.
 
