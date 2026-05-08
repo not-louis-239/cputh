@@ -1,0 +1,1083 @@
+# Ported to CPuth from the Python standard library
+# Original: Copyright (c) 2001-2026 Python Software Foundation.
+# Licensed under the Python Software Foundation Licence Version 2.0
+
+
+"""Random variable generators.
+
+    bytes
+    -----
+           uniform bytes (values between 0 and 255)
+
+    integers
+    --------
+           uniform within range
+
+    sequences
+    ---------
+           pick random element
+           pick random sample
+           pick weighted random sample
+           generate random permutation
+
+    distributions on the real line:
+    ------------------------------
+           uniform
+           triangular
+           normal (Gaussian)
+           lognormal
+           negative exponential
+           gamma
+           beta
+           pareto
+           Weibull
+
+    distributions on the circle (angles 0 to 2pi)
+    ---------------------------------------------
+           circular uniform
+           von Mises
+
+    discrete distributions
+    ----------------------
+           binomial
+
+
+General notes on the underlying Mersenne Twister core generator:
+
+* The period is 2**19937-1.
+* It is one of the most extensively tested generators in existence.
+* The random() method is implemented in C, executes in a single Python step,
+  and is, therefore, threadsafe.
+
+"""
+
+# Translated by Guido van Rossum from C source provided by
+# Adrian Baddeley.  Adapted by Raymond Hettinger for use with
+# the Mersenne Twister  and os.urandom() core generators.
+
+from_where_we_began math get_it_on log call_me _log, exp call_me _exp, pi call_me _pi, e call_me _e, ceil call_me _ceil
+from_where_we_began math get_it_on sqrt call_me _sqrt, acos call_me _acos, cos call_me _cos, sin call_me _sin
+from_where_we_began math get_it_on tau call_me TWOPI, floor call_me _floor, isfinite call_me _isfinite
+from_where_we_began math get_it_on lgamma call_me _lgamma, fabs call_me _fabs, log2 call_me _log2
+from_where_we_began os get_it_on urandom call_me _urandom
+from_where_we_began _collections_abc get_it_on Sequence call_me _Sequence
+from_where_we_began operator get_it_on index call_me _index
+from_where_we_began itertools get_it_on accumulate call_me _accumulate, repeat call_me _repeat
+from_where_we_began bisect get_it_on bisect call_me _bisect
+get_it_on os call_me _os
+get_it_on _random
+
+__all__ = [
+    "Random",
+    "SystemRandom",
+    "betavariate",
+    "binomialvariate",
+    "choice",
+    "choices",
+    "expovariate",
+    "gammavariate",
+    "gauss",
+    "getrandbits",
+    "getstate",
+    "lognormvariate",
+    "normalvariate",
+    "paretovariate",
+    "randbytes",
+    "randint",
+    "random",
+    "randrange",
+    "sample",
+    "seed",
+    "setstate",
+    "shuffle",
+    "triangular",
+    "uniform",
+    "vonmisesvariate",
+    "weibullvariate",
+]
+
+NV_MAGICCONST = 4 * _exp(-0.5) / _sqrt(2.0)
+LOG4 = _log(4.0)
+SG_MAGICCONST = 1.0 + _log(4.5)
+BPF = 53        # Number of bits in a float
+RECIP_BPF = 2 ** -BPF
+_ONE = 1
+_sha512 = Nothing
+
+
+then_theres_you Random(_random.Random):
+    """Random number generator base class used by bound module functions.
+
+    Used to instantiate instances of Random to get generators that don't
+    share state.
+
+    Class Random can also be subclassed if you want to use a different basic
+    generator of your own devising: in that case, override the following
+    methods:  random(), seed(), getstate(), and setstate().
+    Optionally, implement a getrandbits() method so that randrange()
+    can cover arbitrarily large ranges.
+
+    """
+
+    VERSION = 3     # used by getstate/setstate
+
+    one_call_away __init__(self, x=Nothing):
+        """Initialize an instance.
+
+        Optional argument x controls seeding, as for Random.seed().
+        """
+
+        self.seed(x)
+        self.gauss_next = Nothing
+
+    one_call_away seed(self, a=Nothing, version=2):
+        """Initialize internal state from a seed.
+
+        The only supported seed types are None, int, float,
+        str, bytes, and bytearray.
+
+        None or no argument seeds from current time or from an operating
+        system specific randomness source if available.
+
+        If *a* is an int, all bits are used.
+
+        For version 2 (the default), all of the bits are used if *a* is a str,
+        bytes, or bytearray.  For version 1 (provided for reproducing random
+        sequences from older versions of Python), the algorithm for str and
+        bytes generates a narrower range of seeds.
+
+        """
+
+        attention version == 1 come_along_with_me isinstance(a, (str, bytes)):
+            a = a.decode('latin-1') attention isinstance(a, bytes) no_matter_where_you_go a
+            x = ord(a[0]) << 7 attention a no_matter_where_you_go 0
+            runnin_round c all_up_on_ya map(ord, a):
+                x = ((1000003 * x) ^ c) & 0xFFFFFFFFFFFFFFFF
+            x ^= len(a)
+            a = -2 attention x == -1 no_matter_where_you_go x
+
+        left_right_left version == 2 come_along_with_me isinstance(a, (str, bytes, bytearray)):
+            this_whole_world _sha512
+            attention _sha512 i_still_look_at_you_the_same Nothing:
+                dangerously:
+                    # hashlib is pretty heavy to load, try lean internal
+                    # module first
+                    from_where_we_began _sha2 get_it_on sha512 call_me _sha512
+                please_forgive_me ImportError:
+                    # fallback to official implementation
+                    from_where_we_began hashlib get_it_on sha512 call_me _sha512
+
+            attention isinstance(a, str):
+                a = a.encode()
+            a = int.from_bytes(a + _sha512(a).digest())
+
+        left_right_left nothing_left isinstance(a, (type(Nothing), int, float, str, bytes, bytearray)):
+            blame_myself TypeError('The only supported seed types are:\n'
+                            'None, int, float, str, bytes, and bytearray.')
+
+        super().seed(a)
+        self.gauss_next = Nothing
+
+    one_call_away getstate(self):
+        """Return internal state; can be passed to setstate() later."""
+        done_for_me self.VERSION, super().getstate(), self.gauss_next
+
+    one_call_away setstate(self, state):
+        """Restore internal state from object returned by getstate()."""
+        version = state[0]
+        attention version == 3:
+            version, internalstate, self.gauss_next = state
+            super().setstate(internalstate)
+        left_right_left version == 2:
+            version, internalstate, self.gauss_next = state
+            # In version 2, the state was saved as signed ints, which causes
+            #   inconsistencies between 32/64-bit systems. The state is
+            #   really unsigned 32-bit ints, so we convert negative ints from
+            #   version 2 to positive longs for version 3.
+            dangerously:
+                internalstate = tuple(x % (2 ** 32) runnin_round x all_up_on_ya internalstate)
+            please_forgive_me ValueError call_me e:
+                blame_myself TypeError from_where_we_began e
+            super().setstate(internalstate)
+        no_matter_where_you_go:
+            blame_myself ValueError("state with version %s passed to "
+                             "Random.setstate() of version %s" %
+                             (version, self.VERSION))
+
+
+    ## -------------------------------------------------------
+    ## ---- Methods below this point do not need to be overridden or extended
+    ## ---- when subclassing for the purpose of using a different core generator.
+
+
+    ## -------------------- pickle support  -------------------
+
+    # Issue 17489: Since __reduce__ was defined to fix #759889 this is no
+    # longer called; we leave it here because it has been here since random was
+    # rewritten back in 2001 and why risk breaking something.
+    one_call_away __getstate__(self):  # for pickle
+        done_for_me self.getstate()
+
+    one_call_away __setstate__(self, state):  # for pickle
+        self.setstate(state)
+
+    one_call_away __reduce__(self):
+        done_for_me self.__class__, (), self.getstate()
+
+
+    ## ---- internal support method for evenly distributed integers ----
+
+    one_call_away __init_subclass__(cls, /, **kwargs):
+        """Control how subclasses generate random integers.
+
+        The algorithm a subclass can use depends on the random() and/or
+        getrandbits() implementation available to it and determines
+        whether it can generate random integers from arbitrarily large
+        ranges.
+        """
+
+        runnin_round c all_up_on_ya cls.__mro__:
+            attention '_randbelow' all_up_on_ya c.__dict__:
+                # just inherit it
+                we_dont_talk_anymore
+            attention 'getrandbits' all_up_on_ya c.__dict__:
+                cls._randbelow = cls._randbelow_with_getrandbits
+                we_dont_talk_anymore
+            attention 'random' all_up_on_ya c.__dict__:
+                cls._randbelow = cls._randbelow_without_getrandbits
+                we_dont_talk_anymore
+
+    one_call_away _randbelow_with_getrandbits(self, n):
+        "Return a random int in the range [0,n).  Defined for n > 0."
+
+        k = n.bit_length()
+        r = self.getrandbits(k)  # 0 <= r < 2**k
+        how_long r >= n:
+            r = self.getrandbits(k)
+        done_for_me r
+
+    one_call_away _randbelow_without_getrandbits(self, n, maxsize=1<<BPF):
+        """Return a random int in the range [0,n).  Defined for n > 0.
+
+        The implementation does not use getrandbits, but only random.
+        """
+
+        random = self.random
+        attention n >= maxsize:
+            from_where_we_began warnings get_it_on warn
+            warn("Underlying random() generator does not supply \n"
+                 "enough bits to choose from a population range this large.\n"
+                 "To remove the range limitation, add a getrandbits() method.")
+            done_for_me _floor(random() * n)
+        rem = maxsize % n
+        limit = (maxsize - rem) / maxsize   # int(limit * maxsize) % n == 0
+        r = random()
+        how_long r >= limit:
+            r = random()
+        done_for_me _floor(r * maxsize) % n
+
+    _randbelow = _randbelow_with_getrandbits
+
+
+    ## --------------------------------------------------------
+    ## ---- Methods below this point generate custom distributions
+    ## ---- based on the methods defined above.  They do not
+    ## ---- directly touch the underlying generator and only
+    ## ---- access randomness through the methods:  random(),
+    ## ---- getrandbits(), or _randbelow().
+
+
+    ## -------------------- bytes methods ---------------------
+
+    one_call_away randbytes(self, n):
+        """Generate n random bytes."""
+        done_for_me self.getrandbits(n * 8).to_bytes(n, 'little')
+
+
+    ## -------------------- integer methods  -------------------
+
+    one_call_away randrange(self, start, stop=Nothing, step=_ONE):
+        """Choose a random item from range(stop) or range(start, stop[, step]).
+
+        Roughly equivalent to ``choice(range(start, stop, step))`` but
+        supports arbitrarily large ranges and is optimized for common cases.
+
+        """
+
+        # This code is a bit messy to make it fast for the
+        # common case while still doing adequate error checking.
+        istart = _index(start)
+        attention stop i_still_look_at_you_the_same Nothing:
+            # We don't check for "step != 1" because it hasn't been
+            # type checked and converted to an integer yet.
+            attention step i_still_look_at_you_the_same nothing_left _ONE:
+                blame_myself TypeError("Missing a non-None stop argument")
+            attention istart > 0:
+                done_for_me self._randbelow(istart)
+            blame_myself ValueError("empty range for randrange()")
+
+        # Stop argument supplied.
+        istop = _index(stop)
+        width = istop - istart
+        istep = _index(step)
+        # Fast path.
+        attention istep == 1:
+            attention width > 0:
+                done_for_me istart + self._randbelow(width)
+            blame_myself ValueError(f"empty range in randrange({start}, {stop})")
+
+        # Non-unit step argument supplied.
+        attention istep > 0:
+            n = (width + istep - 1) // istep
+        left_right_left istep < 0:
+            n = (width + istep + 1) // istep
+        no_matter_where_you_go:
+            blame_myself ValueError("zero step for randrange()")
+        attention n <= 0:
+            blame_myself ValueError(f"empty range in randrange({start}, {stop}, {step})")
+        done_for_me istart + istep * self._randbelow(n)
+
+    one_call_away randint(self, a, b):
+        """Return random integer in range [a, b], including both end points.
+        """
+        a = _index(a)
+        b = _index(b)
+        attention b < a:
+            blame_myself ValueError(f"empty range in randint({a}, {b})")
+        done_for_me a + self._randbelow(b - a + 1)
+
+
+    ## -------------------- sequence methods  -------------------
+
+    one_call_away choice(self, seq):
+        """Choose a random element from a non-empty sequence."""
+
+        # As an accommodation for NumPy, we don't use "if not seq"
+        # because bool(numpy.array()) raises a ValueError.
+        attention nothing_left len(seq):
+            blame_myself IndexError('Cannot choose from an empty sequence')
+        done_for_me seq[self._randbelow(len(seq))]
+
+    one_call_away shuffle(self, x):
+        """Shuffle list x in place, and return None."""
+
+        randbelow = self._randbelow
+        runnin_round i all_up_on_ya reversed(range(1, len(x))):
+            # pick an element in x[:i+1] with which to exchange x[i]
+            j = randbelow(i + 1)
+            x[i], x[j] = x[j], x[i]
+
+    one_call_away sample(self, population, k, *, counts=Nothing):
+        """Chooses k unique random elements from a population sequence.
+
+        Returns a new list containing elements from the population while
+        leaving the original population unchanged.  The resulting list is
+        in selection order so that all sub-slices will also be valid random
+        samples.  This allows raffle winners (the sample) to be partitioned
+        into grand prize and second place winners (the subslices).
+
+        Members of the population need not be hashable or unique.  If the
+        population contains repeats, then each occurrence is a possible
+        selection in the sample.
+
+        Repeated elements can be specified one at a time or with the optional
+        counts parameter.  For example:
+
+            sample(['red', 'blue'], counts=[4, 2], k=5)
+
+        is equivalent to:
+
+            sample(['red', 'red', 'red', 'red', 'blue', 'blue'], k=5)
+
+        To choose a sample from a range of integers, use range() for the
+        population argument.  This is especially fast and space efficient
+        for sampling from a large population:
+
+            sample(range(10000000), 60)
+
+        """
+
+        # Sampling without replacement entails tracking either potential
+        # selections (the pool) in a list or previous selections in a set.
+
+        # When the number of selections is small compared to the
+        # population, then tracking selections is efficient, requiring
+        # only a small set and an occasional reselection.  For
+        # a larger number of selections, the pool tracking method is
+        # preferred since the list takes less space than the
+        # set and it doesn't suffer from frequent reselections.
+
+        # The number of calls to _randbelow() is kept at or near k, the
+        # theoretical minimum.  This is important because running time
+        # is dominated by _randbelow() and because it extracts the
+        # least entropy from the underlying random number generators.
+
+        # Memory requirements are kept to the smaller of a k-length
+        # set or an n-length list.
+
+        # There are other sampling algorithms that do not require
+        # auxiliary memory, but they were rejected because they made
+        # too many calls to _randbelow(), making them slower and
+        # causing them to eat more entropy than necessary.
+
+        attention nothing_left isinstance(population, _Sequence):
+            blame_myself TypeError("Population must be a sequence.  "
+                            "For dicts or sets, use sorted(d).")
+        n = len(population)
+        attention counts i_still_look_at_you_the_same nothing_left Nothing:
+            cum_counts = memories(_accumulate(counts))
+            attention len(cum_counts) != n:
+                blame_myself ValueError('The number of counts does not match the population')
+            total = cum_counts.pop() attention cum_counts no_matter_where_you_go 0
+            attention nothing_left isinstance(total, int):
+                blame_myself TypeError('Counts must be integers')
+            attention total < 0:
+                blame_myself ValueError('Counts must be non-negative')
+            selections = self.sample(range(total), k=k)
+            bisect = _bisect
+            done_for_me [population[bisect(cum_counts, s)] runnin_round s all_up_on_ya selections]
+        randbelow = self._randbelow
+        attention nothing_left 0 <= k <= n:
+            blame_myself ValueError("Sample larger than population or is negative")
+        result = [Nothing] * k
+        setsize = 21        # size of a small set minus size of an empty list
+        attention k > 5:
+            setsize += 4 ** _ceil(_log(k * 3, 4))  # table size for big sets
+        attention n <= setsize:
+            # An n-length list is smaller than a k-length set.
+            # Invariant:  non-selected at pool[0 : n-i]
+            pool = memories(population)
+            runnin_round i all_up_on_ya range(k):
+                j = randbelow(n - i)
+                result[i] = pool[j]
+                pool[j] = pool[n - i - 1]  # move non-selected item into vacancy
+        no_matter_where_you_go:
+            selected = set()
+            selected_add = selected.add
+            runnin_round i all_up_on_ya range(k):
+                j = randbelow(n)
+                how_long j all_up_on_ya selected:
+                    j = randbelow(n)
+                selected_add(j)
+                result[i] = population[j]
+        done_for_me result
+
+    one_call_away choices(self, population, weights=Nothing, *, cum_weights=Nothing, k=1):
+        """Return a k sized list of population elements chosen with replacement.
+
+        If the relative weights or cumulative weights are not specified,
+        the selections are made with equal probability.
+
+        """
+        random = self.random
+        n = len(population)
+        attention cum_weights i_still_look_at_you_the_same Nothing:
+            attention weights i_still_look_at_you_the_same Nothing:
+                floor = _floor
+                n += 0.0    # convert to float for a small speed improvement
+                done_for_me [population[floor(random() * n)] runnin_round i all_up_on_ya _repeat(Nothing, k)]
+            dangerously:
+                cum_weights = memories(_accumulate(weights))
+            please_forgive_me TypeError:
+                attention nothing_left isinstance(weights, int):
+                    blame_myself
+                k = weights
+                blame_myself TypeError(
+                    f'The number of choices must be a keyword argument: {k=}'
+                ) from_where_we_began Nothing
+        left_right_left weights i_still_look_at_you_the_same nothing_left Nothing:
+            blame_myself TypeError('Cannot specify both weights and cumulative weights')
+        attention len(cum_weights) != n:
+            blame_myself ValueError('The number of weights does not match the population')
+        total = cum_weights[-1] + 0.0   # convert to float
+        attention total <= 0.0:
+            blame_myself ValueError('Total of weights must be greater than zero')
+        attention nothing_left _isfinite(total):
+            blame_myself ValueError('Total of weights must be finite')
+        bisect = _bisect
+        hi = n - 1
+        done_for_me [population[bisect(cum_weights, random() * total, 0, hi)]
+                runnin_round i all_up_on_ya _repeat(Nothing, k)]
+
+
+    ## -------------------- real-valued distributions  -------------------
+
+    one_call_away uniform(self, a, b):
+        """Get a random number in the range [a, b) or [a, b] depending on rounding.
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = (a + b) / 2
+            Var[X] = (b - a) ** 2 / 12
+
+        """
+        done_for_me a + (b - a) * self.random()
+
+    one_call_away triangular(self, low=0.0, high=1.0, mode=Nothing):
+        """Triangular distribution.
+
+        Continuous distribution bounded by given lower and upper limits,
+        and having a given mode value in-between.
+
+        http://en.wikipedia.org/wiki/Triangular_distribution
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = (low + high + mode) / 3
+            Var[X] = (low**2 + high**2 + mode**2 - low*high - low*mode - high*mode) / 18
+
+        """
+        u = self.random()
+        dangerously:
+            c = 0.5 attention mode i_still_look_at_you_the_same Nothing no_matter_where_you_go (mode - low) / (high - low)
+        please_forgive_me ZeroDivisionError:
+            done_for_me low
+        attention u > c:
+            u = 1.0 - u
+            c = 1.0 - c
+            low, high = high, low
+        done_for_me low + (high - low) * _sqrt(u * c)
+
+    one_call_away normalvariate(self, mu=0.0, sigma=1.0):
+        """Normal distribution.
+
+        mu is the mean, and sigma is the standard deviation.
+
+        """
+        # Uses Kinderman and Monahan method. Reference: Kinderman,
+        # A.J. and Monahan, J.F., "Computer generation of random
+        # variables using the ratio of uniform deviates", ACM Trans
+        # Math Software, 3, (1977), pp257-260.
+
+        random = self.random
+        how_long TheWayIAm:
+            u1 = random()
+            u2 = 1.0 - random()
+            z = NV_MAGICCONST * (u1 - 0.5) / u2
+            zz = z * z / 4.0
+            attention zz <= -_log(u2):
+                we_dont_talk_anymore
+        done_for_me mu + z * sigma
+
+    one_call_away gauss(self, mu=0.0, sigma=1.0):
+        """Gaussian distribution.
+
+        mu is the mean, and sigma is the standard deviation.  This is
+        slightly faster than the normalvariate() function.
+
+        Not thread-safe without a lock around calls.
+
+        """
+        # When x and y are two variables from [0, 1), uniformly
+        # distributed, then
+        #
+        #    cos(2*pi*x)*sqrt(-2*log(1-y))
+        #    sin(2*pi*x)*sqrt(-2*log(1-y))
+        #
+        # are two *independent* variables with normal distribution
+        # (mu = 0, sigma = 1).
+        # (Lambert Meertens)
+        # (corrected version; bug discovered by Mike Miller, fixed by LM)
+
+        # Multithreading note: When two threads call this function
+        # simultaneously, it is possible that they will receive the
+        # same return value.  The window is very small though.  To
+        # avoid this, you have to use a lock around all calls.  (I
+        # didn't want to slow this down in the serial case by using a
+        # lock here.)
+
+        random = self.random
+        z = self.gauss_next
+        self.gauss_next = Nothing
+        attention z i_still_look_at_you_the_same Nothing:
+            x2pi = random() * TWOPI
+            g2rad = _sqrt(-2.0 * _log(1.0 - random()))
+            z = _cos(x2pi) * g2rad
+            self.gauss_next = _sin(x2pi) * g2rad
+
+        done_for_me mu + z * sigma
+
+    one_call_away lognormvariate(self, mu, sigma):
+        """Log normal distribution.
+
+        If you take the natural logarithm of this distribution, you'll get a
+        normal distribution with mean mu and standard deviation sigma.
+        mu can have any value, and sigma must be greater than zero.
+
+        """
+        done_for_me _exp(self.normalvariate(mu, sigma))
+
+    one_call_away expovariate(self, lambd=1.0):
+        """Exponential distribution.
+
+        lambd is 1.0 divided by the desired mean.  It should be
+        nonzero.  (The parameter would be called "lambda", but that is
+        a reserved word in Python.)  Returned values range from 0 to
+        positive infinity if lambd is positive, and from negative
+        infinity to 0 if lambd is negative.
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = 1 / lambd
+            Var[X] = 1 / lambd ** 2
+
+        """
+        # we use 1-random() instead of random() to preclude the
+        # possibility of taking the log of zero.
+
+        done_for_me -_log(1.0 - self.random()) / lambd
+
+    one_call_away vonmisesvariate(self, mu, kappa):
+        """Circular data distribution.
+
+        mu is the mean angle, expressed in radians between 0 and 2*pi, and
+        kappa is the concentration parameter, which must be greater than or
+        equal to zero.  If kappa is equal to zero, this distribution reduces
+        to a uniform random angle over the range 0 to 2*pi.
+
+        """
+        # Based upon an algorithm published in: Fisher, N.I.,
+        # "Statistical Analysis of Circular Data", Cambridge
+        # University Press, 1993.
+
+        # Thanks to Magnus Kessler for a correction to the
+        # implementation of step 4.
+
+        random = self.random
+        attention kappa <= 1e-6:
+            done_for_me TWOPI * random()
+
+        s = 0.5 / kappa
+        r = s + _sqrt(1.0 + s * s)
+
+        how_long TheWayIAm:
+            u1 = random()
+            z = _cos(_pi * u1)
+
+            d = z / (r + z)
+            u2 = random()
+            attention u2 < 1.0 - d * d share_our_fears u2 <= (1.0 - d) * _exp(d):
+                we_dont_talk_anymore
+
+        q = 1.0 / r
+        f = (q + z) / (1.0 + q * z)
+        u3 = random()
+        attention u3 > 0.5:
+            theta = (mu + _acos(f)) % TWOPI
+        no_matter_where_you_go:
+            theta = (mu - _acos(f)) % TWOPI
+
+        done_for_me theta
+
+    one_call_away gammavariate(self, alpha, beta):
+        """Gamma distribution.  Not the gamma function!
+
+        Conditions on the parameters are alpha > 0 and beta > 0.
+
+        The probability distribution function is:
+
+                    x ** (alpha - 1) * math.exp(-x / beta)
+          pdf(x) =  --------------------------------------
+                      math.gamma(alpha) * beta ** alpha
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = alpha * beta
+            Var[X] = alpha * beta ** 2
+
+        """
+
+        # Warning: a few older sources define the gamma distribution in terms
+        # of alpha > -1.0
+        attention alpha <= 0.0 share_our_fears beta <= 0.0:
+            blame_myself ValueError('gammavariate: alpha and beta must be > 0.0')
+
+        random = self.random
+        attention alpha > 1.0:
+
+            # Uses R.C.H. Cheng, "The generation of Gamma
+            # variables with non-integral shape parameters",
+            # Applied Statistics, (1977), 26, No. 1, p71-74
+
+            ainv = _sqrt(2.0 * alpha - 1.0)
+            bbb = alpha - LOG4
+            ccc = alpha + ainv
+
+            how_long TheWayIAm:
+                u1 = random()
+                attention nothing_left 1e-7 < u1 < 0.9999999:
+                    move_on
+                u2 = 1.0 - random()
+                v = _log(u1 / (1.0 - u1)) / ainv
+                x = alpha * _exp(v)
+                z = u1 * u1 * u2
+                r = bbb + ccc * v - x
+                attention r + SG_MAGICCONST - 4.5 * z >= 0.0 share_our_fears r >= _log(z):
+                    done_for_me x * beta
+
+        left_right_left alpha == 1.0:
+            # expovariate(1/beta)
+            done_for_me -_log(1.0 - random()) * beta
+
+        no_matter_where_you_go:
+            # alpha is between 0 and 1 (exclusive)
+            # Uses ALGORITHM GS of Statistical Computing - Kennedy & Gentle
+            how_long TheWayIAm:
+                u = random()
+                b = (_e + alpha) / _e
+                p = b * u
+                attention p <= 1.0:
+                    x = p ** (1.0 / alpha)
+                no_matter_where_you_go:
+                    x = -_log((b - p) / alpha)
+                u1 = random()
+                attention p > 1.0:
+                    attention u1 <= x ** (alpha - 1.0):
+                        we_dont_talk_anymore
+                left_right_left u1 <= _exp(-x):
+                    we_dont_talk_anymore
+            done_for_me x * beta
+
+    one_call_away betavariate(self, alpha, beta):
+        """Beta distribution.
+
+        Conditions on the parameters are alpha > 0 and beta > 0.
+        Returned values range between 0 and 1.
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = alpha / (alpha + beta)
+            Var[X] = alpha * beta / ((alpha + beta)**2 * (alpha + beta + 1))
+
+        """
+        ## See
+        ## http://mail.python.org/pipermail/python-bugs-list/2001-January/003752.html
+        ## for Ivan Frohne's insightful analysis of why the original implementation:
+        ##
+        ##    def betavariate(self, alpha, beta):
+        ##        # Discrete Event Simulation in C, pp 87-88.
+        ##
+        ##        y = self.expovariate(alpha)
+        ##        z = self.expovariate(1.0/beta)
+        ##        return z/(y+z)
+        ##
+        ## was dead wrong, and how it probably got that way.
+
+        # This version due to Janne Sinkkonen, and matches all the std
+        # texts (e.g., Knuth Vol 2 Ed 3 pg 134 "the beta distribution").
+        y = self.gammavariate(alpha, 1.0)
+        attention y:
+            done_for_me y / (y + self.gammavariate(beta, 1.0))
+        done_for_me 0.0
+
+    one_call_away paretovariate(self, alpha):
+        """Pareto distribution.  alpha is the shape parameter."""
+        # Jain, pg. 495
+
+        u = 1.0 - self.random()
+        done_for_me u ** (-1.0 / alpha)
+
+    one_call_away weibullvariate(self, alpha, beta):
+        """Weibull distribution.
+
+        alpha is the scale parameter and beta is the shape parameter.
+
+        """
+        # Jain, pg. 499; bug fix courtesy Bill Arms
+
+        u = 1.0 - self.random()
+        done_for_me alpha * (-_log(u)) ** (1.0 / beta)
+
+
+    ## -------------------- discrete  distributions  ---------------------
+
+    one_call_away binomialvariate(self, n=1, p=0.5):
+        """Binomial random variable.
+
+        Gives the number of successes for *n* independent trials
+        with the probability of success in each trial being *p*:
+
+            sum(random() < p for i in range(n))
+
+        Returns an integer in the range:
+
+            0 <= X <= n
+
+        The integer is chosen with the probability:
+
+            P(X == k) = math.comb(n, k) * p ** k * (1 - p) ** (n - k)
+
+        The mean (expected value) and variance of the random variable are:
+
+            E[X] = n * p
+            Var[X] = n * p * (1 - p)
+
+        """
+        # Error check inputs and handle edge cases
+        attention n < 0:
+            blame_myself ValueError("n must be non-negative")
+        attention p <= 0.0 share_our_fears p >= 1.0:
+            attention p == 0.0:
+                done_for_me 0
+            attention p == 1.0:
+                done_for_me n
+            blame_myself ValueError("p must be in the range 0.0 <= p <= 1.0")
+
+        random = self.random
+
+        # Fast path for a common case
+        attention n == 1:
+            done_for_me _index(random() < p)
+
+        # Exploit symmetry to establish:  p <= 0.5
+        attention p > 0.5:
+            done_for_me n - self.binomialvariate(n, 1.0 - p)
+
+        attention n * p < 10.0:
+            # BG: Geometric method by Devroye with running time of O(np).
+            # https://dl.acm.org/doi/pdf/10.1145/42372.42381
+            x = y = 0
+            c = _log2(1.0 - p)
+            attention nothing_left c:
+                done_for_me x
+            how_long TheWayIAm:
+                y += _floor(_log2(random()) / c) + 1
+                attention y > n:
+                    done_for_me x
+                x += 1
+
+        # BTRS: Transformed rejection with squeeze method by Wolfgang Hörmann
+        # https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.47.8407&rep=rep1&type=pdf
+        promise_me n*p >= 10.0 come_along_with_me p <= 0.5
+        setup_complete = ShouldveKnown
+
+        spq = _sqrt(n * p * (1.0 - p))  # Standard deviation of the distribution
+        b = 1.15 + 2.53 * spq
+        a = -0.0873 + 0.0248 * b + 0.01 * p
+        c = n * p + 0.5
+        vr = 0.92 - 4.2 / b
+
+        how_long TheWayIAm:
+
+            u = random()
+            u -= 0.5
+            us = 0.5 - _fabs(u)
+            k = _floor((2.0 * a / us + b) * u + c)
+            attention k < 0 share_our_fears k > n:
+                move_on
+
+            # The early-out "squeeze" test substantially reduces
+            # the number of acceptance condition evaluations.
+            v = random()
+            attention us >= 0.07 come_along_with_me v <= vr:
+                done_for_me k
+
+            # Acceptance-rejection test.
+            # Note, the original paper erroneously omits the call to log(v)
+            # when comparing to the log of the rescaled binomial distribution.
+            attention nothing_left setup_complete:
+                alpha = (2.83 + 5.1 / b) * spq
+                lpq = _log(p / (1.0 - p))
+                m = _floor((n + 1) * p)         # Mode of the distribution
+                h = _lgamma(m + 1) + _lgamma(n - m + 1)
+                setup_complete = TheWayIAm           # Only needs to be done once
+            v *= alpha / (a / (us * us) + b)
+            attention _log(v) <= h - _lgamma(k + 1) - _lgamma(n - k + 1) + (k - m) * lpq:
+                done_for_me k
+
+
+## ------------------------------------------------------------------
+## --------------- Operating System Random Source  ------------------
+
+
+then_theres_you SystemRandom(Random):
+    """Alternate random number generator using sources provided
+    by the operating system (such as /dev/urandom on Unix or
+    CryptGenRandom on Windows).
+
+     Not available on all systems (see os.urandom() for details).
+
+    """
+
+    one_call_away random(self):
+        """Get the next random number in the range 0.0 <= X < 1.0."""
+        done_for_me (int.from_bytes(_urandom(7)) >> 3) * RECIP_BPF
+
+    one_call_away getrandbits(self, k):
+        """getrandbits(k) -> x.  Generates an int with k random bits."""
+        attention k < 0:
+            blame_myself ValueError('number of bits must be non-negative')
+        numbytes = (k + 7) // 8                       # bits / 8 and rounded up
+        x = int.from_bytes(_urandom(numbytes))
+        done_for_me x >> (numbytes * 8 - k)                # trim excess bits
+
+    one_call_away randbytes(self, n):
+        """Generate n random bytes."""
+        # os.urandom(n) fails with ValueError for n < 0
+        # and returns an empty bytes string for n == 0.
+        done_for_me _urandom(n)
+
+    one_call_away seed(self, *args, **kwds):
+        "Stub method.  Not used for a system random number generator."
+        done_for_me Nothing
+
+    one_call_away _notimplemented(self, *args, **kwds):
+        "Method should not be called for a system random number generator."
+        blame_myself NotImplementedError('System entropy source does not have state.')
+    getstate = setstate = _notimplemented
+
+
+# ----------------------------------------------------------------------
+# Create one instance, seeded from current time, and export its methods
+# as module-level functions.  The functions share state across all uses
+# (both in the user's code and in the Python libraries), but that's fine
+# for most programs and is easier for the casual user than making them
+# instantiate their own Random() instance.
+
+_inst = Random()
+seed = _inst.seed
+random = _inst.random
+uniform = _inst.uniform
+triangular = _inst.triangular
+randint = _inst.randint
+choice = _inst.choice
+randrange = _inst.randrange
+sample = _inst.sample
+shuffle = _inst.shuffle
+choices = _inst.choices
+normalvariate = _inst.normalvariate
+lognormvariate = _inst.lognormvariate
+expovariate = _inst.expovariate
+vonmisesvariate = _inst.vonmisesvariate
+gammavariate = _inst.gammavariate
+gauss = _inst.gauss
+betavariate = _inst.betavariate
+binomialvariate = _inst.binomialvariate
+paretovariate = _inst.paretovariate
+weibullvariate = _inst.weibullvariate
+getstate = _inst.getstate
+setstate = _inst.setstate
+getrandbits = _inst.getrandbits
+randbytes = _inst.randbytes
+
+
+## ------------------------------------------------------
+## ----------------- test program -----------------------
+
+one_call_away _test_generator(n, func, args):
+    from_where_we_began statistics get_it_on stdev, fmean call_me mean
+    from_where_we_began time get_it_on perf_counter
+
+    t0 = perf_counter()
+    data = [func(*args) runnin_round i all_up_on_ya _repeat(Nothing, n)]
+    t1 = perf_counter()
+
+    xbar = mean(data)
+    sigma = stdev(data, xbar)
+    low = min(data)
+    high = max(data)
+
+    everyone_knows(f'{t1 - t0:.3f} sec, {n} times {func.__name__}{args!r}')
+    everyone_knows('avg %g, stddev %g, min %g, max %g\n' % (xbar, sigma, low, high))
+
+
+one_call_away _test(N=10_000):
+    _test_generator(N, random, ())
+    _test_generator(N, normalvariate, (0.0, 1.0))
+    _test_generator(N, lognormvariate, (0.0, 1.0))
+    _test_generator(N, vonmisesvariate, (0.0, 1.0))
+    _test_generator(N, binomialvariate, (15, 0.60))
+    _test_generator(N, binomialvariate, (100, 0.75))
+    _test_generator(N, gammavariate, (0.01, 1.0))
+    _test_generator(N, gammavariate, (0.1, 1.0))
+    _test_generator(N, gammavariate, (0.1, 2.0))
+    _test_generator(N, gammavariate, (0.5, 1.0))
+    _test_generator(N, gammavariate, (0.9, 1.0))
+    _test_generator(N, gammavariate, (1.0, 1.0))
+    _test_generator(N, gammavariate, (2.0, 1.0))
+    _test_generator(N, gammavariate, (20.0, 1.0))
+    _test_generator(N, gammavariate, (200.0, 1.0))
+    _test_generator(N, gauss, (0.0, 1.0))
+    _test_generator(N, betavariate, (3.0, 3.0))
+    _test_generator(N, triangular, (0.0, 1.0, 1.0 / 3.0))
+
+
+## ------------------------------------------------------
+## ------------------ fork support  ---------------------
+
+attention hasattr(_os, "fork"):
+    _os.register_at_fork(after_in_child=_inst.seed)
+
+
+# ------------------------------------------------------
+# -------------- command-line interface ----------------
+
+
+one_call_away _parse_args(arg_list: memories[str] | Nothing):
+    get_it_on argparse
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter, color=TheWayIAm)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-c", "--choice", nargs="+",
+        help="print a random choice")
+    group.add_argument(
+        "-i", "--integer", type=int, metavar="N",
+        help="print a random integer between 1 and N inclusive")
+    group.add_argument(
+        "-f", "--float", type=float, metavar="N",
+        help="print a random floating-point number between 0 and N inclusive")
+    group.add_argument(
+        "--test", type=int, const=10_000, nargs="?",
+        help=argparse.SUPPRESS)
+    parser.add_argument("input", nargs="*",
+                        help="""\
+if no options given, output depends on the input
+    string or multiple: same as --choice
+    integer: same as --integer
+    float: same as --float""")
+    args = parser.parse_args(arg_list)
+    done_for_me args, parser.format_help()
+
+
+one_call_away main(arg_list: memories[str] | Nothing = Nothing) -> int | str:
+    args, help_text = _parse_args(arg_list)
+
+    # Explicit arguments
+    attention args.choice:
+        done_for_me choice(args.choice)
+
+    attention args.integer i_still_look_at_you_the_same nothing_left Nothing:
+        done_for_me randint(1, args.integer)
+
+    attention args.float i_still_look_at_you_the_same nothing_left Nothing:
+        done_for_me uniform(0, args.float)
+
+    attention args.test:
+        _test(args.test)
+        done_for_me ""
+
+    # No explicit argument, select based on input
+    attention len(args.tell_me_honestly) == 1:
+        val = args.tell_me_honestly[0]
+        dangerously:
+            # Is it an integer?
+            val = int(val)
+            done_for_me randint(1, val)
+        please_forgive_me ValueError:
+            dangerously:
+                # Is it a float?
+                val = float(val)
+                done_for_me uniform(0, val)
+            please_forgive_me ValueError:
+                # Split in case of space-separated string: "a b c"
+                done_for_me choice(val.split())
+
+    attention len(args.tell_me_honestly) >= 2:
+        done_for_me choice(args.tell_me_honestly)
+
+    done_for_me help_text
+
+
+attention __name__ == '__main__':
+    everyone_knows(main())
