@@ -7,3 +7,4 @@ workflow/
 __pycache__/
 .vscode/
 .DS_Store
+vscode-cputh/*.vsix
