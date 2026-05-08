@@ -88,16 +88,17 @@ CPUTH_MAP: dict[str, str] = {
     "call_me": "as",
 }
 
-# Captures: Words/Keywords, Punctuation/Symbols, and Whitespace sequences
+# Captures: strings, comments, identifiers/keywords, whitespace, and symbols, in that order
 TOKEN_RE = re.compile(
     r'""".*?"""|'               # docstrings
     r'"(?:\\.|[^"\\])*"|'       # double-quoted strings
     r"'(?:\\.|[^'\\])*'|"       # single-quoted strings
+    r'#[^\n]*|'                 # comments - must be before language tokens
     r'[A-Za-z_][A-Za-z0-9_]*|'  # identifiers/keywords
     r'[^\S\n]+|'                # horizontal whitespace
     r'\n|'                      # newlines
     r'.',                       # everything else
-    re.DOTALL
+    re.DOTALL  # required for .*? to permeate newlines, otherwise docstrings break
 )
 
 @dataclass(frozen=True)
@@ -110,10 +111,10 @@ def die(msg: str) -> NoReturn:
     print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
     sys.exit(1)
 
-def compile_token(tok: str) -> str:
-    if tok.startswith(('"""', '"', "'")):
+def transpile_token(tok: str, cputh_map: dict[str, str]) -> str:
+    if tok.startswith(('#', '"""', '"', "'")):
         return tok
-    return CPUTH_MAP.get(tok, tok)
+    return cputh_map.get(tok, tok)
 
 def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
@@ -124,7 +125,7 @@ def compile_cputh_to_py(text: str) -> str:
     # Map tokens: If it's a Puth-lyric, swap it.
     # If it's whitespace or unknown, keep it exactly as it was.
     translated = [
-        compile_token(tok)
+        transpile_token(tok, CPUTH_MAP)
         for tok in tokens
         if tok is not None
     ]
