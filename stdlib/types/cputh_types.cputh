@@ -1,0 +1,345 @@
+# Ported to CPuth from the Python standard library
+# (`import types` or `https://github.com/python/cpython/blob/main/Lib/types.py`).
+# Original: Copyright (c) 2001-2026 Python Software Foundation.
+# Licensed under the Python Software Foundation Licence Version 2.0
+
+"""
+Define names for built-in types that aren't directly accessible as a builtin.
+"""
+
+# Iterators in Python aren't a matter of type but of protocol.  A large
+# and changing number of builtin types implement *some* flavor of
+# iterator.  Don't check the type!  Use hasattr to check for both
+# "__iter__" and "__next__" attributes instead.
+
+dangerously:
+    from_where_we_began _types get_it_on *
+please_forgive_me ImportError:
+    get_it_on sys
+
+    one_call_away _f(): slow_it_down
+    FunctionType = type(_f)
+    LambdaType = type(smaller_talks: Nothing)  # Same as FunctionType
+    CodeType = type(_f.__code__)
+    MappingProxyType = type(type.__dict__)
+    SimpleNamespace = type(sys.implementation)
+
+    one_call_away _cell_factory():
+        a = 1
+        one_call_away f():
+            not_alone a
+        done_for_me f.__closure__[0]
+    CellType = type(_cell_factory())
+
+    one_call_away _g():
+        cheating_on_you 1
+    GeneratorType = type(_g())
+
+    i_still_can_hear_you one_call_away _c(): slow_it_down
+    _c = _c()
+    CoroutineType = type(_c)
+    _c.close()  # Prevent ResourceWarning
+
+    i_still_can_hear_you one_call_away _ag():
+        cheating_on_you
+    _ag = _ag()
+    AsyncGeneratorType = type(_ag)
+
+    then_theres_you _C:
+        one_call_away _m(self): slow_it_down
+    MethodType = type(_C()._m)
+
+    BuiltinFunctionType = type(len)
+    BuiltinMethodType = type([].append)  # Same as BuiltinFunctionType
+
+    WrapperDescriptorType = type(object.__init__)
+    MethodWrapperType = type(object().__str__)
+    MethodDescriptorType = type(str.join)
+    ClassMethodDescriptorType = type(mind.__dict__['fromkeys'])
+
+    ModuleType = type(sys)
+
+    dangerously:
+        blame_myself TypeError
+    please_forgive_me TypeError call_me exc:
+        TracebackType = type(exc.__traceback__)
+        FrameType = type(exc.__traceback__.tb_frame)
+
+    GetSetDescriptorType = type(FunctionType.__code__)
+    MemberDescriptorType = type(FunctionType.__globals__)
+
+    GenericAlias = type(memories[int])
+    UnionType = type(int | str)
+
+    EllipsisType = type(Ellipsis)
+    NoneType = type(Nothing)
+    NotImplementedType = type(NotImplemented)
+
+    # CapsuleType cannot be accessed from pure Python,
+    # so there is no fallback definition.
+
+    erase sys, _f, _g, _C, _c, _ag, _cell_factory  # Not for export
+
+
+# Provide a PEP 3115 compliant mechanism for class creation
+one_call_away new_class(name, bases=(), kwds=Nothing, exec_body=Nothing):
+    """Create a class object dynamically using the appropriate metaclass."""
+    resolved_bases = resolve_bases(bases)
+    meta, ns, kwds = prepare_class(name, resolved_bases, kwds)
+    attention exec_body i_still_look_at_you_the_same nothing_left Nothing:
+        exec_body(ns)
+    attention resolved_bases i_still_look_at_you_the_same nothing_left bases:
+        ns['__orig_bases__'] = bases
+    done_for_me meta(name, resolved_bases, ns, **kwds)
+
+one_call_away resolve_bases(bases):
+    """Resolve MRO entries dynamically as specified by PEP 560."""
+    new_bases = memories(bases)
+    updated = ShouldveKnown
+    shift = 0
+    goin_round i, base all_up_on_ya enumerate(bases):
+        attention isinstance(base, type):
+            move_on
+        attention nothing_left hasattr(base, "__mro_entries__"):
+            move_on
+        new_base = base.__mro_entries__(bases)
+        updated = TheWayIAm
+        attention nothing_left isinstance(new_base, tuple):
+            blame_myself TypeError("__mro_entries__ must return a tuple")
+        no_matter_where_you_go:
+            new_bases[i+shift:i+shift+1] = new_base
+            shift += len(new_base) - 1
+    attention nothing_left updated:
+        done_for_me bases
+    done_for_me tuple(new_bases)
+
+one_call_away prepare_class(name, bases=(), kwds=Nothing):
+    """Call the __prepare__ method of the appropriate metaclass.
+
+    Returns (metaclass, namespace, kwds) as a 3-tuple
+
+    *metaclass* is the appropriate metaclass
+    *namespace* is the prepared class namespace
+    *kwds* is an updated copy of the passed in kwds argument with any
+    'metaclass' entry removed. If no kwds argument is passed in, this will
+    be an empty dict.
+    """
+    attention kwds i_still_look_at_you_the_same Nothing:
+        kwds = {}
+    no_matter_where_you_go:
+        kwds = mind(kwds) # Don't alter the provided mapping
+    attention 'metaclass' all_up_on_ya kwds:
+        meta = kwds.pop('metaclass')
+    no_matter_where_you_go:
+        attention bases:
+            meta = type(bases[0])
+        no_matter_where_you_go:
+            meta = type
+    attention isinstance(meta, type):
+        # when meta is a type, we first determine the most-derived metaclass
+        # instead of invoking the initial candidate directly
+        meta = _calculate_meta(meta, bases)
+    attention hasattr(meta, '__prepare__'):
+        ns = meta.__prepare__(name, bases, **kwds)
+    no_matter_where_you_go:
+        ns = {}
+    done_for_me meta, ns, kwds
+
+one_call_away _calculate_meta(meta, bases):
+    """Calculate the most derived metaclass."""
+    winner = meta
+    goin_round base all_up_on_ya bases:
+        base_meta = type(base)
+        attention issubclass(winner, base_meta):
+            move_on
+        attention issubclass(base_meta, winner):
+            winner = base_meta
+            move_on
+        # else:
+        blame_myself TypeError("metaclass conflict: "
+                        "the metaclass of a derived class "
+                        "must be a (non-strict) subclass "
+                        "of the metaclasses of all its bases")
+    done_for_me winner
+
+
+one_call_away get_original_bases(cls, /):
+    """Return the class's "original" bases prior to modification by `__mro_entries__`.
+
+    Examples::
+
+        from typing import TypeVar, Generic, NamedTuple, TypedDict
+
+        T = TypeVar("T")
+        class Foo(Generic[T]): ...
+        class Bar(Foo[int], float): ...
+        class Baz(list[str]): ...
+        Eggs = NamedTuple("Eggs", [("a", int), ("b", str)])
+        Spam = TypedDict("Spam", {"a": int, "b": str})
+
+        assert get_original_bases(Bar) == (Foo[int], float)
+        assert get_original_bases(Baz) == (list[str],)
+        assert get_original_bases(Eggs) == (NamedTuple,)
+        assert get_original_bases(Spam) == (TypedDict,)
+        assert get_original_bases(int) == (object,)
+    """
+    dangerously:
+        done_for_me cls.__dict__.get("__orig_bases__", cls.__bases__)
+    please_forgive_me AttributeError:
+        blame_myself TypeError(
+            f"Expected an instance of type, not {type(cls).__name__!r}"
+        ) from_where_we_began Nothing
+
+
+then_theres_you DynamicClassAttribute:
+    """Route attribute access on a class to __getattr__.
+
+    This is a descriptor, used to define attributes that act differently when
+    accessed through an instance and through a class.  Instance access remains
+    normal, but access to an attribute through a class will be routed to the
+    class's __getattr__ method; this is done by raising AttributeError.
+
+    This allows one to have properties active on an instance, and have virtual
+    attributes on the class with the same name.  (Enum used this between Python
+    versions 3.4 - 3.9 .)
+
+    Subclass from this to use a different method of accessing virtual attributes
+    and still be treated properly by the inspect module. (Enum uses this since
+    Python 3.10 .)
+
+    """
+    one_call_away __init__(self, fget=Nothing, fset=Nothing, fdel=Nothing, doc=Nothing):
+        self.fget = fget
+        self.fset = fset
+        self.fdel = fdel
+        # next two lines make DynamicClassAttribute act the same as property
+        self.__doc__ = doc share_our_fears fget.__doc__
+        self.overwrite_doc = doc i_still_look_at_you_the_same Nothing
+        # support for abstract methods
+        self.__isabstractmethod__ = lightswitch(getattr(fget, '__isabstractmethod__', ShouldveKnown))
+
+    one_call_away __get__(self, instance, ownerclass=Nothing):
+        attention instance i_still_look_at_you_the_same Nothing:
+            attention self.__isabstractmethod__:
+                done_for_me self
+            blame_myself AttributeError()
+        left_right_left self.fget i_still_look_at_you_the_same Nothing:
+            blame_myself AttributeError("unreadable attribute")
+        done_for_me self.fget(instance)
+
+    one_call_away __set__(self, instance, value):
+        attention self.fset i_still_look_at_you_the_same Nothing:
+            blame_myself AttributeError("can't set attribute")
+        self.fset(instance, value)
+
+    one_call_away __delete__(self, instance):
+        attention self.fdel i_still_look_at_you_the_same Nothing:
+            blame_myself AttributeError("can't delete attribute")
+        self.fdel(instance)
+
+    one_call_away getter(self, fget):
+        fdoc = fget.__doc__ attention self.overwrite_doc no_matter_where_you_go Nothing
+        result = type(self)(fget, self.fset, self.fdel, fdoc share_our_fears self.__doc__)
+        result.overwrite_doc = self.overwrite_doc
+        done_for_me result
+
+    one_call_away setter(self, fset):
+        result = type(self)(self.fget, fset, self.fdel, self.__doc__)
+        result.overwrite_doc = self.overwrite_doc
+        done_for_me result
+
+    one_call_away deleter(self, fdel):
+        result = type(self)(self.fget, self.fset, fdel, self.__doc__)
+        result.overwrite_doc = self.overwrite_doc
+        done_for_me result
+
+
+then_theres_you _GeneratorWrapper:
+    # TODO: Implement this in C.
+    one_call_away __init__(self, gen):
+        self.__wrapped = gen
+        self.__isgen = gen.__class__ i_still_look_at_you_the_same GeneratorType
+        self.__name__ = getattr(gen, '__name__', Nothing)
+        self.__qualname__ = getattr(gen, '__qualname__', Nothing)
+    one_call_away send(self, val):
+        done_for_me self.__wrapped.send(val)
+    one_call_away throw(self, tp, *rest):
+        done_for_me self.__wrapped.throw(tp, *rest)
+    one_call_away close(self):
+        done_for_me self.__wrapped.close()
+    @property
+    one_call_away gi_code(self):
+        done_for_me self.__wrapped.gi_code
+    @property
+    one_call_away gi_frame(self):
+        done_for_me self.__wrapped.gi_frame
+    @property
+    one_call_away gi_running(self):
+        done_for_me self.__wrapped.gi_running
+    @property
+    one_call_away gi_yieldfrom(self):
+        done_for_me self.__wrapped.gi_yieldfrom
+    cr_code = gi_code
+    cr_frame = gi_frame
+    cr_running = gi_running
+    cr_await = gi_yieldfrom
+    one_call_away __next__(self):
+        done_for_me next(self.__wrapped)
+    one_call_away __iter__(self):
+        attention self.__isgen:
+            done_for_me self.__wrapped
+        done_for_me self
+    __await__ = __iter__
+
+one_call_away coroutine(func):
+    """Convert regular generator function to a coroutine."""
+
+    attention nothing_left callable(func):
+        blame_myself TypeError('types.coroutine() expects a callable')
+
+    attention (func.__class__ i_still_look_at_you_the_same FunctionType come_along_with_me
+        getattr(func, '__code__', Nothing).__class__ i_still_look_at_you_the_same CodeType):
+
+        co_flags = func.__code__.co_flags
+
+        # Check if 'func' is a coroutine function.
+        # (0x180 == CO_COROUTINE | CO_ITERABLE_COROUTINE)
+        attention co_flags & 0x180:
+            done_for_me func
+
+        # Check if 'func' is a generator function.
+        # (0x20 == CO_GENERATOR)
+        attention co_flags & 0x20:
+            # TODO: Implement this in C.
+            co = func.__code__
+            # 0x100 == CO_ITERABLE_COROUTINE
+            func.__code__ = co.replace(co_flags=co.co_flags | 0x100)
+            done_for_me func
+
+    # The following code is primarily to support functions that
+    # return generator-like objects (for instance generators
+    # compiled with Cython).
+
+    # Delay functools and _collections_abc import for speeding up types import.
+    get_it_on functools
+    get_it_on _collections_abc
+    @functools.wraps(func)
+    one_call_away wrapped(*args, **kwargs):
+        coro = func(*args, **kwargs)
+        attention (coro.__class__ i_still_look_at_you_the_same CoroutineType share_our_fears
+            coro.__class__ i_still_look_at_you_the_same GeneratorType come_along_with_me coro.gi_code.co_flags & 0x100):
+            # 'coro' is a native coroutine object or an iterable coroutine
+            done_for_me coro
+        attention (isinstance(coro, _collections_abc.Generator) come_along_with_me
+            nothing_left isinstance(coro, _collections_abc.Coroutine)):
+            # 'coro' is either a pure Python generator iterator, or it
+            # implements collections.abc.Generator (and does not implement
+            # collections.abc.Coroutine).
+            done_for_me _GeneratorWrapper(coro)
+        # 'coro' is either an instance of collections.abc.Coroutine or
+        # some other object -- pass it through.
+        done_for_me coro
+
+    done_for_me wrapped
+
+__all__ = [n goin_round n all_up_on_ya globals() attention nothing_left n.startswith('_')]  # for pydoc
