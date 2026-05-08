@@ -18,6 +18,8 @@
 import re
 import sys
 import argparse
+import subprocess
+import tempfile
 from dataclasses import dataclass
 from typing import NoReturn
 from pathlib import Path
@@ -107,6 +109,11 @@ class Args:
     output_path: Path   # .py
     force: bool  # overwrite the output file if it already exists
 
+@dataclass(frozen=True)
+class DiagnosticOutputLine:
+    lineno: int
+    msg: str
+
 def die(msg: str) -> NoReturn:
     print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
     sys.exit(1)
@@ -115,6 +122,24 @@ def transpile_token(tok: str, cputh_map: dict[str, str]) -> str:
     if tok.startswith(('#', '"""', '"', "'")):
         return tok
     return cputh_map.get(tok, tok)
+
+def parse_diagnostics(output: str) -> list[DiagnosticOutputLine]:
+    pattern = r":(\d+):\d+:\s*(.*)"
+    results = []
+
+    for line in output.splitlines():
+        if match := re.search(pattern, line):
+            lineno = int(match.group(1))
+            msg = match.group(2)
+
+            results.append(
+                DiagnosticOutputLine(
+                    lineno=lineno,
+                    msg=msg
+                )
+            )
+
+    return results
 
 def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
@@ -212,11 +237,30 @@ def main() -> None:
         compile(py, args.input_path.name, mode="exec")
     except SyntaxError as exc:
         print(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
-        print(f"Code was not written to output file.")
+        print("Code was not written to output file.")
         print("\nPython output:\n")
         if exc.lineno is not None:
             print(format_code_view(py, lineno=exc.lineno, view_range=2))
         sys.exit(1)
+
+    # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
+    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) as tempf:
+        tempf.write(py)
+        tempf.flush()
+
+        # Check for Pylance errors and print them if so
+        proc = subprocess.run(
+            ["python", "-m", "pyflakes", tempf.name],
+            capture_output=True,
+        )
+
+    if proc.stdout:
+        print("\nErrors or warnings found in static analysis. Output: ")
+        text = proc.stdout.decode("utf-8", errors="replace")
+        diag = parse_diagnostics(text)
+
+        for line in diag:
+            print(f"\033[93mline {line.lineno}\033[0m: {line.msg}")
 
     with open(args.output_path, "w") as f:
         f.write(py)
