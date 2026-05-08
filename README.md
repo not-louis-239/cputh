@@ -33,8 +33,8 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 - `slow_it_down` -> `pass` (album: Voicenotes)
 
 ### Functions and Classes
-- `one_call_away` -> `class` (One Call Away)
-- `then_theres_you` -> `def` (Then There’s You)
+- `then_theres_you` -> `class` (Then There’s You)
+- `one_call_away` -> `def` (One Call Away)
 - `smaller_talks` -> `lambda` (Changes)
 - `done_for_me` -> `return` (Done for Me)
 - `cheating_on_you` -> `yield` (Cheating on You)

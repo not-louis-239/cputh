@@ -46,8 +46,8 @@ CPUTH_MAP: dict[str, str] = {
     "slow_it_down": "pass",
 
     # functions / classes
-    "one_call_away": "class",
-    "then_theres_you": "def",
+    "then_theres_you": "class",
+    "one_call_away": "def",
     "smaller_talks": "lambda",
     "done_for_me": "return",
     "cheating_on_you": "yield",
