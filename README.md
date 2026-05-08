@@ -28,8 +28,8 @@ Inspired by the logic of ArnoldC, but this time with more hair and perfect pitch
 ### Loops
 - `how_long` -> `while` (How Long)
 - `goin_round` -> `for` (Left and Right)
-- `move_on` -> `continue` (We Don’t Talk Anymore)
 - `we_dont_talk_anymore` -> `break` (We Don't Talk Anymore)
+- `move_on` -> `continue` (We Don’t Talk Anymore)
 - `slow_it_down` -> `pass` (album: Voicenotes)
 
 ### Functions and Classes

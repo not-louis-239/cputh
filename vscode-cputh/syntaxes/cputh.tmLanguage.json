@@ -71,6 +71,11 @@
                     "match": "(?<=,\\s*)(\\*)"
                 },
                 {
+                    "comment": "anonymous function",
+                    "name": "storage.type.function.anonymous.cputh",
+                    "match": "\\bsmaller_talks\\b"
+                },
+                {
                     "comment": "function definition: keyword, name, and opening paren",
                     "match": "\\b(one_call_away)\\s+([a-z_][a-zA-Z0-9_]*)\\s*(\\()",
                     "captures": {
@@ -151,6 +156,11 @@
                     "comment": "data structure types - include cputh and vanilla python",
                     "name": "support.type.cputh",
                     "match": "\\b(lightswitch|memories|mind|str|float|tuple|int|set|frozenset|bytes|bytearray|memoryview|slice)\\b"
+                },
+                {
+                    "comment": "magic methods ",
+                    "name": "support.function.magic.cputh",
+                    "match": "\\b(__init__|__add__|__sub__|__mul__|__truediv__|__floordiv__|__hash__|__eq__|__ne__|__lt__|__le__|__gt__|__ge__|__getattr__|__setattr__|__delattr__|__repr__|__str__|__call__|__int__|__len__|__bool__)\\b"
                 }
             ]
         },
