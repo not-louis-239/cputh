@@ -1,99 +1,173 @@
 {
-    "if": {
+    "attention": {
         "prefix": "attention",
-        "body": ["attention ${1:condition}:", "\t$0"],
         "description": "if statement"
     },
-    "elif": {
+    "left_right_left": {
         "prefix": "left_right_left",
-        "body": ["left_right_left ${1:condition}:", "\t$0"],
         "description": "elif statement"
     },
-    "else": {
+    "no_matter_where_you_go": {
         "prefix": "no_matter_where_you_go",
-        "body": ["no_matter_where_you_go:", "\t$0"],
         "description": "else statement"
     },
-    "while": {
+
+    "i_still_look_at_you_the_same": {
+        "prefix": "i_still_look_at_you_the_same",
+        "description": "is operator"
+    },
+    "all_up_on_ya": {
+        "prefix": "all_up_on_ya",
+        "description": "in operator"
+    },
+    "nothing_left": {
+        "prefix": "nothing_left",
+        "description": "not operator"
+    },
+    "come_along_with_me": {
+        "prefix": "come_along_with_me",
+        "description": "and operator"
+    },
+    "share_our_fears": {
+        "prefix": "share_our_fears",
+        "description": "or operator"
+    },
+
+    "how_long": {
         "prefix": "how_long",
-        "body": ["how_long ${1:condition}:", "\t$0"],
         "description": "while loop"
     },
-    "for": {
+    "goin_round": {
         "prefix": "goin_round",
-        "body": ["goin_round ${1:item} all_up_on_ya ${2:iterable}:", "\t$0"],
         "description": "for loop"
     },
-    "def": {
-        "prefix": "one_call_away",
-        "body": ["one_call_away ${1:name}(${2:args}):", "\t$0"],
-        "description": "function definition"
+    "we_dont_talk_anymore": {
+        "prefix": "we_dont_talk_anymore",
+        "description": "break statement"
     },
-    "class": {
+    "move_on": {
+        "prefix": "move_on",
+        "description": "continue statement"
+    },
+    "slow_it_down": {
+        "prefix": "slow_it_down",
+        "description": "pass statement"
+    },
+
+    "then_theres_you": {
         "prefix": "then_theres_you",
-        "body": ["then_theres_you ${1:Name}:", "\t$0"],
         "description": "class definition"
     },
-    "try/except": {
-        "prefix": "dangerously",
-        "body": [
-            "dangerously:",
-            "\t${1:pass}",
-            "please_forgive_me ${2:Exception} call_me ${3:e}:",
-            "\t$0"
-        ],
-        "description": "try/except block"
+    "one_call_away": {
+        "prefix": "one_call_away",
+        "description": "function definition"
     },
-    "try/except/finally": {
-        "prefix": "dangerously_finally",
-        "body": [
-            "dangerously:",
-            "\t${1:pass}",
-            "please_forgive_me ${2:Exception} call_me ${3:e}:",
-            "\t${4:pass}",
-            "see_you_again:",
-            "\t$0"
-        ],
-        "description": "try/except/finally block"
+    "smaller_talks": {
+        "prefix": "smaller_talks",
+        "description": "lambda expression"
     },
-    "import": {
-        "prefix": "get_it_on",
-        "body": ["get_it_on ${1:module}"],
-        "description": "import statement"
-    },
-    "from import": {
-        "prefix": "from_where_we_began",
-        "body": ["from_where_we_began ${1:module} get_it_on ${2:name}"],
-        "description": "from ... import statement"
-    },
-    "return": {
+    "done_for_me": {
         "prefix": "done_for_me",
-        "body": ["done_for_me ${1:value}"],
         "description": "return statement"
     },
-    "print": {
+    "cheating_on_you": {
+        "prefix": "cheating_on_you",
+        "description": "yield statement"
+    },
+
+    "this_whole_world": {
+        "prefix": "this_whole_world",
+        "description": "global statement"
+    },
+    "not_alone": {
+        "prefix": "not_alone",
+        "description": "nonlocal statement"
+    },
+    "erase": {
+        "prefix": "erase",
+        "description": "del statement"
+    },
+
+    "i_still_can_hear_you": {
+        "prefix": "i_still_can_hear_you",
+        "description": "async keyword"
+    },
+    "it_wont_be_long": {
+        "prefix": "it_wont_be_long",
+        "description": "await expression"
+    },
+
+    "promise_me": {
+        "prefix": "promise_me",
+        "description": "assert statement"
+    },
+    "dangerously": {
+        "prefix": "dangerously",
+        "description": "try block"
+    },
+    "please_forgive_me": {
+        "prefix": "please_forgive_me",
+        "description": "except block"
+    },
+    "see_you_again": {
+        "prefix": "see_you_again",
+        "description": "finally block"
+    },
+    "blame_myself": {
+        "prefix": "blame_myself",
+        "description": "raise statement"
+    },
+
+    "TheWayIAm": {
+        "prefix": "TheWayIAm",
+        "description": "True constant"
+    },
+    "ShouldveKnown": {
+        "prefix": "ShouldveKnown",
+        "description": "False constant"
+    },
+    "Nothing": {
+        "prefix": "Nothing",
+        "description": "None constant"
+    },
+
+    "everyone_knows": {
         "prefix": "everyone_knows",
-        "body": ["everyone_knows(${1:value})"],
-        "description": "print"
+        "description": "print function"
     },
-    "input": {
+    "tell_me_honestly": {
         "prefix": "tell_me_honestly",
-        "body": ["tell_me_honestly(${1:prompt})"],
-        "description": "input"
+        "description": "input function"
     },
-    "with": {
+
+    "lightswitch": {
+        "prefix": "lightswitch",
+        "description": "bool constructor"
+    },
+    "memories": {
+        "prefix": "memories",
+        "description": "list constructor"
+    },
+    "mind": {
+        "prefix": "mind",
+        "description": "dict constructor"
+    },
+
+    "stay_with_me": {
         "prefix": "stay_with_me",
-        "body": ["stay_with_me ${1:expr} call_me ${2:name}:", "\t$0"],
         "description": "with statement"
     },
-    "async def": {
-        "prefix": "i_still_can_hear_you",
-        "body": ["i_still_can_hear_you one_call_away ${1:name}(${2:args}):", "\t$0"],
-        "description": "async function definition"
+    "call_me": {
+        "prefix": "call_me",
+        "description": "as keyword"
     },
-    "await": {
-        "prefix": "it_wont_be_long",
-        "body": ["it_wont_be_long ${1:expr}"],
-        "description": "await expression"
+
+    "from_where_we_began": {
+        "prefix": "from_where_we_began",
+        "description": "from keyword"
+    },
+    "get_it_on": {
+        "prefix": "get_it_on",
+        "description": "import statement"
     }
 }
