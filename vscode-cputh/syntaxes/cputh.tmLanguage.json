@@ -9,7 +9,6 @@
         { "include": "#types" },
         { "include": "#params" },
         { "include": "#variables" },
-        { "include": "#punctuation" },
         { "include": "#operators" },
         { "include": "#constants" }
     ],
@@ -20,11 +19,6 @@
                     "comment": "control flow",
                     "name": "keyword.control.flow.cputh",
                     "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|goin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you)\\b"
-                },
-                {
-                    "comment": "annotations",
-                    "name": "punctuation.separator.annotation.result.cputh",
-                    "match": "->"
                 },
                 {
                     "comment": "exceptions",
@@ -57,6 +51,26 @@
                     "match": "(\\+=|-=|\\*=|/=|//=|%=|\\*\\*=|&=|\\|=|\\^=|>>=|<<=)"
                 },
                 {
+                    "comment": "annotations",
+                    "name": "punctuation.separator.annotation.result.cputh",
+                    "match": "->"
+                },
+                {
+                    "comment": "ellipsis",
+                    "name": "constant.other.ellipsis.cputh",
+                    "match": "\\.\\.\\."
+                },
+                {
+                    "comment": "positional-only separator",
+                    "name": "variable.parameter.positional-only.cputh",
+                    "match": "(?<=,\\s*)(\\/)"
+                },
+                {
+                    "comment": "keyword-only separator",
+                    "name": "variable.parameter.keyword-only.cputh",
+                    "match": "(?<=,\\s*)(\\*)"
+                },
+                {
                     "comment": "function definition: keyword, name, and opening paren",
                     "match": "\\b(one_call_away)\\s+([a-z_][a-zA-Z0-9_]*)\\s*(\\()",
                     "captures": {
@@ -82,35 +96,23 @@
                             "name": "entity.name.type.class.cputh"
                         }
                     }
-                },
-                {
-                    "comment": "ellipsis",
-                    "name": "constant.other.ellipsis.cputh",
-                    "match": "\\.\\.\\."
-                },
-                {
-                    "comment": "positional-only separator",
-                    "name": "variable.parameter.positional-only.cputh",
-                    "match": "(?<=,\\s*)(\\/)"
-                },
-                {
-                    "comment": "keyword-only separator",
-                    "name": "variable.parameter.keyword-only.cputh",
-                    "match": "(?<=,\\s*)(\\*)"
                 }
             ]
         },
-        "types": {
+        "comments": {
             "patterns": [
                 {
-                    "comment": "i/o - both cputh and vanilla python",
-                    "name": "support.function.builtin.cputh",
-                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec)\\b"
+                    "comment": "docstrings",
+                    "name": "string.quoted.docstring.multi.cputh",
+                    "begin": "\"\"\"",
+                    "end": "\"\"\"",
+                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
+                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } }
                 },
                 {
-                    "comment": "data structure types - include cputh and vanilla python",
-                    "name": "support.type.cputh",
-                    "match": "\\b(lightswitch|memories|mind|str|float|tuple|int|set|frozenset|bytes|bytearray|memoryview|slice)\\b"
+                    "comment": "line comments",
+                    "name": "comment.line.number-sign.cputh",
+                    "match": "#.*$"
                 }
             ]
         },
@@ -135,6 +137,43 @@
                     "patterns": [
                         { "name": "constant.character.escape.cputh", "match": "\\\\." }
                     ]
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "comment": "i/o - both cputh and vanilla python",
+                    "name": "support.function.builtin.cputh",
+                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec)\\b"
+                },
+                {
+                    "comment": "data structure types - include cputh and vanilla python",
+                    "name": "support.type.cputh",
+                    "match": "\\b(lightswitch|memories|mind|str|float|tuple|int|set|frozenset|bytes|bytearray|memoryview|slice)\\b"
+                }
+            ]
+        },
+        "params": {
+            "patterns": [
+
+            ]
+        },
+        "variables": {
+            "patterns": [
+                {
+                    "comment": "function, method or class call",
+                    "match": "\\b([a-zA-Z_]\\w*)\\s*(?=\\()",
+                    "captures": {
+                        "1": {
+                            "name": "entity.name.function.call.cputh"
+                        }
+                    }
+                },
+                {
+                    "comment": "special variable names - self, cls",
+                    "name": "variable.language.special.cputh",
+                    "match": "\\b(self|cls)\\b"
                 }
             ]
         },
@@ -180,51 +219,6 @@
                     "name": "punctuation.brackets.cputh",
                     "match": "[\\(\\)\\[\\]\\{\\}]"
                 }
-            ]
-        },
-        "comments": {
-            "patterns": [
-                {
-                    "comment": "docstrings",
-                    "name": "string.quoted.docstring.multi.cputh",
-                    "begin": "\"\"\"",
-                    "end": "\"\"\"",
-                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
-                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } }
-                },
-                {
-                    "comment": "line comments",
-                    "name": "comment.line.number-sign.cputh",
-                    "match": "#.*$"
-                }
-            ]
-        },
-        "params": {
-            "patterns": [
-
-            ]
-        },
-        "variables": {
-            "patterns": [
-                {
-                    "comment": "function call",
-                    "match": "\\b([a-zA-Z_]\\w*)\\s*(?=\\()",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.function.call.cputh"
-                        }
-                    }
-                },
-                {
-                    "comment": "special variable names - self, cls",
-                    "name": "variable.language.special.cputh",
-                    "match": "\\b(self|cls)\\b"
-                }
-            ]
-        },
-        "punctuation": {
-            "patterns": [
-
             ]
         },
         "constants": {
