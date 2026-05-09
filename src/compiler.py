@@ -103,6 +103,11 @@ TOKEN_RE = re.compile(
     re.DOTALL  # required for .*? to permeate newlines, otherwise docstrings break
 )
 
+COL_WARN = "\033[95m"
+COL_ERROR = "\033[91m"
+COL_BOLD = "\033[1m"
+COL_RESET = "\033[0m"
+
 @dataclass(frozen=True)
 class Args:
     input_path: Path    # .cputh
@@ -177,7 +182,7 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
         line = f"{n:>{max_len}} | {line}"
 
         if n == lineno:
-            line = "\033[95m" + line + "\033[0m"
+            line = COL_WARN + line + COL_RESET
 
         out.append(line)
 
@@ -213,7 +218,7 @@ def parse_args() -> Args:
     # Force flag logic
     if args_raw.output_path.exists():
         if args_raw.force:
-            print(f"\033[93m\033[1mwarning\033[0m\033[33m: overwriting existing file '{args_raw.output_path}'\033[0m", file=sys.stderr)
+            print(f"{COL_WARN}{COL_BOLD}warning{COL_RESET}: {COL_WARN}overwriting existing file '{args_raw.output_path}'{COL_WARN}", file=sys.stderr)
         else:
             die(f"output file '{args_raw.output_path}' already exists. Use -f or --force to overwrite.")
 
@@ -224,7 +229,7 @@ def parse_args() -> Args:
     )
 
 def _run(args: Args) -> int:
-    with open(args.input_path, "r") as f:
+    with open(args.input_path, "r", encoding="utf-8") as f:
         cputh = f.read()
 
     py = compile_cputh_to_py(cputh)
@@ -237,7 +242,7 @@ def _run(args: Args) -> int:
         out: list[str] = []
 
         # Error display
-        err_displ = f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m"
+        err_displ = f"{COL_ERROR}{COL_BOLD}syntax error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
         out.append(err_displ)
 
         # Flavour text and code output
@@ -271,10 +276,10 @@ def _run(args: Args) -> int:
 
         # Print each line in the diagnostic output
         for line in diag_output:
-            print(f"\033[93mline {line.lineno}\033[0m: {line.msg}")
+            print(f"{COL_WARN}line {COL_BOLD}{line.lineno}{COL_RESET}: {line.msg}")
 
     # Finally write the Python code to the output path
-    with open(args.output_path, "w") as f:
+    with open(args.output_path, "w", encoding="utf-8") as f:
         f.write(py)
 
     return 0
