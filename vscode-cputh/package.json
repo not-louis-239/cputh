@@ -12,6 +12,7 @@
         "type": "git",
         "url": "https://github.com/not-louis-239/cputh"
     },
+    "icon": "image/cputh.png",
     "contributes": {
         "languages": [{
             "id": "cputh",
