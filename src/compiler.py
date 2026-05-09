@@ -190,10 +190,10 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
     out = []
     max_len = len(str(end_line - 1))
     for n, line in enumerate(lines, start=start_line):
-        line = f"{n:>{max_len}} | {line}"
-
         if n == lineno:
-            line = COL_WARN + line + COL_RESET
+            line = f"{COL_WARN}{COL_BOLD}{n:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
+        else:
+            line = f"{n:>{max_len}} | {line}"
 
         out.append(line)
 
@@ -240,8 +240,12 @@ def parse_args() -> Args:
     )
 
 def _run(args: Args) -> int:
-    with open(args.input_path, "r", encoding="utf-8") as f:
-        cputh = f.read()
+    try:
+        with open(args.input_path, "r", encoding="utf-8") as f:
+            cputh = f.read()
+    except UnicodeDecodeError:
+        die("cannot read from input: invalid source encoding")
+        return 1
 
     py = compile_cputh_to_py(cputh)
 
@@ -258,11 +262,13 @@ def _run(args: Args) -> int:
 
         # Flavour text and code output
         if exc.lineno is not None:
-            out.append(f"we don't talk anymore (at line {exc.lineno}) - how long has this been going on?")
+            out.append(f"file: '{args.input_path}', line {exc.lineno}")
+        else:
+            out.append(f"file: '{args.input_path}'")
+        out.append("we don't talk anymore - how long has this been going on?")
+        if exc.lineno is not None:
             out.append("\nPython output:\n")
             out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
-        else:  # compiles to `else`
-            out.append("we don't talk anymore - how long has this been going on?")
 
         out_str = "\n".join(out)
         print(out_str, file=sys.stderr)
