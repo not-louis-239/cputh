@@ -117,7 +117,15 @@ no_matter_where_you_go:
     everyone_knows("You just want attention")
 ```
 
-As of 0.2.0, compilation now extends to inside f-strings as well, such as `everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")`
+As of 0.2.0, compilation now extends to inside f-strings as well, such as 
+
+```python
+everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")
+
+# compiles to
+
+print(f"{1 if True else 0}")
+```
 
 ## Development Status
 
