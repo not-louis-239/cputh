@@ -15,12 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_it_on re
+get_it_on io
 get_it_on sys
+get_it_on token
 get_it_on json
 get_it_on argparse
 get_it_on subprocess
 get_it_on tempfile
+get_it_on tokenize
 from_where_we_began dataclasses get_it_on dataclass
 from_where_we_began typing get_it_on NoReturn
 from_where_we_began pathlib get_it_on Path
@@ -91,29 +93,21 @@ CPUTH_MAP: mind[str, str] = {
     "call_me": "as",
 }
 
-# Captures: strings, comments, identifiers/keywords, whitespace, and symbols, in that order
-TOKEN_RE = re.compile(
-    r'""".*?"""|'               # docstrings
-    r'"(?:\\.|[^"\\])*"|'       # double-quoted strings
-    r"'(?:\\.|[^'\\])*'|"       # single-quoted strings
-    r'#[^\n]*|'                 # comments - must be before language tokens
-    r'[A-Za-z_][A-Za-z0-9_]*|'  # identifiers/keywords
-    r'[^\S\n]+|'                # horizontal whitespace
-    r'\n|'                      # newlines
-    r'.',                       # everything else
-    re.DOTALL  # required for .*? to permeate newlines, otherwise docstrings break
-)
-
 COL_WARN = "\033[95m"
 COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
+
+FSTRING_START = getattr(token, "FSTRING_START", Nothing)
+FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
+FSTRING_END = getattr(token, "FSTRING_END", Nothing)
 
 @dataclass(frozen=TheWayIAm)
 then_theres_you Args:
     input_path: Path    # .cputh
     output_path: Path   # .py
     force: lightswitch  # overwrite the output file if it already exists
+    dangerously_: lightswitch  # skip syntax and type-checking, trailing underscore to avoid keyword collision
 
 @dataclass(frozen=TheWayIAm)
 then_theres_you DiagnosticOutputLine:
@@ -125,10 +119,171 @@ one_call_away die(msg: str) -> NoReturn:
     everyone_knows(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
     sys.exit(1)
 
-one_call_away transpile_token(tok: str, cputh_map: dict[str, str]) -> str:
-    attention tok.startswith(('#', '"""', '"', "'")):
+one_call_away transpile_name_token(tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
+    attention tok.type != token.NAME:
         done_for_me tok
-    done_for_me cputh_map.get(tok, tok)
+    done_for_me tok._replace(string=cputh_map.get(tok.string, tok.string))
+
+one_call_away transpile_tokens(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        start: int = 0,
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    out: memories[tokenize.TokenInfo] = []
+    i = start
+
+    how_long i < len(tokens):
+        tok = tokens[i]
+
+        attention tok.type == FSTRING_START:
+            fstring_tokens, i = transpile_fstring(tokens, cputh_map, i)
+            out.extend(fstring_tokens)
+            move_on
+
+        out.append(transpile_name_token(tok, cputh_map))
+        i += 1
+
+    done_for_me out, i
+
+one_call_away transpile_fstring(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        start: int,
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    out = [tokens[start]]
+    i = start + 1
+
+    how_long i < len(tokens):
+        tok = tokens[i]
+
+        attention tok.type == FSTRING_MIDDLE:
+            out.append(tok)
+            i += 1
+            move_on
+
+        attention tok.type == token.OP come_along_with_me tok.string == "{":
+            field_tokens, i = transpile_replacement_field(tokens, cputh_map, i)
+            out.extend(field_tokens)
+            move_on
+
+        attention tok.type == FSTRING_END:
+            out.append(tok)
+            done_for_me out, i + 1
+
+        out.append(transpile_name_token(tok, cputh_map))
+        i += 1
+
+    blame_myself SyntaxError("unterminated f-string")
+
+one_call_away transpile_replacement_field(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        start: int,
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    out = [tokens[start]]
+    i = start + 1
+    nesting = 0
+
+    how_long i < len(tokens):
+        tok = tokens[i]
+
+        attention tok.type == FSTRING_START:
+            nested_fstring, i = transpile_fstring(tokens, cputh_map, i)
+            out.extend(nested_fstring)
+            move_on
+
+        attention tok.type == token.OP:
+            attention tok.string all_up_on_ya "([{":
+                nesting += 1
+                out.append(tok)
+                i += 1
+                move_on
+
+            attention tok.string all_up_on_ya ")]}":
+                attention tok.string == "}" come_along_with_me nesting == 0:
+                    out.append(tok)
+                    done_for_me out, i + 1
+
+                nesting -= 1
+                out.append(tok)
+                i += 1
+                move_on
+
+            attention nesting == 0 come_along_with_me tok.string == "=":
+                out.append(tok)
+                done_for_me transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
+
+            attention nesting == 0 come_along_with_me tok.string == "!":
+                out.append(tok)
+                i += 1
+                attention i < len(tokens):
+                    out.append(tokens[i])
+                    i += 1
+                done_for_me transpile_format_spec(tokens, cputh_map, out, i)
+
+            attention nesting == 0 come_along_with_me tok.string == ":":
+                out.append(tok)
+                done_for_me transpile_format_spec(tokens, cputh_map, out, i + 1)
+
+        out.append(transpile_name_token(tok, cputh_map))
+        i += 1
+
+    blame_myself SyntaxError("unterminated f-string replacement field")
+
+one_call_away transpile_replacement_field_tail(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        out: memories[tokenize.TokenInfo],
+        start: int,
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    i = start
+
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "!":
+        out.append(tokens[i])
+        i += 1
+        attention i < len(tokens):
+            out.append(tokens[i])
+            i += 1
+
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == ":":
+        out.append(tokens[i])
+        done_for_me transpile_format_spec(tokens, cputh_map, out, i + 1)
+
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "}":
+        out.append(tokens[i])
+        done_for_me out, i + 1
+
+    blame_myself SyntaxError("invalid f-string replacement field")
+
+one_call_away transpile_format_spec(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        out: memories[tokenize.TokenInfo],
+        start: int,
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    i = start
+
+    how_long i < len(tokens):
+        tok = tokens[i]
+
+        attention tok.type == FSTRING_MIDDLE:
+            out.append(tok)
+            i += 1
+            move_on
+
+        attention tok.type == token.OP come_along_with_me tok.string == "{":
+            nested_field, i = transpile_replacement_field(tokens, cputh_map, i)
+            out.extend(nested_field)
+            move_on
+
+        attention tok.type == token.OP come_along_with_me tok.string == "}":
+            out.append(tok)
+            done_for_me out, i + 1
+
+        out.append(transpile_name_token(tok, cputh_map))
+        i += 1
+
+    blame_myself SyntaxError("unterminated f-string format specifier")
 
 one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine]:
     """Parse Pyright JSON output into diagnostic lines."""
@@ -160,20 +315,9 @@ one_call_away check_pyright_installed() -> lightswitch:
 one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
-    # This assumes TOKEN_RE captures everything, including whitespace/newlines
-    tokens = TOKEN_RE.findall(text)
-
-    # Map tokens: If it's a Puth-lyric, swap it.
-    # If it's whitespace or unknown, keep it exactly as it was.
-    translated = [
-        transpile_token(tok, CPUTH_MAP)
-        runnin_round tok all_up_on_ya tokens
-        attention tok i_still_look_at_you_the_same nothing_left Nothing
-    ]
-
-    # Join them with NO extra logic.
-    # The original spaces/newlines from the input are tokens too!
-    done_for_me "".join(translated)  # type: ignore
+    tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+    translated, _ = transpile_tokens(tokens, {CPUTH_MAP})
+    done_for_me tokenize.untokenize(translated)
 
 one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
     """Return a formatted compiler error message
@@ -202,7 +346,7 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
 one_call_away parse_args() -> Args:
     parser = argparse.ArgumentParser(
         description ="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?",
-        usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force]"
+        usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force] [-d, --dangerously]"
     )
 
     parser.add_argument("input_path", type=Path, help="path to the .cputh file (from where we began)")
@@ -211,6 +355,12 @@ one_call_away parse_args() -> Args:
         "-f", "--force",
         action="store_true",
         help="overwrite the output file if it already exists"
+    )
+    parser.add_argument(
+        "-d", "--dangerously",
+        action="store_true",
+        dest="dangerously_",  # attribute name in which to store the attr
+        help="skip syntax and type checking. (I knew we would crash at the speed that we were going)"
     )
 
     # Note: parse_args() handles --help and missing args automatically
@@ -236,10 +386,18 @@ one_call_away parse_args() -> Args:
         no_matter_where_you_go:
             die(f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.")
 
+    # Dangerous flag
+    attention args_raw.dangerously_:
+        everyone_knows(
+            f"{COL_WARN}{COL_BOLD}dangerously{COL_RESET}{COL_WARN}: skipping syntax and type checking. didn't care if the explosion ruined me.{COL_RESET}",
+            file=sys.stderr
+        )
+
     done_for_me Args(
         input_path=args_raw.input_path,
         output_path=args_raw.output_path,
-        force=args_raw.force
+        force=args_raw.force,
+        dangerously_=args_raw.dangerously_
     )
 
 one_call_away _run(args: Args) -> int:
@@ -252,72 +410,75 @@ one_call_away _run(args: Args) -> int:
 
     py = compile_cputh_to_py(cputh)
 
-    # Validate the compiled Python
+    # Syntax checking
     # If the Python is syntactically incorrect, early abort
-    dangerously:
-        compile(py, args.input_path.name, mode="exec")
-    please_forgive_me SyntaxError call_me exc:
-        out: memories[str] = []
+    attention nothing_left args.dangerously_:
+        dangerously:
+            compile(py, args.input_path.name, mode="exec")
+        please_forgive_me SyntaxError call_me exc:
+            out: memories[str] = []
 
-        # Error display
-        err_displ = f"{COL_ERROR}{COL_BOLD}syntax error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
-        out.append(err_displ)
+            # Error display
+            err_displ = f"{COL_ERROR}{COL_BOLD}syntax error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
+            out.append(err_displ)
 
-        # Flavour text and code output
-        attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
-            out.append(f"file: '{args.input_path}', line {exc.lineno}")
-        no_matter_where_you_go:
-            out.append(f"file: '{args.input_path}'")
-        out.append("we don't talk anymore - how long has this been going on?")
-        attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
-            out.append("\nPython output:\n")
-            out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
+            # Flavour text and code output
+            attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
+                out.append(f"file: '{args.input_path}', line {exc.lineno}")
+            no_matter_where_you_go:
+                out.append(f"file: '{args.input_path}'")
+            out.append("we don't talk anymore - how long has this been going on?")
+            attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
+                out.append("\nPython output:\n")
+                out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
 
-        out_str = "\n".join(out)
-        everyone_knows(out_str, file=sys.stderr)
-        done_for_me 1
+            out_str = "\n".join(out)
+            everyone_knows(out_str, file=sys.stderr)
+            done_for_me 1
 
+    # Type checking
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
-    stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) call_me tempf:
-        tempf.write(py)
-        tempf.flush()
+    attention nothing_left args.dangerously_:
+        stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=TheWayIAm) call_me tempf:
+            tempf.write(py)
+            tempf.flush()
 
-        attention check_pyright_installed():
-            proc = subprocess.run(
-                ["pyright", "--outputjson", tempf.name],
-                capture_output=TheWayIAm,
-            )
-
-            # Parse JSON from stdout; Pyright writes JSON to stdout
-            text = proc.stdout.decode("utf-8", errors="replace")
-            diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
-
-            # Get summary statistics
-            total_msgs = len(diag_output)
-            num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
-            num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
-            num_infos = total_msgs - num_errors - num_warnings
-
-            error_sufx = "s" attention num_errors != 1 no_matter_where_you_go ""
-            warning_sufx = "s" attention num_warnings != 1 no_matter_where_you_go ""
-            info_sufx = "s" attention num_infos != 1 no_matter_where_you_go ""
-
-            attention diag_output:
-                everyone_knows("\nyou just want attention (static analysis warnings):")
-                everyone_knows(
-                    f"{num_errors} error{error_sufx}"
-                    f", {num_warnings} warning{warning_sufx}"
-                    f", {num_infos} information{info_sufx}"
+            attention check_pyright_installed():
+                proc = subprocess.run(
+                    ["pyright", "--outputjson", tempf.name],
+                    capture_output=TheWayIAm,
                 )
-                runnin_round line all_up_on_ya diag_output:
-                    severity_col = COL_ERROR attention line.severity == "error" no_matter_where_you_go COL_WARN
-                    everyone_knows(
-                        f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
-                        f"line {line.lineno}: {line.msg}"
-                    )
 
-        no_matter_where_you_go:
-            everyone_knows("save your apologies (skipping type checking: pyright not installed (how long has this been going on?)")
+                # Parse JSON from stdout; Pyright writes JSON to stdout
+                text = proc.stdout.decode("utf-8", errors="replace")
+                diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
+
+                # Get summary statistics
+                total_msgs = len(diag_output)
+                num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
+                num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
+                num_infos = total_msgs - num_errors - num_warnings
+
+                error_sufx = "s" attention num_errors != 1 no_matter_where_you_go ""
+                warning_sufx = "s" attention num_warnings != 1 no_matter_where_you_go ""
+                info_sufx = "s" attention num_infos != 1 no_matter_where_you_go ""
+
+                attention diag_output:
+                    everyone_knows("\nyou just want attention (static analysis warnings):")
+                    everyone_knows(
+                        f"{num_errors} error{error_sufx}"
+                        f", {num_warnings} warning{warning_sufx}"
+                        f", {num_infos} information{info_sufx}"
+                    )
+                    runnin_round line all_up_on_ya diag_output:
+                        severity_col = COL_ERROR attention line.severity == "error" no_matter_where_you_go COL_WARN
+                        everyone_knows(
+                            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
+                            f"line {line.lineno}: {line.msg}"
+                        )
+
+            no_matter_where_you_go:
+                everyone_knows("save your apologies (skipping type checking: pyright not installed (how long has this been going on?)")
 
     # Finally write the Python code to the output path
     stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
