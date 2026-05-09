@@ -17,6 +17,7 @@
 
 import re
 import sys
+import json
 import argparse
 import subprocess
 import tempfile
@@ -118,6 +119,7 @@ class Args:
 class DiagnosticOutputLine:
     lineno: int
     msg: str
+    severity: str  # "error", "warning", "information"
 
 def die(msg: str) -> NoReturn:
     print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
@@ -128,23 +130,32 @@ def transpile_token(tok: str, cputh_map: dict[str, str]) -> str:
         return tok
     return cputh_map.get(tok, tok)
 
-def parse_diagnostics(output: str) -> list[DiagnosticOutputLine]:
-    pattern = r":(\d+):\d+:\s*(.*)"
-    results = []
+def parse_diagnostics(json_text: str) -> list[DiagnosticOutputLine]:
+    """Parse Pyright JSON output into diagnostic lines."""
+    try:
+        data = json.loads(json_text)
+    except json.JSONDecodeError:
+        return []
 
-    for line in output.splitlines():
-        if match := re.search(pattern, line):
-            lineno = int(match.group(1))
-            msg = match.group(2)
+    lines: list[DiagnosticOutputLine] = []
+    for diag in data.get("generalDiagnostics", []):
+        lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
+        msg = diag.get("message", "unknown error")
+        severity = diag.get("severity", "error")
+        lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
+    return lines
 
-            results.append(
-                DiagnosticOutputLine(
-                    lineno=lineno,
-                    msg=msg
-                )
-            )
-
-    return results
+def check_pyright_installed() -> bool:
+    """Check if pyright is available on PATH."""
+    try:
+        subprocess.run(
+            ["pyright", "--version"],
+            capture_output=True,
+            check=True,
+        )
+        return True
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return False
 
 def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
@@ -262,21 +273,28 @@ def _run(args: Args) -> int:
         tempf.write(py)
         tempf.flush()
 
-        # Check for Pylance errors and print them if so
-        proc = subprocess.run(
-            ["python", "-m", "pyflakes", tempf.name],
-            capture_output=True,
-        )
+        if check_pyright_installed():
+            proc = subprocess.run(
+                ["pyright", "--outputjson", tempf.name],
+                capture_output=True,
+            )
 
-    # Only show error display if the static analysis emitted errors or warnings
-    if proc.stdout:
-        print("\nyou just want attention (static analysis warnings): ")
-        text = proc.stdout.decode("utf-8", errors="replace")
-        diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
+            # Parse JSON from stdout; Pyright writes JSON to stdout
+            if proc.stdout:
+                text = proc.stdout.decode("utf-8", errors="replace")
+                diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
 
-        # Print each line in the diagnostic output
-        for line in diag_output:
-            print(f"{COL_WARN}line {COL_BOLD}{line.lineno}{COL_RESET}: {line.msg}")
+                if diag_output:
+                    print("\nyou just want attention (static analysis warnings):")
+                    for line in diag_output:
+                        severity_col = COL_ERROR if line.severity == "error" else COL_WARN
+                        print(
+                            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
+                            f"line {line.lineno}: {line.msg}"
+                        )
+
+        else:
+            print("save your apologies (pyright not installed, skipping type checking)")
 
     # Finally write the Python code to the output path
     with open(args.output_path, "w", encoding="utf-8") as f:

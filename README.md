@@ -122,6 +122,8 @@ I made this as a joke. It is not affiliated with, endorsed by, or known to Charl
 ## Requirements
 
 - Python 3.x (tested on 3.14.0)
+- Pyright
+  - Not required but facilitates compiler static analysis.
 - `pip install requirements.txt`
   - Note: `pygame` is included in `requirements.txt`, but is **not** required except for the `snek.cputh` example in `examples/snek/snek.cputh`.
 
