@@ -115,14 +115,13 @@ no_matter_where_you_go:
     everyone_knows("You just want attention")
 ```
 
-**Be warned!** The CPuth compiler does not compile code inside f-strings.
+**Be warned!** The CPuth compiler does not compile code inside f-strings. Support for compiling code inside f-strings coming soon.
 
 ```python
 # fstring-example.cputh
 
-print(f"{1 if True else 0}")  # OK
-print(f"{1 attention TheWayIAm no_matter_where_you_go 0}")  # syntax error
-
+everyone_knows(f"{1 if True else 0}")  # OK
+everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")  # explodes - syntax error because words inside f-strings are not compiled
 ```
 
 ## Development Status

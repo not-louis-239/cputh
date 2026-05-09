@@ -201,16 +201,16 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
-        description ="Compile Charlie Puth code to Python.",
+        description ="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?",
         usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force]"
     )
 
-    parser.add_argument("input_path", type=Path, help="Path to the .cputh file")
-    parser.add_argument("output_path", type=Path, help="Path to the output .py file")
+    parser.add_argument("input_path", type=Path, help="path to the .cputh file (from where we began)")
+    parser.add_argument("output_path", type=Path, help="path to the output .py file (see you again)")
     parser.add_argument(
         "-f", "--force",
         action="store_true",
-        help="Overwrite the output file if it already exists"
+        help="overwrite the output file if it already exists"
     )
 
     # Note: parse_args() handles --help and missing args automatically
@@ -220,7 +220,7 @@ def parse_args() -> Args:
     if not args_raw.input_path.exists():
         die(f"cannot read from input: no such file: {args_raw.input_path}")
     if not args_raw.input_path.is_file():
-        die(f"cannot read from input: invalid file: {args_raw.input_path}")
+        die(f"cannot read from input: not a file: {args_raw.input_path}")
 
     # Output parent directory validation
     if not args_raw.output_path.parent.exists():
@@ -229,9 +229,12 @@ def parse_args() -> Args:
     # Force flag logic
     if args_raw.output_path.exists():
         if args_raw.force:
-            print(f"{COL_WARN}{COL_BOLD}warning{COL_RESET}: {COL_WARN}overwriting existing file '{args_raw.output_path}'{COL_WARN}", file=sys.stderr)
+            print(
+                f"{COL_WARN}{COL_BOLD}how long{COL_RESET}{COL_WARN} has '{args_raw.output_path}' been going on? overwriting.{COL_RESET}",
+                file=sys.stderr
+            )
         else:
-            die(f"output file '{args_raw.output_path}' already exists. Use -f or --force to overwrite.")
+            die(f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.")
 
     return Args(
         input_path=args_raw.input_path,
@@ -314,7 +317,7 @@ def _run(args: Args) -> int:
                     )
 
         else:
-            print("save your apologies (pyright not installed, skipping type checking)")
+            print("save your apologies (skipping type checking: pyright not installed (how long has this been going on?)")
 
     # Finally write the Python code to the output path
     with open(args.output_path, "w", encoding="utf-8") as f:
