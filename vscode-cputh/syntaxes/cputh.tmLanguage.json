@@ -26,6 +26,11 @@
                     "match": "\\b(dangerously|please_forgive_me|see_you_again|blame_myself)\\b"
                 },
                 {
+                    "comment": "future imports",
+                    "name": "keyword.control.import.future.cputh",
+                    "match": "\\bmarvin_gaye\\b"
+                },
+                {
                     "comment": "imports",
                     "name": "keyword.control.import.cputh",
                     "match": "\\b(from_where_we_began|get_it_on)\\b"
@@ -241,9 +246,9 @@
         "builtins": {
             "patterns": [
                 {
-                    "comment": "i/o - both cputh and vanilla python",
+                    "comment": "functions - both cputh and vanilla python",
                     "name": "support.function.builtin.cputh",
-                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec|hasattr|setattr|getattr|delattr|hash|repr|id|type|isinstance|issubclass|dir|globals|locals|vars|compile|execfile|raw)\\b"
+                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec|hasattr|setattr|getattr|delattr|hash|repr|id|type|isinstance|issubclass|dir|globals|locals|vars|compile|execfile|raw|range)\\b"
                 },
                 {
                     "comment": "data structure types - include cputh and vanilla python",

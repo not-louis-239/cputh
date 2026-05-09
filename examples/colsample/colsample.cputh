@@ -1,0 +1,12 @@
+one_call_away col(code: int) -> str:
+    done_for_me f"\033[38;5;{code}m"
+
+one_call_away main() -> Nothing:
+    runnin_round i all_up_on_ya range(16):
+        runnin_round j all_up_on_ya range(16):
+            idx = i * 16 + j
+            everyone_knows(f"{col(idx)}{idx:03}", end=' ')
+        everyone_knows()
+
+attention __name__ == "__main__":
+    main()

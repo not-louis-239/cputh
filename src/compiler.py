@@ -91,6 +91,7 @@ CPUTH_MAP: dict[str, str] = {
     # context
     "stay_with_me": "with",
     "call_me": "as",
+    "marvin_gaye": "from __future__ import"
 }
 
 COL_WARN = "\033[95m"
