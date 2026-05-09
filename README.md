@@ -115,6 +115,16 @@ no_matter_where_you_go:
     everyone_knows("You just want attention")
 ```
 
+**Be warned!** The CPuth compiler does not compile code inside f-strings.
+
+```python
+# fstring-example.cputh
+
+print(f"{1 if True else 0}")  # OK
+print(f"{1 attention TheWayIAm no_matter_where_you_go 0}")  # syntax error
+
+```
+
 ## Development Status
 
 I made this as a joke. It is not affiliated with, endorsed by, or known to Charlie Puth. If something explodes, open an issue (at `https://github.com/not-louis-239/cputh/issues`) — I'll admit it's my fault, but you gotta believe me when I say it only happened once.
