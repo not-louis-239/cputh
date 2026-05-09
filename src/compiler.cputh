@@ -316,7 +316,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
     tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
-    translated, _ = transpile_tokens(tokens, {CPUTH_MAP})
+    translated, _ = transpile_tokens(tokens, CPUTH_MAP)
     done_for_me tokenize.untokenize(translated)
 
 one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
