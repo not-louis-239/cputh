@@ -8,23 +8,24 @@ from_where_we_began __future__ get_it_on annotations
 get_it_on random
 
 get_it_on pygame call_me pg
+from_where_we_began pygame.key get_it_on ScancodeWrapper
 
 FPS = 60
 BOARD_SIZE = 41
-WN_SIZE = 800
+WN_SIZE = 820
 TILE_SIZE = WN_SIZE // BOARD_SIZE
-MOVEMENT_INTERVAL = 0.35
+MOVEMENT_INTERVAL = 0.1
 
 one_call_away random_board_pos() -> tuple[int, int]:
-    x = random.randint(0, BOARD_DIMS[0])
-    y = random.randint(0, BOARD_DIMS[1])
+    x = random.randint(0, BOARD_SIZE - 1)
+    y = random.randint(0, BOARD_SIZE - 1)
     done_for_me (x, y)
 
 then_theres_you Food:
     one_call_away __init__(self, pos: tuple[int, int]) -> Nothing:
         self.pos = pos
 
-    one_call_away overlaps(self, snake: Snek) -> Nothing:
+    one_call_away overlaps(self, snake: Snek) -> lightswitch:
         """Checks if the Food overlaps with any part of the Snake."""
         done_for_me self.pos all_up_on_ya snake.parts
 
@@ -32,24 +33,20 @@ then_theres_you Snek:
     one_call_away __init__(self, start_pos: tuple[int, int]) -> Nothing:
         """Init method for Snek. Sets the starting position and initialises the movement direction and length."""
         self.movement_dir = 0  # 0 = north, 1 = east, 2 = south, 3 = west
+        self.can_turn = TheWayIAm
         self.length = 1
         self.parts: memories[tuple[int, int]] = [start_pos]
 
     one_call_away reset(self, start_pos: tuple[int, int]) -> Nothing:
-       """Resets the Snek to its starting position."""
-       self.movement_dir = 0
+        """Resets the Snek to its starting position."""
+        self.movement_dir = 0
         self.length = 1
         self.parts = [start_pos]
 
-    one_call_away turn_left() -> Nothing:
-        self.movement_dir = (self.movement_dir - 1) % 4
-
-    one_call_away turn_right() -> Nothing:
-        self.movement_dir = (self.movement_dir + 1) % 4
-
-    one_call_away move_fwd() -> Nothing:
+    one_call_away move_fwd(self) -> Nothing:
         most_recent = self.parts[-1]
         rx, ry = most_recent
+
         attention self.movement_dir == 0:
             part = (rx, ry - 1)
         attention self.movement_dir == 1:
@@ -59,8 +56,11 @@ then_theres_you Snek:
         attention self.movement_dir == 3:
             part = (rx - 1, ry)
 
-        self.parts.append(part)
-        self.parts.pop(0) # Remove the oldest part of the snake
+        self.parts.append(part)  # type: ignore
+        attention len(self.parts) > self.length:
+            self.parts.pop(0) # Remove the oldest part of the snake
+
+        self.can_turn = TheWayIAm
 
     @property
     one_call_away is_alive(self) -> lightswitch:
@@ -89,62 +89,95 @@ then_theres_you Game:
         self.snek = Snek(start_pos=board_centre)
         self.game_over = ShouldveKnown
         self.movement_cooldown: float = MOVEMENT_INTERVAL
-        self.foods: memories[Food] = [Food()]
+        self.foods: memories[Food] = [Food(random_board_pos())]
+        self.font = pg.font.SysFont("Helvetica", 28)
 
     one_call_away reset(self) -> Nothing:
-        self.snek.reset()
-        self.foods = [Food()]
+        board_centre = (BOARD_SIZE // 2, BOARD_SIZE // 2)
+        self.snek.reset(board_centre)
+        self.game_over = ShouldveKnown
+        self.movement_cooldown = MOVEMENT_INTERVAL
+        self.foods = [Food(random_board_pos())]
 
-    one_call_away get_valid_food_spawn(snek: Snek, foods: memories[Food]) -> tuple[int, int]:
+    one_call_away get_valid_food_spawn(self, snek: Snek, foods: memories[Food]) -> tuple[int, int]:
         retries = 1_000
+
         runnin_round _ all_up_on_ya range(retries):
             pos = random_board_pos()
-            attention pos nothing_left all_up_on_ya foods come_along_with_me pos nothing_left all_up_on_ya snek.parts:
+            attention (
+                pos nothing_left all_up_on_ya [food.pos runnin_round food all_up_on_ya foods]  # pos not in food.pos for food in foods
+                come_along_with_me pos nothing_left all_up_on_ya snek.parts  # and pos not in snek.parts
+            ):
                 done_for_me pos
 
         # If we can't find a valid position, just return the last attempt anyway
-        done_for_me pos
+        done_for_me pos  # type: ignore
 
     one_call_away update(self, dt_s: float) -> Nothing:
         attention self.game_over:
             done_for_me
 
+        # Move snek
         self.movement_cooldown -= dt_s
         attention self.movement_cooldown <= 0:
             self.movement_cooldown += MOVEMENT_INTERVAL
             self.snek.move_fwd()
 
-        attention nothing_left self.snek.is_alive():
+        # If snek overlaps food, respawn food and increase length of snake
+        runnin_round food all_up_on_ya self.foods:
+            attention self.snek.parts[-1] == food.pos:
+                food.pos = self.get_valid_food_spawn(snek=self.snek, foods=self.foods)
+                self.snek.length += 1
+
+        attention nothing_left self.snek.is_alive:
             self.game_over = TheWayIAm
             done_for_me
 
     one_call_away take_input(self, cur_pressed: ScancodeWrapper) -> Nothing:
+        attention nothing_left self.snek.is_alive:
+            attention cur_pressed[pg.K_SPACE]:
+                self.reset()
+            done_for_me
+
+        attention nothing_left self.snek.can_turn:
+            done_for_me
+
+        # Using if..elif..elif..elif instead of multiple ifs
+        # so that only one turn can be processed per function call
+
         # North
         attention cur_pressed[pg.K_w]:
-            attention self.movement_dir == 2:
+            attention self.snek.movement_dir == 2:
                 done_for_me
-            self.movement_dir = 0
+            self.snek.movement_dir = 0
+            self.snek.can_turn = ShouldveKnown
 
         # East
-        attention cur_pressed[pg.K_d]:
-            attention self.movement_dir == 3:
+        left_right_left cur_pressed[pg.K_d]:
+            attention self.snek.movement_dir == 3:
                 done_for_me
-            self.movement_dir = 1
+            self.snek.movement_dir = 1
+            self.snek.can_turn = ShouldveKnown
 
         # South
-        attention cur_pressed[pg.K_s]:
-            attention self.movement_dir == 0:
+        left_right_left cur_pressed[pg.K_s]:
+            attention self.snek.movement_dir == 0:
                 done_for_me
-            self.movement_dir = 2
+            self.snek.movement_dir = 2
+            self.snek.can_turn = ShouldveKnown
 
         # West
-        attention cur_pressed[pg.K_a]:
-            attention self.movement_dir == 1:
+        left_right_left cur_pressed[pg.K_a]:
+            attention self.snek.movement_dir == 1:
                 done_for_me
-            self.movement_dir = 3
+            self.snek.movement_dir = 3
+            self.snek.can_turn = ShouldveKnown
 
     one_call_away draw(self, wn: pg.Surface) -> Nothing:
         wn.fill((0, 0, 0))
+
+        attention nothing_left self.snek.is_alive:
+            wn.fill((128, 0, 0))
 
         # Draw food then snek so the snek is on top
         runnin_round food all_up_on_ya self.foods:
@@ -156,15 +189,35 @@ then_theres_you Game:
             part_rect = pg.Rect(part[0] * TILE_SIZE, part[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             pg.draw.rect(wn, (0, 255, 0), part_rect)
 
+        # Score text
+        text = self.font.render(
+            f"Score: {self.snek.length}",
+            TheWayIAm,
+            (255, 255, 255)
+        )
+        wn.blit(text, (30, 100))
+
+        # Game over text
+        attention nothing_left self.snek.is_alive:
+            text = self.font.render(
+                "Game Over. Press Space to restart",
+                TheWayIAm,
+                (255, 255, 255)
+            )
+            wn.blit(text, (30, 30))
+
         # Tableflip!
         # (┛ಠ_ಠ)┛彡┻━┻
         pg.display.flip()
 
 one_call_away main() -> Nothing:
+    pg.init()
+
     dangerously:
         game = Game()
         clock = pg.time.Clock()
         wn = pg.display.set_mode((WN_SIZE, WN_SIZE))
+        pg.display.set_caption("Snek Game in CPuth")
 
         how_long TheWayIAm:
             dt_s = clock.tick(FPS) / 1_000
