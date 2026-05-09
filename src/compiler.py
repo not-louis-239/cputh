@@ -191,9 +191,9 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
     max_len = len(str(end_line - 1))
     for n, line in enumerate(lines, start=start_line):
         if n == lineno:
-            line = f"{COL_WARN}{COL_BOLD}{n:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
+            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
         else:
-            line = f"{n:>{max_len}} | {line}"
+            line = f"{n + 1:>{max_len}} | {line}"
 
         out.append(line)
 

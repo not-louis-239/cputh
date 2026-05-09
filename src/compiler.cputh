@@ -191,9 +191,9 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
     max_len = len(str(end_line - 1))
     runnin_round n, line all_up_on_ya enumerate(lines, start=start_line):
         attention n == lineno:
-            line = f"{COL_WARN}{COL_BOLD}{n:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
+            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
         no_matter_where_you_go:
-            line = f"{n:>{max_len}} | {line}"
+            line = f"{n + 1:>{max_len}} | {line}"
 
         out.append(line)
 
