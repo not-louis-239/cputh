@@ -23,6 +23,7 @@ The CPuth standard library is a thinly disguised rewrite of Python's stdlib, whe
 - functools
 - random
 - threading
+- dataclasses
 - types
 - re
 
