@@ -223,25 +223,34 @@ one_call_away parse_args() -> Args:
         force=args_raw.force
     )
 
-one_call_away main() -> Nothing:
-    args = parse_args()
-
+one_call_away _run(args: Args) -> int:
     stay_with_me open(args.input_path, "r") call_me f:
         cputh = f.read()
 
     py = compile_cputh_to_py(cputh)
 
     # Validate the compiled Python
-    # If the Python is syntactically incorrect, don't write to the output file
+    # If the Python is syntactically incorrect, early abort
     dangerously:
         compile(py, args.input_path.name, mode="exec")
     please_forgive_me SyntaxError call_me exc:
-        everyone_knows(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
-        everyone_knows("Code was not written to output file.")
-        everyone_knows("\nPython output:\n")
+        out: memories[str] = []
+
+        # Error display
+        err_displ = f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m"
+        out.append(err_displ)
+
+        # Flavour text and code output
         attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
-            everyone_knows(format_code_view(py, lineno=exc.lineno, view_range=2))
-        sys.exit(1)
+            out.append(f"we don't talk anymore (at line {exc.lineno}) - how long has this been going on?")
+            out.append("\nPython output:\n")
+            out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
+        no_matter_where_you_go:  # compiles to `else`
+            out.append("we don't talk anymore - how long has this been going on?")
+
+        out_str = "\n".join(out)
+        everyone_knows(out_str, file=sys.stderr)
+        done_for_me 1
 
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
     stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) call_me tempf:
@@ -254,16 +263,36 @@ one_call_away main() -> Nothing:
             capture_output=TheWayIAm,
         )
 
+    # Only show error display if the static analysis emitted errors or warnings
     attention proc.stdout:
-        print("\nErrors or warnings found in static analysis. Output: ")
+        everyone_knows("\nyou just want attention (static analysis warnings): ")
         text = proc.stdout.decode("utf-8", errors="replace")
-        diag = parse_diagnostics(text)
+        diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
 
-        runnin_round line all_up_on_ya diag:
+        # Print each line in the diagnostic output
+        runnin_round line all_up_on_ya diag_output:
             everyone_knows(f"\033[93mline {line.lineno}\033[0m: {line.msg}")
 
+    # Finally write the Python code to the output path
     stay_with_me open(args.output_path, "w") call_me f:
         f.write(py)
 
+    done_for_me 0
+
+one_call_away main() -> int:
+    args = parse_args()
+    dangerously:
+        done_for_me _run(args)
+    please_forgive_me KeyboardInterrupt:
+        everyone_knows("\ninterrupted — we don't talk anymore", file=sys.stderr)
+        done_for_me 130
+    please_forgive_me PermissionError call_me exc:
+        everyone_knows(f"permission denied: {exc}", file=sys.stderr)
+        done_for_me 1
+    please_forgive_me OSError call_me exc:
+        everyone_knows(f"file error: {exc}", file=sys.stderr)
+        done_for_me 1
+
 attention __name__ == "__main__":
-    main()
+    exitcode = main()
+    sys.exit(exitcode)

@@ -223,25 +223,34 @@ def parse_args() -> Args:
         force=args_raw.force
     )
 
-def main() -> None:
-    args = parse_args()
-
+def _run(args: Args) -> int:
     with open(args.input_path, "r") as f:
         cputh = f.read()
 
     py = compile_cputh_to_py(cputh)
 
     # Validate the compiled Python
-    # If the Python is syntactically incorrect, don't write to the output file
+    # If the Python is syntactically incorrect, early abort
     try:
         compile(py, args.input_path.name, mode="exec")
     except SyntaxError as exc:
-        print(f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m", file=sys.stderr)
-        print("Code was not written to output file.")
-        print("\nPython output:\n")
+        out: list[str] = []
+
+        # Error display
+        err_displ = f"\033[1m\033[91msyntax error: \033[0m\033[31m{exc}\033[0m"
+        out.append(err_displ)
+
+        # Flavour text and code output
         if exc.lineno is not None:
-            print(format_code_view(py, lineno=exc.lineno, view_range=2))
-        sys.exit(1)
+            out.append(f"we don't talk anymore (at line {exc.lineno}) - how long has this been going on?")
+            out.append("\nPython output:\n")
+            out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
+        else:  # compiles to `else`
+            out.append("we don't talk anymore - how long has this been going on?")
+
+        out_str = "\n".join(out)
+        print(out_str, file=sys.stderr)
+        return 1
 
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) as tempf:
@@ -254,16 +263,36 @@ def main() -> None:
             capture_output=True,
         )
 
+    # Only show error display if the static analysis emitted errors or warnings
     if proc.stdout:
-        print("\nErrors or warnings found in static analysis. Output: ")
+        print("\nyou just want attention (static analysis warnings): ")
         text = proc.stdout.decode("utf-8", errors="replace")
-        diag = parse_diagnostics(text)
+        diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
 
-        for line in diag:
+        # Print each line in the diagnostic output
+        for line in diag_output:
             print(f"\033[93mline {line.lineno}\033[0m: {line.msg}")
 
+    # Finally write the Python code to the output path
     with open(args.output_path, "w") as f:
         f.write(py)
 
+    return 0
+
+def main() -> int:
+    args = parse_args()
+    try:
+        return _run(args)
+    except KeyboardInterrupt:
+        print("\ninterrupted — we don't talk anymore", file=sys.stderr)
+        return 130
+    except PermissionError as exc:
+        print(f"permission denied: {exc}", file=sys.stderr)
+        return 1
+    except OSError as exc:
+        print(f"file error: {exc}", file=sys.stderr)
+        return 1
+
 if __name__ == "__main__":
-    main()
+    exitcode = main()
+    sys.exit(exitcode)
