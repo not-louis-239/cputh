@@ -7,8 +7,8 @@
         { "include": "#comments" },
         { "include": "#strings" },
         { "include": "#constants" },
-        { "include": "#types" },
-        { "include": "#params" },
+        { "include": "#builtins" },
+        { "include": "#identifiers" },
         { "include": "#variables" },
         { "include": "#operators" }
     ],
@@ -48,7 +48,7 @@
                 {
                     "comment": "augmented assignment operators - defined above regular assignment operators to take priority",
                     "name": "keyword.operator.assignment.cputh",
-                    "match": "(\\+=|-=|\\*=|/=|//=|%=|\\*\\*=|&=|\\|=|\\^=|>>=|<<=)"
+                    "match": "(\\+=|-=|\\*=|/=|//=|%=|\\*\\*=|&=|\\|=|\\^=|>>=|<<=|:=)"
                 },
                 {
                     "comment": "ellipsis",
@@ -74,33 +74,6 @@
                     "comment": "logical operators",
                     "name": "keyword.operator.logical.cputh",
                     "match": "\\b(i_still_look_at_you_the_same|all_up_on_ya|nothing_left|come_along_with_me|share_our_fears)\\b"
-                },
-                {
-                    "comment": "function definition: keyword, name, and opening paren",
-                    "match": "\\b(one_call_away)\\s+([a-z_][a-zA-Z0-9_]*)\\s*(\\()",
-                    "captures": {
-                        "1": {
-                            "name": "storage.type.function.cputh"
-                        },
-                        "2": {
-                            "name": "entity.name.function.cputh"
-                        },
-                        "3": {
-                            "name": "punctuation.definition.parameters.begin.cputh"
-                        }
-                    }
-                },
-                {
-                    "comment": "class definition: keyword followed by class name",
-                    "match": "\\b(then_theres_you)\\s+([A-Za-z_][a-zA-Z0-9_]*)\\s*(?=[:(])",
-                    "captures": {
-                        "1": {
-                            "name": "storage.type.class.cputh"
-                        },
-                        "2": {
-                            "name": "entity.name.type.class.cputh"
-                        }
-                    }
                 }
             ]
         },
@@ -263,12 +236,12 @@
                 }
             ]
         },
-        "types": {
+        "builtins": {
             "patterns": [
                 {
                     "comment": "i/o - both cputh and vanilla python",
                     "name": "support.function.builtin.cputh",
-                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec)\\b"
+                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec|hasattr|setattr|getattr|delattr|hash|repr|id|type|isinstance|issubclass|dir|globals|locals|vars|compile|execfile|raw)\\b"
                 },
                 {
                     "comment": "data structure types - include cputh and vanilla python",
@@ -278,18 +251,70 @@
                 {
                     "comment": "builtin exceptions",
                     "name": "support.type.exception.cputh",
-                    "match": "\\bTypeError|ValueError|KeyError|IndexError|NameError|AttributeError|IOError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|Warning|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning\\b"
-                },
-                {
-                    "comment": "magic methods ",
-                    "name": "support.function.magic.cputh",
-                    "match": "\\b(__init__|__add__|__sub__|__mul__|__truediv__|__floordiv__|__hash__|__eq__|__ne__|__lt__|__le__|__gt__|__ge__|__getattr__|__setattr__|__delattr__|__repr__|__str__|__call__|__int__|__len__|__bool__)\\b"
+                    "match": "\\b(TypeError|ValueError|KeyError|IndexError|NameError|AttributeError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning|PermissionError|OverflowError|RecursionError|Warning)\\b"
                 }
             ]
         },
-        "params": {
+        "identifiers": {
             "patterns": [
-
+                {
+                    "comment": "builtin decorators",
+                    "match": "^\\s*(@)(property|staticmethod|classmethod)\\b",
+                    "captures": {
+                        "1": { "name": "punctuation.definition.decorator.cputh" },
+                        "2": { "name": "support.function.builtin.decorator.cputh" }
+                    }
+                },
+                {
+                    "comment": "decorators",
+                    "match": "^\\s*(@)([A-Za-z_][a-zA-Z0-9_]*(?:\\.[A-Za-z_][a-zA-Z0-9_]*)*)",
+                    "captures": {
+                        "1": { "name": "punctuation.definition.decorator.cputh" },
+                        "2": { "name": "entity.name.function.decorator.cputh" }
+                    }
+                },
+                {
+                    "comment": "magic method definition: keyword, name, and opening paren",
+                    "match": "\\b(one_call_away)\\s+(__init__|__add__|__sub__|__mul__|__truediv__|__floordiv__|__hash__|__eq__|__ne__|__lt__|__le__|__gt__|__ge__|__getattr__|__setattr__|__delattr__|__repr__|__str__|__call__|__int__|__len__|__bool__)\\s*(\\()",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.function.cputh"
+                        },
+                        "2": {
+                            "name": "support.function.magic.cputh"
+                        },
+                        "3": {
+                            "name": "punctuation.definition.parameters.begin.cputh"
+                        }
+                    }
+                },
+                {
+                    "comment": "function definition: keyword, name, and opening paren",
+                    "match": "\\b(one_call_away)\\s+([a-z_][a-zA-Z0-9_]*)\\s*(\\()",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.function.cputh"
+                        },
+                        "2": {
+                            "name": "entity.name.function.cputh"
+                        },
+                        "3": {
+                            "name": "punctuation.definition.parameters.begin.cputh"
+                        }
+                    }
+                },
+                {
+                    "comment": "class definition: keyword followed by class name",
+                    "match": "\\b(then_theres_you)\\s+([A-Za-z_][a-zA-Z0-9_]*)\\s*(?=[:(])",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.class.cputh"
+                        },
+                        "2": {
+                            "name": "entity.name.type.class.cputh"
+                        }
+                    }
+                }
             ]
         },
         "variables": {
@@ -338,7 +363,7 @@
                     "match": "(&|\\||\\^|~|<<|>>)"
                 },
                 {
-                    "comment": "punctuation - decorator or matmul",
+                    "comment": "punctuation - decorator or matrix multiplication operator",
                     "name": "punctuation.definition.decorator.cputh",
                     "match": "@"
                 },
