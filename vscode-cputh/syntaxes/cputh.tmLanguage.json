@@ -105,7 +105,7 @@
                     "comment": "f-string double quoted",
                     "name": "string.quoted.double.cputh",
                     "begin": "(f)(\")",
-                    "end": "\"",
+                    "end": "(?<!\\\\)\\\"",
                     "beginCaptures": {
                         "1": { "name": "storage.type.string.cputh" },
                         "2": { "name": "punctuation.definition.string.begin.cputh" }
@@ -114,11 +114,7 @@
                         "0": { "name": "punctuation.definition.string.end.cputh" }
                     },
                     "patterns": [
-                        {
-                            "comment": "escape sequences",
-                            "name": "constant.character.escape.cputh",
-                            "match": "\\\\."
-                        },
+                        { "name": "constant.character.escape.cputh", "match": "\\\\([\\\\'\"abfnrtv]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|N\\{[^}]+\\}|[0-7]{1,3})" },
                         {
                             "comment": "interpolated expression",
                             "include": "#f-string-interpolation"
@@ -129,7 +125,7 @@
                     "comment": "f-string single quoted",
                     "name": "string.quoted.single.cputh",
                     "begin": "(f)(')",
-                    "end": "'",
+                    "end": "(?<!\\\\)'",
                     "beginCaptures": {
                         "1": { "name": "storage.type.string.cputh" },
                         "2": { "name": "punctuation.definition.string.begin.cputh" }
@@ -138,11 +134,7 @@
                         "0": { "name": "punctuation.definition.string.end.cputh" }
                     },
                     "patterns": [
-                        {
-                            "comment": "escape sequences",
-                            "name": "constant.character.escape.cputh",
-                            "match": "\\\\."
-                        },
+                        { "name": "constant.character.escape.cputh", "match": "\\\\([\\\\'\"abfnrtv]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|N\\{[^}]+\\}|[0-7]{1,3})" },
                         {
                             "comment": "interpolated expression",
                             "include": "#f-string-interpolation"
@@ -152,21 +144,21 @@
                 {
                     "name": "string.quoted.double.cputh",
                     "begin": "\"",
-                    "end": "\"",
+                    "end": "(?<!\\\\)\\\"",
                     "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
                     "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
                     "patterns": [
-                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
+                        { "name": "constant.character.escape.cputh", "match": "\\\\([\\\\'\"abfnrtv]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|N\\{[^}]+\\}|[0-7]{1,3})" }
                     ]
                 },
                 {
                     "name": "string.quoted.single.cputh",
                     "begin": "'",
-                    "end": "'",
+                    "end": "(?<!\\\\)'",
                     "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
                     "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
                     "patterns": [
-                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
+                        { "name": "constant.character.escape.cputh", "match": "\\\\([\\\\'\"abfnrtv]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|N\\{[^}]+\\}|[0-7]{1,3})" }
                     ]
                 }
             ]

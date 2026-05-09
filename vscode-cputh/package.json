@@ -3,7 +3,7 @@
     "displayName": "Charlie Puth Syntax Highlighting",
     "author": { "name": "Louis Masarei-Boulton" },
     "publisher": "louis-boulton",
-    "description": "Syntax highlighting and snippets for the cputh language.",
+    "description": "Syntax highlighting and snippets for the cputh language. How long has your code been going on?",
     "version": "0.2.0",
     "license": "Apache-2.0",
     "engines": { "vscode": "^1.60.0" },
