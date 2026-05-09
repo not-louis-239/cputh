@@ -1,11 +1,13 @@
 # cputh compiler
 
+**Version: 0.2.0**
+
 Simple compiler to compile Charlie Puth source to Python.
 Why? Because now you can sing your source code!
 
 `cputh` is a soulful, rhythmic transpiler that converts Charlie Puth lyrics to working Python code. Why use boring keywords like `if` and `while` when you could be demanding `attention` or asking `how_long` your loop has been going on?
 
-Inspired by ArnoldC. Same energy, different discography. Arnold lifts. Charlie cries in falsetto.
+Inspired by ArnoldC. Same energy, different discography. Arnold lifts while barking at the computer. Charlie cries in falsetto.
 
 Free syntax highlighting extension for VS Code included!
 
@@ -115,14 +117,7 @@ no_matter_where_you_go:
     everyone_knows("You just want attention")
 ```
 
-**Be warned!** The CPuth compiler does not compile code inside f-strings. Support for compiling code inside f-strings coming soon.
-
-```python
-# fstring-example.cputh
-
-everyone_knows(f"{1 if True else 0}")  # OK
-everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")  # explodes - syntax error because words inside f-strings are not compiled
-```
+As of 0.2.0, compilation now extends to inside f-strings as well, such as `everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")`
 
 ## Development Status
 
