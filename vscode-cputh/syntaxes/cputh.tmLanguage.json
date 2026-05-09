@@ -97,26 +97,6 @@
         "strings": {
             "patterns": [
                 {
-                    "name": "string.quoted.double.cputh",
-                    "begin": "\"",
-                    "end": "\"",
-                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
-                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
-                    "patterns": [
-                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
-                    ]
-                },
-                {
-                    "name": "string.quoted.single.cputh",
-                    "begin": "'",
-                    "end": "'",
-                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
-                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
-                    "patterns": [
-                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
-                    ]
-                },
-                {
                     "comment": "f-string double quoted",
                     "name": "string.quoted.double.cputh",
                     "begin": "(f)(\")",
@@ -136,20 +116,7 @@
                         },
                         {
                             "comment": "interpolated expression",
-                            "name": "meta.interpolation.cputh",
-                            "begin": "\\{",
-                            "end": "\\}",
-                            "beginCaptures": {
-                                "0": { "name": "punctuation.definition.template.begin.cputh" }
-                            },
-                            "endCaptures": {
-                                "0": { "name": "punctuation.definition.template.end.cputh" }
-                            },
-                            "patterns": [
-                                { "include": "#keywords" },
-                                { "include": "#variables" },
-                                { "include": "#operators" }
-                            ]
+                            "include": "#f-string-interpolation"
                         }
                     ]
                 },
@@ -173,21 +140,56 @@
                         },
                         {
                             "comment": "interpolated expression",
-                            "name": "meta.interpolation.cputh",
-                            "begin": "\\{",
-                            "end": "\\}",
-                            "beginCaptures": {
-                                "0": { "name": "punctuation.definition.template.begin.cputh" }
-                            },
-                            "endCaptures": {
-                                "0": { "name": "punctuation.definition.template.end.cputh" }
-                            },
-                            "patterns": [
-                                { "include": "#keywords" },
-                                { "include": "#variables" },
-                                { "include": "#operators" }
-                            ]
+                            "include": "#f-string-interpolation"
                         }
+                    ]
+                },
+                {
+                    "name": "string.quoted.double.cputh",
+                    "begin": "\"",
+                    "end": "\"",
+                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
+                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
+                    "patterns": [
+                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.cputh",
+                    "begin": "'",
+                    "end": "'",
+                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.cputh" } },
+                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.cputh" } },
+                    "patterns": [
+                        { "name": "constant.character.escape.cputh", "match": "\\\\." }
+                    ]
+                }
+            ]
+        },
+        "f-string-interpolation": {
+            "patterns": [
+                {
+                    "comment": "interpolated expression",
+                    "name": "meta.interpolation.cputh",
+                    "contentName": "meta.embedded.inline.cputh source.cputh",
+                    "begin": "\\{",
+                    "end": "\\}",
+                    "beginCaptures": {
+                        "0": { "name": "punctuation.definition.template.begin.cputh" }
+                    },
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.template.end.cputh" }
+                    },
+                    "patterns": [
+                        { "include": "#f-string-interpolation" },
+                        { "include": "#keywords" },
+                        { "include": "#comments" },
+                        { "include": "#strings" },
+                        { "include": "#constants" },
+                        { "include": "#builtins" },
+                        { "include": "#identifiers" },
+                        { "include": "#variables" },
+                        { "include": "#operators" }
                     ]
                 }
             ]

@@ -459,16 +459,12 @@ def _run(args: Args) -> int:
                 num_warnings = sum(1 for d in diag_output if d.severity == "warning")
                 num_infos = total_msgs - num_errors - num_warnings
 
-                error_sufx = "s" if num_errors != 1 else ""
-                warning_sufx = "s" if num_warnings != 1 else ""
-                info_sufx = "s" if num_infos != 1 else ""
-
                 if diag_output:
                     print("\nyou just want attention (static analysis warnings):")
                     print(
-                        f"{num_errors} error{error_sufx}"
-                        f", {num_warnings} warning{warning_sufx}"
-                        f", {num_infos} information{info_sufx}"
+                        f"{num_errors} error{"s" if num_errors != 1 else ""}"
+                        f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
+                        f", {num_infos} information{"s" if num_infos != 1 else ""}"
                     )
                     for line in diag_output:
                         severity_col = COL_ERROR if line.severity == "error" else COL_WARN
