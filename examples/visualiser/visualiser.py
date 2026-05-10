@@ -13,7 +13,7 @@ import numpy as np
 
 WN_W, WN_H = 800, 600
 BAR_COUNT = 64
-BAR_MAG_MULT = 200
+BAR_MAG_MULT = 70
 BLOCK_SIZE = 1024
 
 class Visualiser:
@@ -21,7 +21,8 @@ class Visualiser:
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
         self.decay_rate = 0.4  # decay rate for smooth FFT
-        self.render_decay_rate = 0.02  # decay rate for visual graph
+        self.render_decay_rate = 0.05  # decay rate for visual graph
+        self.alpha_fade = 36
 
         self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
         self.fg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
@@ -42,6 +43,7 @@ class Visualiser:
         bar_w = graph_width / BAR_COUNT
 
         for i, mag in enumerate(fft):
+            mag = mag * (i + 1)
             h = min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
 
             x = min_x + i * bar_w
@@ -61,12 +63,12 @@ class Visualiser:
         # We need to move the history to a temp surface to work on it
         temp_surface = self.fg_surface.copy()
 
-        # Apply fade to history
+        # Apply fade to history - we don't talk anymore, but the bars still do
         fade = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
-        fade.fill((0, 0, 0, 6))  # higher alpha value = shorter trails
+        fade.fill((0, 0, 0, self.alpha_fade))  # higher alpha value = shorter trails
         temp_surface.blit(fade, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
 
-        # Apply scale/zoom
+        # Apply scale/zoom - more recent -> more attention
         scaled_w = int(WN_W * (1 - self.render_decay_rate))
         scaled_h = int(WN_H * (1 - self.render_decay_rate))
         scaled = pg.transform.scale(temp_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
@@ -86,7 +88,7 @@ class Visualiser:
             xy_botright=(WN_W, WN_H),
         )
 
-        # Final blit
+        # Tell me honestly - what is all this work without blitting?
         screen.blit(self.bg_surface, (0, 0))
         screen.blit(self.fg_surface, (0, 0))
 
@@ -141,13 +143,24 @@ def audio_callback(indata, frames, time, status) -> None:
 
     print(f"in: {audio.shape}, max: {float(np.max(np.abs(audio))):.4f}")
 
-    fft = np.abs(np.fft.rfft(audio))
-    fft = fft[:len(fft) // 2]
+    fft_data = np.abs(np.fft.rfft(audio))
+    n_fft = len(fft_data)
 
-    bins = np.array_split(fft, BAR_COUNT)
-    latest_fft = np.array([b.mean() for b in bins])
+    indices = np.geomspace(1, n_fft, BAR_COUNT + 1).astype(int)
 
-    # This is the part where we update the buffer
+    latest_fft = np.zeros(BAR_COUNT)
+    for i in range(BAR_COUNT):
+        start = indices[i]
+        end = indices[i+1]
+
+        if start == end:
+            latest_fft[i] = fft_data[min(start, n_fft - 1)]
+        else:
+            latest_fft[i] = np.mean(fft_data[start:end])
+
+    tilt = np.linspace(1, 6, BAR_COUNT)
+    latest_fft *= tilt
+
     buf.update(new_fft=latest_fft)
 
 def main():
