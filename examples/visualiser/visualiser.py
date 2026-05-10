@@ -16,35 +16,63 @@ BAR_COUNT = 64
 BAR_MAG_MULT = 70
 BLOCK_SIZE = 1024
 
+PULSE_COLOUR_MARKERS: dict[int, tuple[int, int, int]] = {
+    0: (0, 0, 0),
+    500: (70, 0, 200),
+    750: (140, 50, 250)
+}
+sorted_keys = sorted(PULSE_COLOUR_MARKERS.keys())
+
 class Visualiser:
+    DECAY_RATE = 0.4  # decay rate for smooth FFT
+    RENDER_DECAY_RATE = 0.05  # decay rate for visual graph
+    ALPHA_FADE = 36
+    PEAK_FALL_RATE = 8
+
     def __init__(self):
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
         self.peak_heights = np.zeros(BAR_COUNT)
-        self.decay_rate = 0.4  # decay rate for smooth FFT
-        self.render_decay_rate = 0.05  # decay rate for visual graph
-        self.alpha_fade = 36
-        self.peak_fall_rate = 8
 
         self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
         self.fg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
 
-    def update(self, new_fft: np.ndarray) -> None:
-        self.smooth_fft = self.decay_rate * new_fft + (1 - self.decay_rate) * self.smooth_fft
-        self.fft = new_fft
+    def _pulse_intensity_to_colour(self, pulse_intensity: float) -> tuple[int, int, int]:
+        # Handle boundaries
+        if pulse_intensity <= sorted_keys[0]:
+            return PULSE_COLOUR_MARKERS[sorted_keys[0]]
+        if pulse_intensity >= sorted_keys[-1]:
+            return PULSE_COLOUR_MARKERS[sorted_keys[-1]]
 
-    def _bar_height(self, mag: float, i: int, graph_height: int) -> int:
+        # Find the two markers to interpolate between
+        for i in range(len(sorted_keys) - 1):
+            lower_bound = sorted_keys[i]
+            upper_bound = sorted_keys[i + 1]
+
+            if lower_bound <= pulse_intensity <= upper_bound:
+                # Calculate the relative position (0.0 to 1.0) between markers
+                t = (pulse_intensity - lower_bound) / (upper_bound - lower_bound)
+
+                return lerp_colours(
+                    PULSE_COLOUR_MARKERS[lower_bound],
+                    PULSE_COLOUR_MARKERS[upper_bound],
+                    t
+                )
+
+        return PULSE_COLOUR_MARKERS[sorted_keys[-1]]
+
+    def _calc_bar_height(self, mag: float, i: int, graph_height: int) -> int:
         mag = mag * (i + 1)
         return min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
 
     def _update_peak_caps(self, fft: np.ndarray, graph_height: int) -> None:
         for i, mag in enumerate(fft):
-            h = self._bar_height(mag, i, graph_height)
+            h = self._calc_bar_height(mag, i, graph_height)
 
             if h > self.peak_heights[i]:
                 self.peak_heights[i] = h
             else:
-                self.peak_heights[i] = max(h, self.peak_heights[i] - self.peak_fall_rate)
+                self.peak_heights[i] = max(h, self.peak_heights[i] - self.PEAK_FALL_RATE)
 
     def _draw_fft_graph(
             self, fft: np.ndarray, screen: pg.Surface,
@@ -58,7 +86,7 @@ class Visualiser:
         bar_w = graph_width / BAR_COUNT
 
         for i, mag in enumerate(fft):
-            h = self._bar_height(mag, i, graph_height)
+            h = self._calc_bar_height(mag, i, graph_height)
 
             x = min_x + i * bar_w
             y = max_y - h
@@ -92,11 +120,15 @@ class Visualiser:
 
             pg.draw.rect(screen, cap_colour, (int(x), int(y), width, cap_h), border_radius=2)
 
+    def update(self, new_fft: np.ndarray) -> None:
+        self.smooth_fft = self.DECAY_RATE * new_fft + (1 - self.DECAY_RATE) * self.smooth_fft
+        self.fft = new_fft
+
     def render(self, screen: pg.Surface):
         # Background pulse
         energy = np.mean(self.smooth_fft)
-        pulse = min(255, int(np.log1p(energy) * 200))
-        self.bg_surface.fill((pulse // 5, 0, pulse // 2))
+        pulse_intensity = int(np.log1p(energy) * 200)
+        self.bg_surface.fill(self._pulse_intensity_to_colour(pulse_intensity))
 
         # Create a temporary work surface
         # We need to move the history to a temp surface to work on it
@@ -104,12 +136,12 @@ class Visualiser:
 
         # Apply fade to history - we don't talk anymore, but the bars still do
         fade = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
-        fade.fill((0, 0, 0, self.alpha_fade))  # higher alpha value = shorter trails
+        fade.fill((0, 0, 0, self.ALPHA_FADE))  # higher alpha value = shorter trails
         temp_surface.blit(fade, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
 
         # Apply scale/zoom - more recent -> more attention
-        scaled_w = int(WN_W * (1 - self.render_decay_rate))
-        scaled_h = int(WN_H * (1 - self.render_decay_rate))
+        scaled_w = int(WN_W * (1 - self.RENDER_DECAY_RATE))
+        scaled_h = int(WN_H * (1 - self.RENDER_DECAY_RATE))
         scaled = pg.transform.scale(temp_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
 
         # Clear the main surface so we can then put back the history
