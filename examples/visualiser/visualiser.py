@@ -113,6 +113,7 @@ def main():
 
     pg.init()
     screen = pg.display.set_mode((WN_W, WN_H))
+    pg.display.set_caption("CPuth Music Visualiser")
     clock = pg.time.Clock()
 
     stream = None
