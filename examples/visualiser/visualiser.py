@@ -20,9 +20,11 @@ class Visualiser:
     def __init__(self):
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
+        self.peak_heights = np.zeros(BAR_COUNT)
         self.decay_rate = 0.4  # decay rate for smooth FFT
         self.render_decay_rate = 0.05  # decay rate for visual graph
         self.alpha_fade = 36
+        self.peak_fall_rate = 8
 
         self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
         self.fg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
@@ -30,6 +32,19 @@ class Visualiser:
     def update(self, new_fft: np.ndarray) -> None:
         self.smooth_fft = self.decay_rate * new_fft + (1 - self.decay_rate) * self.smooth_fft
         self.fft = new_fft
+
+    def _bar_height(self, mag: float, i: int, graph_height: int) -> int:
+        mag = mag * (i + 1)
+        return min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
+
+    def _update_peak_caps(self, fft: np.ndarray, graph_height: int) -> None:
+        for i, mag in enumerate(fft):
+            h = self._bar_height(mag, i, graph_height)
+
+            if h > self.peak_heights[i]:
+                self.peak_heights[i] = h
+            else:
+                self.peak_heights[i] = max(h, self.peak_heights[i] - self.peak_fall_rate)
 
     def _draw_fft_graph(
             self, fft: np.ndarray, screen: pg.Surface,
@@ -43,8 +58,7 @@ class Visualiser:
         bar_w = graph_width / BAR_COUNT
 
         for i, mag in enumerate(fft):
-            mag = mag * (i + 1)
-            h = min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
+            h = self._bar_height(mag, i, graph_height)
 
             x = min_x + i * bar_w
             y = max_y - h
@@ -52,6 +66,31 @@ class Visualiser:
             colour = BAR_COLOURS[i]
 
             pg.draw.rect(screen, colour, (int(x), int(y), max(1, int(bar_w - 2)), int(h)))
+
+    def _draw_peak_caps(
+            self, screen: pg.Surface,
+            xy_topleft: tuple[int, int], xy_botright: tuple[int, int],
+        ) -> None:
+        min_x, min_y = xy_topleft
+        max_x, max_y = xy_botright
+
+        graph_width = max_x - min_x
+        graph_height = max_y - min_y
+        bar_w = graph_width / BAR_COUNT
+        cap_h = 4
+
+        self._update_peak_caps(self.smooth_fft, graph_height)
+
+        for i, peak_h in enumerate(self.peak_heights):
+            x = min_x + i * bar_w
+            y = max(min_y, max_y - int(peak_h) - cap_h)
+            width = max(2, int(bar_w - 1))
+
+            cl = BAR_COLOURS[i]
+            base_colour = (cl.r, cl.g, cl.b)
+            cap_colour = lerp_colours((255, 255, 255), base_colour, 0.35)
+
+            pg.draw.rect(screen, cap_colour, (int(x), int(y), width, cap_h), border_radius=2)
 
     def render(self, screen: pg.Surface):
         # Background pulse
@@ -91,6 +130,7 @@ class Visualiser:
         # Tell me honestly - what is all this work without blitting?
         screen.blit(self.bg_surface, (0, 0))
         screen.blit(self.fg_surface, (0, 0))
+        self._draw_peak_caps(screen, (0, 0), (WN_W, WN_H))
 
 # yes this is a global
 # yes global vars freaking suck
@@ -101,7 +141,7 @@ def lerp(a: float, b: float, t: float) -> float:
     return a + (b - a) * t
 
 # Compute bar colours once at startup to avoid wasteful computation
-BAR_COLOURS = []
+BAR_COLOURS: list[pg.Color] = []
 for i in range(BAR_COUNT):
     c = pg.Color(0)
     c.hsva = (lerp(120, 210, i / BAR_COUNT), 60, 100, 100)
