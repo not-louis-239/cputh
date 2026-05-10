@@ -134,11 +134,15 @@ I made this as a joke. It is not affiliated with, endorsed by, or known to Charl
 
 ## Requirements
 
-- Python 3.x (tested on 3.14.0)
-- Pyright
-  - Not required but facilitates compiler static analysis.
+- Python 3.x (tested on 3.14.0) (`brew install python` or from `python.org`)
+- Pyright (`npm install -g pyright`)
+  - Not strictly required but facilitates compiler static analysis.
 - `pip install requirements.txt`
-  - Note: `pygame` is included in `requirements.txt`, but is **not** required except for the `snek.cputh` example in `examples/snek/snek.cputh`.
+  - Not required for compiler but used by `examples/`:
+    - `pygame`
+    - `numpy`
+    - `sounddevice`
+    - Visualiser requires `blackhole-2ch` (`brew install blackhole-2ch`)
 
 ## Installation & Usage
 
