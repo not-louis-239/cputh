@@ -2,7 +2,8 @@
 # that captures speaker output
 # and displays it in a pygame window
 
-# how long has this been going on?
+# you just want attention, you don't want my heart
+# maybe you just hate the thought of me with someone new
 
 from typing import Any
 
@@ -10,25 +11,99 @@ import pygame as pg
 import sounddevice as sd
 import numpy as np
 
-
 WN_W, WN_H = 800, 600
 BAR_COUNT = 64
 BAR_MAG_MULT = 200
 BLOCK_SIZE = 1024
 
-class AudioBuffer:
+class Visualiser:
     def __init__(self):
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
-        self.decay_rate = 0.6  # decay rate for smooth FFT
+        self.decay_rate = 0.4  # decay rate for smooth FFT
+        self.render_decay_rate = 0.02  # decay rate for visual graph
+
+        self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
+        self.fg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
+
+    def update(self, new_fft: np.ndarray) -> None:
+        self.smooth_fft = self.decay_rate * new_fft + (1 - self.decay_rate) * self.smooth_fft
+        self.fft = new_fft
+
+    def _draw_fft_graph(
+            self, fft: np.ndarray, screen: pg.Surface,
+            xy_topleft: tuple[int, int], xy_botright: tuple[int, int],
+        ) -> None:
+        min_x, min_y = xy_topleft
+        max_x, max_y = xy_botright
+
+        graph_width = max_x - min_x
+        graph_height = max_y - min_y
+        bar_w = graph_width / BAR_COUNT
+
+        for i, mag in enumerate(fft):
+            h = min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
+
+            x = min_x + i * bar_w
+            y = max_y - h
+
+            colour = BAR_COLOURS[i]
+
+            pg.draw.rect(screen, colour, (int(x), int(y), max(1, int(bar_w - 2)), int(h)))
+
+    def render(self, screen: pg.Surface):
+        # Background pulse
+        energy = np.mean(self.smooth_fft)
+        pulse = min(255, int(np.log1p(energy) * 200))
+        self.bg_surface.fill((pulse // 5, 0, pulse // 2))
+
+        # Create a temporary work surface
+        # We need to move the history to a temp surface to work on it
+        temp_surface = self.fg_surface.copy()
+
+        # Apply fade to history
+        fade = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
+        fade.fill((0, 0, 0, 6))  # higher alpha value = shorter trails
+        temp_surface.blit(fade, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
+
+        # Apply scale/zoom
+        scaled_w = int(WN_W * (1 - self.render_decay_rate))
+        scaled_h = int(WN_H * (1 - self.render_decay_rate))
+        scaled = pg.transform.scale(temp_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
+
+        # Clear the main surface so we can then put back the history
+        self.fg_surface.fill((0, 0, 0, 0))
+        self.fg_surface.blit(
+            scaled,
+            ((WN_W - scaled_w) // 2, (WN_H - scaled_h) // 2)
+        )
+
+        # Draw the new bars on top of the clean surface
+        self._draw_fft_graph(
+            fft=self.smooth_fft,
+            screen=self.fg_surface,
+            xy_topleft=(0, 0),
+            xy_botright=(WN_W, WN_H),
+        )
+
+        # Final blit
+        screen.blit(self.bg_surface, (0, 0))
+        screen.blit(self.fg_surface, (0, 0))
 
 # yes this is a global
 # yes global vars freaking suck
 # but it's the only thing I can think of right now that would work
-buf = AudioBuffer()
+buf = Visualiser()
 
 def lerp(a: float, b: float, t: float) -> float:
     return a + (b - a) * t
+
+# Compute bar colours once at startup to avoid wasteful computation
+BAR_COLOURS = []
+for i in range(BAR_COUNT):
+    c = pg.Color(0)
+    c.hsva = (lerp(120, 210, i / BAR_COUNT), 60, 100, 100)
+    BAR_COLOURS.append(c)
 
 def lerp_colours(c1: tuple[int, int, int], c2: tuple[int, int, int], t: float) -> tuple[int, int, int]:
     r1, g1, b1 = c1
@@ -49,7 +124,7 @@ def find_blackhole_device():
         if "blackhole" in name and device["max_input_channels"] > 0:
             return i
 
-    raise ValueError(
+    raise RuntimeError(
         "BlackHole device not found. "
         "Make sure BlackHole is installed and enabled in Audio MIDI Setup."
     )
@@ -73,32 +148,7 @@ def audio_callback(indata, frames, time, status) -> None:
     latest_fft = np.array([b.mean() for b in bins])
 
     # This is the part where we update the buffer
-    buf.fft = latest_fft
-    buf.smooth_fft = buf.decay_rate * buf.smooth_fft + (1 - buf.decay_rate) * latest_fft
-
-def draw_visualiser(buf: AudioBuffer, screen: pg.Surface) -> None:
-    screen.fill((0, 0, 0))
-
-    bar_w = WN_W // BAR_COUNT
-
-    # Pulsing effect based on fft intensity
-    energy = np.mean(buf.fft)
-    pulse = min(255, int(energy * 255))
-    screen.fill((pulse // 5, 0, pulse // 2))
-
-    # Draw bars
-    for i, mag in enumerate(buf.smooth_fft):
-        h = int(np.log1p(mag) * BAR_MAG_MULT)
-
-        colour = pg.Color(0)
-        colour.hsva = (lerp(120, 210, i / BAR_COUNT), 60, 100, 100)
-        pg.draw.rect(
-            screen,
-            colour,
-            (i * bar_w, WN_H - h, bar_w - 2, h),
-        )
-
-    pg.display.flip()
+    buf.update(new_fft=latest_fft)
 
 def main():
     # XXX: make sure nothing else is outputting from BLACKHOLE_IDX
@@ -139,7 +189,7 @@ def main():
                 if event.type == pg.QUIT:
                     running = False
 
-            draw_visualiser(buf=buf, screen=screen)
+            buf.render(screen=screen)
             pg.display.flip()
             clock.tick(60)
 
