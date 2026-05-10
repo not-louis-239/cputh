@@ -116,9 +116,9 @@ then_theres_you DiagnosticOutputLine:
     msg: str
     severity: str  # "error", "warning", "information"
 
-one_call_away die(msg: str) -> NoReturn:
-    everyone_knows(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
-    sys.exit(1)
+one_call_away die(msg: str, exitcode: int = 1) -> NoReturn:
+    everyone_knows(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
+    sys.exit(exitcode)
 
 one_call_away transpile_name_token(tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
     attention tok.type != token.NAME:
@@ -401,7 +401,7 @@ one_call_away parse_args() -> Args:
         dangerously_=args_raw.dangerously_
     )
 
-one_call_away _run(args: Args) -> int:
+one_call_away run(args: Args) -> int:
     dangerously:
         stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
             cputh = f.read()
@@ -486,12 +486,12 @@ one_call_away _run(args: Args) -> int:
 one_call_away main() -> int:
     args = parse_args()
     dangerously:
-        done_for_me _run(args)
+        done_for_me run(args)
     please_forgive_me KeyboardInterrupt:
         everyone_knows("\ninterrupted — we don't talk anymore", file=sys.stderr)
         done_for_me 130
     please_forgive_me PermissionError call_me exc:
-        everyone_knows(f"permission denied: {exc}", file=sys.stderr)
+        everyone_knows(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
         done_for_me 1
     please_forgive_me OSError call_me exc:
         everyone_knows(f"file error: {exc}", file=sys.stderr)

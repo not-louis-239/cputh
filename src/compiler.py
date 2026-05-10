@@ -116,9 +116,9 @@ class DiagnosticOutputLine:
     msg: str
     severity: str  # "error", "warning", "information"
 
-def die(msg: str) -> NoReturn:
-    print(f"{Path(__file__).name}: fatal: {msg}", file=sys.stderr)
-    sys.exit(1)
+def die(msg: str, exitcode: int = 1) -> NoReturn:
+    print(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
+    sys.exit(exitcode)
 
 def transpile_name_token(tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
     if tok.type != token.NAME:
@@ -401,7 +401,7 @@ def parse_args() -> Args:
         dangerously_=args_raw.dangerously_
     )
 
-def _run(args: Args) -> int:
+def run(args: Args) -> int:
     try:
         with open(args.input_path, "r", encoding="utf-8") as f:
             cputh = f.read()
@@ -486,12 +486,12 @@ def _run(args: Args) -> int:
 def main() -> int:
     args = parse_args()
     try:
-        return _run(args)
+        return run(args)
     except KeyboardInterrupt:
         print("\ninterrupted — we don't talk anymore", file=sys.stderr)
         return 130
     except PermissionError as exc:
-        print(f"permission denied: {exc}", file=sys.stderr)
+        print(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
         return 1
     except OSError as exc:
         print(f"file error: {exc}", file=sys.stderr)
