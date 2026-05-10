@@ -12,43 +12,61 @@ import sounddevice as sd
 import numpy as np
 
 WN_W, WN_H = 800, 600
-BAR_COUNT = 64
+BAR_COUNT = 96
 BAR_MAG_MULT = 30
 BLOCK_SIZE = 1024
+BAR_WIDTH_FACTOR = 0.5  # how much of the space a bar could fill up it actually fills up
 
+# must be in order of lowest -> highest
 PULSE_COLOUR_MARKERS: dict[int, tuple[int, int, int]] = {
     0: (0, 0, 0),
     500: (70, 0, 200),
     750: (140, 50, 250)
 }
-sorted_keys = sorted(PULSE_COLOUR_MARKERS.keys())
 
 class Visualiser:
     DECAY_RATE = 0.4  # decay rate for smooth FFT
     RENDER_DECAY_RATE = 0.05  # decay rate for visual graph
     ALPHA_FADE = 36
-    PEAK_FALL_RATE = 8
-    HALF_H = WN_H // 2
+    PEAK_FALL_RATE = 2
+    HALF_WN_H = WN_H // 2
 
-    def __init__(self):
+    def __init__(self) -> None:
+        # always store as unmodified values, render pipeline decides how to display them
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
         self.peak_heights = np.zeros(BAR_COUNT)
 
         self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
-        self.fg_surface = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
+        self.fg_surface = pg.Surface((WN_W, self.HALF_WN_H), pg.SRCALPHA)
+
+        # temporary work surface so as not to
+        # clobber the foreground surface while creating alpha effects
+        # we make this once in init because surface churning is terrible
+        # practice in pygame
+        self.work_surface = pg.Surface((WN_W, self.HALF_WN_H), pg.SRCALPHA)
+
+        # Fade surface
+        self.fade_surface = pg.Surface((WN_W, self.HALF_WN_H), pg.SRCALPHA)
+        self.fade_surface.fill((0, 0, 0, self.ALPHA_FADE))
+
+    def update(self, new_fft: np.ndarray) -> None:
+        self.smooth_fft = self.DECAY_RATE * new_fft + (1 - self.DECAY_RATE) * self.smooth_fft
+        self.fft = new_fft
 
     def _pulse_intensity_to_colour(self, pulse_intensity: float) -> tuple[int, int, int]:
+        keys = tuple(PULSE_COLOUR_MARKERS.keys())
+
         # Handle boundaries
-        if pulse_intensity <= sorted_keys[0]:
-            return PULSE_COLOUR_MARKERS[sorted_keys[0]]
-        if pulse_intensity >= sorted_keys[-1]:
-            return PULSE_COLOUR_MARKERS[sorted_keys[-1]]
+        if pulse_intensity <= keys[0]:
+            return PULSE_COLOUR_MARKERS[keys[0]]
+        if pulse_intensity >= keys[-1]:
+            return PULSE_COLOUR_MARKERS[keys[-1]]
 
         # Find the two markers to interpolate between
-        for i in range(len(sorted_keys) - 1):
-            lower_bound = sorted_keys[i]
-            upper_bound = sorted_keys[i + 1]
+        for i in range(len(keys) - 1):
+            lower_bound = keys[i]
+            upper_bound = keys[i + 1]
 
             if lower_bound <= pulse_intensity <= upper_bound:
                 # Calculate the relative position (0.0 to 1.0) between markers
@@ -60,7 +78,7 @@ class Visualiser:
                     t
                 )
 
-        return PULSE_COLOUR_MARKERS[sorted_keys[-1]]
+        return PULSE_COLOUR_MARKERS[keys[-1]]
 
     def _calc_bar_height(self, mag: float, i: int, graph_height: int) -> int:
         mag = mag * (i + 1)
@@ -75,6 +93,18 @@ class Visualiser:
             else:
                 self.peak_heights[i] = max(h, self.peak_heights[i] - self.PEAK_FALL_RATE)
 
+    def _bar_colour(self, frac: float) -> tuple[int, int, int]:
+        if frac < 0.3:
+            t = frac / 0.3
+            colour = lerp_colours((110, 110, 255), (110, 255, 255), t)
+        elif frac < 0.7:
+            t = (frac - 0.3) / 0.4
+            colour = lerp_colours((110, 255, 255), (110, 255, 110), t)
+        else:
+            t = (frac - 0.7) / 0.3
+            colour = lerp_colours((110, 255, 110), (255, 255, 110), t)
+        return colour
+
     def _draw_fft_graph(
             self, fft: np.ndarray, screen: pg.Surface,
             xy_topleft: tuple[int, int], xy_botright: tuple[int, int],
@@ -84,17 +114,24 @@ class Visualiser:
 
         graph_width = max_x - min_x
         graph_height = max_y - min_y
-        bar_w = graph_width / BAR_COUNT
+        bar_w_total = graph_width / BAR_COUNT
+        bar_w_margin = int((bar_w_total * (1 - BAR_WIDTH_FACTOR)) / 2)
 
         for i, mag in enumerate(fft):
             h = self._calc_bar_height(mag, i, graph_height)
 
-            x = min_x + i * bar_w
+            x = min_x + i * bar_w_total
             y = max_y - h
 
-            colour = BAR_COLOURS[i]
+            actual_width = BAR_WIDTH_FACTOR * bar_w_total
 
-            pg.draw.rect(screen, colour, (int(x), int(y), max(1, int(bar_w - 2)), int(h)))
+            base_colour = self._bar_colour(frac=i / BAR_COUNT)
+            tip_h = max(1, h // 4)
+            body_h = max(0, h - tip_h)
+
+            if body_h > 0:
+                pg.draw.rect(screen, (*base_colour, 255), (int(x + bar_w_margin), int(y), actual_width, int(tip_h)))  # draw tip at full opacity
+            pg.draw.rect(screen, (*base_colour, 127), (int(x + bar_w_margin), int(y + tip_h), actual_width, int(body_h)))  # main body stays low alpha to make tips stand out more
 
     def _draw_peak_caps(
             self, screen: pg.Surface,
@@ -115,60 +152,50 @@ class Visualiser:
             y = max(min_y, max_y - int(peak_h) - cap_h)
             width = max(2, int(bar_w - 1))
 
-            cl = BAR_COLOURS[i]
-            base_colour = (cl.r, cl.g, cl.b)
+            base_colour = self._bar_colour(frac=i / BAR_COUNT)
             cap_colour = lerp_colours((255, 255, 255), base_colour, 0.35)
 
             pg.draw.rect(screen, cap_colour, (int(x), int(y), width, cap_h), border_radius=2)
 
-    def update(self, new_fft: np.ndarray) -> None:
-        self.smooth_fft = self.DECAY_RATE * new_fft + (1 - self.DECAY_RATE) * self.smooth_fft
-        self.fft = new_fft
-
-    def render(self, screen: pg.Surface):
+    def render(self, screen: pg.Surface) -> None:
         # Background pulse
         energy = np.mean(self.smooth_fft)
         pulse_intensity = int(np.log1p(energy) * 200)
         self.bg_surface.fill(self._pulse_intensity_to_colour(pulse_intensity))
 
-        # Create a temporary work surface
-        # We need to move the history to a temp surface to work on it
-        temp_surface = self.fg_surface.copy()
+        # Copy the foreground surface to the work surface so we don't clobber fg_surface
+        self.work_surface.fill((0, 0, 0, 0))
+        self.work_surface.blit(self.fg_surface, (0, 0))
+        self.work_surface.blit(self.fade_surface, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
 
-        # Apply fade to history - we don't talk anymore, but the bars still do
-        fade = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
-        fade.fill((0, 0, 0, self.ALPHA_FADE))  # higher alpha value = shorter trails
-        temp_surface.blit(fade, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
-
-        # Apply scale/zoom - more recent -> more attention
+        # More recent - more attention
         scaled_w = int(WN_W * (1 - self.RENDER_DECAY_RATE))
-        scaled_h = int(self.HALF_H * (1 - self.RENDER_DECAY_RATE))
-        scaled = pg.transform.scale(temp_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
+        scaled_h = int(self.HALF_WN_H * (1 - self.RENDER_DECAY_RATE))
+        scaled = pg.transform.scale(self.work_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
 
         # Clear the main surface so we can then put back the history
         self.fg_surface.fill((0, 0, 0, 0))
-        self.fg_surface.blit(
-            scaled,
-            ((WN_W - scaled_w) // 2, self.HALF_H - scaled_h)
-        )
+        self.fg_surface.blit(scaled, ((WN_W - scaled_w) // 2, self.HALF_WN_H - scaled_h))
 
         # Draw the new bars on top of the clean surface
+        self.work_surface.fill((0, 0, 0, 0))
         self._draw_fft_graph(
             fft=self.smooth_fft,
-            screen=self.fg_surface,
+            screen=self.work_surface,
             xy_topleft=(0, 0),
-            xy_botright=(WN_W, self.HALF_H),
+            xy_botright=(WN_W, self.HALF_WN_H),
         )
+        self.fg_surface.blit(self.work_surface, (0, 0))
 
-        cap_surface = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
-        self._draw_peak_caps(cap_surface, (0, 0), (WN_W, self.HALF_H))
+        # Draw peak caps on the work surface then transfer to the fg_surface
+        self.work_surface.fill((0, 0, 0, 0))
+        self._draw_peak_caps(self.work_surface, (0, 0), (WN_W, self.HALF_WN_H))
+        self.fg_surface.blit(self.work_surface, (0, 0))
 
         # Tell me honestly - what is all this work without blitting?
         screen.blit(self.bg_surface, (0, 0))
         screen.blit(self.fg_surface, (0, 0))
-        screen.blit(pg.transform.flip(self.fg_surface, False, True), (0, self.HALF_H))
-        screen.blit(cap_surface, (0, 0))
-        screen.blit(pg.transform.flip(cap_surface, False, True), (0, self.HALF_H))
+        screen.blit(pg.transform.flip(self.fg_surface, False, True), (0, self.HALF_WN_H))
 
 # yes this is a global
 # yes global vars freaking suck
@@ -177,13 +204,6 @@ buf = Visualiser()
 
 def lerp(a: float, b: float, t: float) -> float:
     return a + (b - a) * t
-
-# Compute bar colours once at startup to avoid wasteful computation
-BAR_COLOURS: list[pg.Color] = []
-for i in range(BAR_COUNT):
-    c = pg.Color(0)
-    c.hsva = (lerp(120, 210, i / BAR_COUNT), 60, 100, 100)
-    BAR_COLOURS.append(c)
 
 def lerp_colours(c1: tuple[int, int, int], c2: tuple[int, int, int], t: float) -> tuple[int, int, int]:
     r1, g1, b1 = c1
@@ -206,7 +226,7 @@ def find_blackhole_device():
 
     raise RuntimeError(
         "BlackHole device not found. "
-        "Make sure BlackHole is installed and enabled in Audio MIDI Setup."
+        "Make sure BlackHole is installed (`pip install blackhole-2ch`) and enabled in Audio MIDI Setup."
     )
 
 def audio_callback(indata, frames, time, status) -> None:
@@ -218,8 +238,6 @@ def audio_callback(indata, frames, time, status) -> None:
     global buf
 
     audio = indata[:, 0]
-
-    print(f"in: {audio.shape}, max: {float(np.max(np.abs(audio))):.4f}")
 
     fft_data = np.abs(np.fft.rfft(audio))
     n_fft = len(fft_data)
@@ -248,7 +266,7 @@ def main():
     global buf
 
     BLACKHOLE_IDX = find_blackhole_device()
-    print(sd.query_devices(BLACKHOLE_IDX))  # DEBUG
+    print(f"Found BlackHole device: {sd.query_devices(BLACKHOLE_IDX)}")
 
     SAMPLE_RATE = 44100  # force stable mode
 
@@ -292,3 +310,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
