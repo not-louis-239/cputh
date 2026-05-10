@@ -369,13 +369,13 @@ def parse_args() -> Args:
 
     # Input path validation
     if not args_raw.input_path.exists():
-        die(f"cannot read from input: no such file: {args_raw.input_path}")
+        die(f"cannot read from input: no such file: '{args_raw.input_path}'")
     if not args_raw.input_path.is_file():
-        die(f"cannot read from input: not a file: {args_raw.input_path}")
+        die(f"cannot read from input: not a file: '{args_raw.input_path}'")
 
     # Output parent directory validation
     if not args_raw.output_path.parent.exists():
-        die(f"invalid output file: no such parent directory: {args_raw.output_path.parent}")
+        die(f"invalid output path: no such parent directory: '{args_raw.output_path.parent}'")
 
     # Force flag logic
     if args_raw.output_path.exists():
@@ -406,7 +406,7 @@ def run(args: Args) -> int:
         with open(args.input_path, "r", encoding="utf-8") as f:
             cputh = f.read()
     except UnicodeDecodeError:
-        die("cannot read from input: invalid source encoding")
+        die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
         return 1
 
     py = compile_cputh_to_py(cputh)
@@ -461,7 +461,7 @@ def run(args: Args) -> int:
                 num_infos = total_msgs - num_errors - num_warnings
 
                 if diag_output:
-                    print("\nyou just want attention (static analysis warnings):")
+                    print(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
                     print(
                         f"{num_errors} error{"s" if num_errors != 1 else ""}"
                         f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
@@ -475,7 +475,7 @@ def run(args: Args) -> int:
                         )
 
             else:
-                print("save your apologies (skipping type checking: pyright not installed (how long has this been going on?)")
+                print("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
 
     # Finally write the Python code to the output path
     with open(args.output_path, "w", encoding="utf-8") as f:

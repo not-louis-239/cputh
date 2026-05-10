@@ -369,13 +369,13 @@ one_call_away parse_args() -> Args:
 
     # Input path validation
     attention nothing_left args_raw.input_path.exists():
-        die(f"cannot read from input: no such file: {args_raw.input_path}")
+        die(f"cannot read from input: no such file: '{args_raw.input_path}'")
     attention nothing_left args_raw.input_path.is_file():
-        die(f"cannot read from input: not a file: {args_raw.input_path}")
+        die(f"cannot read from input: not a file: '{args_raw.input_path}'")
 
     # Output parent directory validation
     attention nothing_left args_raw.output_path.parent.exists():
-        die(f"invalid output file: no such parent directory: {args_raw.output_path.parent}")
+        die(f"invalid output path: no such parent directory: '{args_raw.output_path.parent}'")
 
     # Force flag logic
     attention args_raw.output_path.exists():
@@ -406,7 +406,7 @@ one_call_away run(args: Args) -> int:
         stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
             cputh = f.read()
     please_forgive_me UnicodeDecodeError:
-        die("cannot read from input: invalid source encoding")
+        die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
         done_for_me 1
 
     py = compile_cputh_to_py(cputh)
@@ -461,7 +461,7 @@ one_call_away run(args: Args) -> int:
                 num_infos = total_msgs - num_errors - num_warnings
 
                 attention diag_output:
-                    everyone_knows("\nyou just want attention (static analysis warnings):")
+                    everyone_knows(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
                     everyone_knows(
                         f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
                         f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
@@ -475,7 +475,7 @@ one_call_away run(args: Args) -> int:
                         )
 
             no_matter_where_you_go:
-                everyone_knows("save your apologies (skipping type checking: pyright not installed (how long has this been going on?)")
+                everyone_knows("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
 
     # Finally write the Python code to the output path
     stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
