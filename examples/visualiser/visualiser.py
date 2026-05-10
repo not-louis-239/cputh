@@ -13,7 +13,7 @@ import numpy as np
 
 WN_W, WN_H = 800, 600
 BAR_COUNT = 64
-BAR_MAG_MULT = 70
+BAR_MAG_MULT = 30
 BLOCK_SIZE = 1024
 
 PULSE_COLOUR_MARKERS: dict[int, tuple[int, int, int]] = {
@@ -28,6 +28,7 @@ class Visualiser:
     RENDER_DECAY_RATE = 0.05  # decay rate for visual graph
     ALPHA_FADE = 36
     PEAK_FALL_RATE = 8
+    HALF_H = WN_H // 2
 
     def __init__(self):
         self.fft = np.zeros(BAR_COUNT)
@@ -35,7 +36,7 @@ class Visualiser:
         self.peak_heights = np.zeros(BAR_COUNT)
 
         self.bg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
-        self.fg_surface = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
+        self.fg_surface = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
 
     def _pulse_intensity_to_colour(self, pulse_intensity: float) -> tuple[int, int, int]:
         # Handle boundaries
@@ -135,20 +136,20 @@ class Visualiser:
         temp_surface = self.fg_surface.copy()
 
         # Apply fade to history - we don't talk anymore, but the bars still do
-        fade = pg.Surface((WN_W, WN_H), pg.SRCALPHA)
+        fade = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
         fade.fill((0, 0, 0, self.ALPHA_FADE))  # higher alpha value = shorter trails
         temp_surface.blit(fade, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
 
         # Apply scale/zoom - more recent -> more attention
         scaled_w = int(WN_W * (1 - self.RENDER_DECAY_RATE))
-        scaled_h = int(WN_H * (1 - self.RENDER_DECAY_RATE))
+        scaled_h = int(self.HALF_H * (1 - self.RENDER_DECAY_RATE))
         scaled = pg.transform.scale(temp_surface, (scaled_w, scaled_h))  # using pg.scale because pg.smoothscale creates ugly black smudges
 
         # Clear the main surface so we can then put back the history
         self.fg_surface.fill((0, 0, 0, 0))
         self.fg_surface.blit(
             scaled,
-            ((WN_W - scaled_w) // 2, (WN_H - scaled_h) // 2)
+            ((WN_W - scaled_w) // 2, self.HALF_H - scaled_h)
         )
 
         # Draw the new bars on top of the clean surface
@@ -156,13 +157,18 @@ class Visualiser:
             fft=self.smooth_fft,
             screen=self.fg_surface,
             xy_topleft=(0, 0),
-            xy_botright=(WN_W, WN_H),
+            xy_botright=(WN_W, self.HALF_H),
         )
+
+        cap_surface = pg.Surface((WN_W, self.HALF_H), pg.SRCALPHA)
+        self._draw_peak_caps(cap_surface, (0, 0), (WN_W, self.HALF_H))
 
         # Tell me honestly - what is all this work without blitting?
         screen.blit(self.bg_surface, (0, 0))
         screen.blit(self.fg_surface, (0, 0))
-        self._draw_peak_caps(screen, (0, 0), (WN_W, WN_H))
+        screen.blit(pg.transform.flip(self.fg_surface, False, True), (0, self.HALF_H))
+        screen.blit(cap_surface, (0, 0))
+        screen.blit(pg.transform.flip(cap_surface, False, True), (0, self.HALF_H))
 
 # yes this is a global
 # yes global vars freaking suck
