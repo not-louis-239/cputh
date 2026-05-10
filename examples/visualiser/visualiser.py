@@ -20,7 +20,7 @@ class AudioBuffer:
     def __init__(self):
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
-        self.decay_rate = 0.95  # decay rate for smooth FFT
+        self.decay_rate = 0.6  # decay rate for smooth FFT
 
 # yes this is a global
 # yes global vars freaking suck
@@ -67,25 +67,34 @@ def audio_callback(indata, frames, time, status) -> None:
     print(f"in: {audio.shape}, max: {float(np.max(np.abs(audio))):.4f}")
 
     fft = np.abs(np.fft.rfft(audio))
-    fft = fft[:len(fft)//2]
+    fft = fft[:len(fft) // 2]
 
     bins = np.array_split(fft, BAR_COUNT)
     latest_fft = np.array([b.mean() for b in bins])
 
     # This is the part where we update the buffer
     buf.fft = latest_fft
+    buf.smooth_fft = buf.decay_rate * buf.smooth_fft + (1 - buf.decay_rate) * latest_fft
 
 def draw_visualiser(buf: AudioBuffer, screen: pg.Surface) -> None:
     screen.fill((0, 0, 0))
 
     bar_w = WN_W // BAR_COUNT
 
-    for i, mag in enumerate(buf.fft):
+    # Pulsing effect based on fft intensity
+    energy = np.mean(buf.fft)
+    pulse = min(255, int(energy * 255))
+    screen.fill((pulse // 5, 0, pulse // 2))
+
+    # Draw bars
+    for i, mag in enumerate(buf.smooth_fft):
         h = int(np.log1p(mag) * BAR_MAG_MULT)
 
+        colour = pg.Color(0)
+        colour.hsva = (lerp(120, 210, i / BAR_COUNT), 60, 100, 100)
         pg.draw.rect(
             screen,
-            (120, 200, 255),
+            colour,
             (i * bar_w, WN_H - h, bar_w - 2, h),
         )
 
