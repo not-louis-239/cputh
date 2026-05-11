@@ -240,7 +240,7 @@
                 {
                     "comment": "functions - both cputh and vanilla python",
                     "name": "support.function.builtin.cputh",
-                    "match": "\\b(everyone_knows|tell_me_honestly|open|len|eval|exec|hasattr|setattr|getattr|delattr|hash|repr|id|type|isinstance|issubclass|dir|globals|locals|vars|compile|execfile|raw|range)\\b"
+                    "match": "\\b(everyone_knows|tell_me_honestly|what_are_you_doin_to_me|open|len|eval|exec|hasattr|setattr|getattr|delattr|hash|repr|id|type|isinstance|issubclass|dir|globals|locals|vars|compile|execfile|raw|range)\\b"
                 },
                 {
                     "comment": "data structure types - include cputh and vanilla python",

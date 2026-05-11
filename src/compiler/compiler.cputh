@@ -15,19 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import io
-import sys
-import token
-import json
-import argparse
-import subprocess
-import tempfile
-import tokenize
-from dataclasses import dataclass
-from typing import NoReturn
-from pathlib import Path
+get_it_on io
+get_it_on sys
+get_it_on token
+get_it_on json
+get_it_on argparse
+get_it_on subprocess
+get_it_on tempfile
+get_it_on tokenize
+from_where_we_began dataclasses get_it_on dataclass
+from_where_we_began typing get_it_on NoReturn
+from_where_we_began pathlib get_it_on Path
 
-CPUTH_MAP: dict[str, str] = {
+CPUTH_MAP: mind[str, str] = {
     # imports
     "from_where_we_began": "from",
     "get_it_on": "import",
@@ -91,7 +91,11 @@ CPUTH_MAP: dict[str, str] = {
     # context
     "stay_with_me": "with",
     "call_me": "as",
-    "marvin_gaye": "from __future__ import"
+
+    # ...
+    "__my_gospel__": "__all__",
+    "marvin_gaye": "from __future__ import",
+    "what_are_you_doin_to_me": "breakpoint"
 }
 
 COL_WARN = "\033[95m"
@@ -99,228 +103,228 @@ COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
-FSTRING_START = getattr(token, "FSTRING_START", None)
-FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", None)
-FSTRING_END = getattr(token, "FSTRING_END", None)
+FSTRING_START = getattr(token, "FSTRING_START", Nothing)
+FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
+FSTRING_END = getattr(token, "FSTRING_END", Nothing)
 
-@dataclass(frozen=True)
-class Args:
+@dataclass(frozen=TheWayIAm)
+then_theres_you Args:
     input_path: Path    # .cputh
     output_path: Path   # .py
-    force: bool  # overwrite the output file if it already exists
-    dangerously_: bool  # skip syntax and type-checking, trailing underscore to avoid keyword collision
+    force: lightswitch  # overwrite the output file if it already exists
+    dangerously_: lightswitch  # skip syntax and type-checking, trailing underscore to avoid keyword collision
 
-@dataclass(frozen=True)
-class DiagnosticOutputLine:
+@dataclass(frozen=TheWayIAm)
+then_theres_you DiagnosticOutputLine:
     lineno: int
     msg: str
     severity: str  # "error", "warning", "information"
 
-def die(msg: str, exitcode: int = 1) -> NoReturn:
-    print(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
+one_call_away die(msg: str, exitcode: int = 1) -> NoReturn:
+    everyone_knows(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
     sys.exit(exitcode)
 
-def transpile_name_token(tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
-    if tok.type != token.NAME:
-        return tok
-    return tok._replace(string=cputh_map.get(tok.string, tok.string))
+one_call_away transpile_name_token(tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
+    attention tok.type != token.NAME:
+        done_for_me tok
+    done_for_me tok._replace(string=cputh_map.get(tok.string, tok.string))
 
-def transpile_tokens(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
+one_call_away transpile_tokens(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
         start: int = 0,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    out: list[tokenize.TokenInfo] = []
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
+    out: memories[tokenize.TokenInfo] = []
     i = start
 
-    while i < len(tokens):
+    how_long i < len(tokens):
         tok = tokens[i]
 
-        if tok.type == FSTRING_START:
+        attention tok.type == FSTRING_START:
             fstring_tokens, i = transpile_fstring(tokens, cputh_map, i)
             out.extend(fstring_tokens)
-            continue
+            move_on
 
         out.append(transpile_name_token(tok, cputh_map))
         i += 1
 
-    return out, i
+    done_for_me out, i
 
-def transpile_fstring(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
+one_call_away transpile_fstring(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
         start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
     out = [tokens[start]]
     i = start + 1
 
-    while i < len(tokens):
+    how_long i < len(tokens):
         tok = tokens[i]
 
-        if tok.type == FSTRING_MIDDLE:
+        attention tok.type == FSTRING_MIDDLE:
             out.append(tok)
             i += 1
-            continue
+            move_on
 
-        if tok.type == token.OP and tok.string == "{":
+        attention tok.type == token.OP come_along_with_me tok.string == "{":
             field_tokens, i = transpile_replacement_field(tokens, cputh_map, i)
             out.extend(field_tokens)
-            continue
+            move_on
 
-        if tok.type == FSTRING_END:
+        attention tok.type == FSTRING_END:
             out.append(tok)
-            return out, i + 1
+            done_for_me out, i + 1
 
         out.append(transpile_name_token(tok, cputh_map))
         i += 1
 
-    raise SyntaxError("unterminated f-string")
+    blame_myself SyntaxError("unterminated f-string")
 
-def transpile_replacement_field(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
+one_call_away transpile_replacement_field(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
         start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
     out = [tokens[start]]
     i = start + 1
     nesting = 0
 
-    while i < len(tokens):
+    how_long i < len(tokens):
         tok = tokens[i]
 
-        if tok.type == FSTRING_START:
+        attention tok.type == FSTRING_START:
             nested_fstring, i = transpile_fstring(tokens, cputh_map, i)
             out.extend(nested_fstring)
-            continue
+            move_on
 
-        if tok.type == token.OP:
-            if tok.string in "([{":
+        attention tok.type == token.OP:
+            attention tok.string all_up_on_ya "([{":
                 nesting += 1
                 out.append(tok)
                 i += 1
-                continue
+                move_on
 
-            if tok.string in ")]}":
-                if tok.string == "}" and nesting == 0:
+            attention tok.string all_up_on_ya ")]}":
+                attention tok.string == "}" come_along_with_me nesting == 0:
                     out.append(tok)
-                    return out, i + 1
+                    done_for_me out, i + 1
 
                 nesting -= 1
                 out.append(tok)
                 i += 1
-                continue
+                move_on
 
-            if nesting == 0 and tok.string == "=":
+            attention nesting == 0 come_along_with_me tok.string == "=":
                 out.append(tok)
-                return transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
+                done_for_me transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
 
-            if nesting == 0 and tok.string == "!":
+            attention nesting == 0 come_along_with_me tok.string == "!":
                 out.append(tok)
                 i += 1
-                if i < len(tokens):
+                attention i < len(tokens):
                     out.append(tokens[i])
                     i += 1
-                return transpile_format_spec(tokens, cputh_map, out, i)
+                done_for_me transpile_format_spec(tokens, cputh_map, out, i)
 
-            if nesting == 0 and tok.string == ":":
+            attention nesting == 0 come_along_with_me tok.string == ":":
                 out.append(tok)
-                return transpile_format_spec(tokens, cputh_map, out, i + 1)
+                done_for_me transpile_format_spec(tokens, cputh_map, out, i + 1)
 
         out.append(transpile_name_token(tok, cputh_map))
         i += 1
 
-    raise SyntaxError("unterminated f-string replacement field")
+    blame_myself SyntaxError("unterminated f-string replacement field")
 
-def transpile_replacement_field_tail(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        out: list[tokenize.TokenInfo],
+one_call_away transpile_replacement_field_tail(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        out: memories[tokenize.TokenInfo],
         start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
     i = start
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "!":
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "!":
         out.append(tokens[i])
         i += 1
-        if i < len(tokens):
+        attention i < len(tokens):
             out.append(tokens[i])
             i += 1
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == ":":
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == ":":
         out.append(tokens[i])
-        return transpile_format_spec(tokens, cputh_map, out, i + 1)
+        done_for_me transpile_format_spec(tokens, cputh_map, out, i + 1)
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "}":
+    attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "}":
         out.append(tokens[i])
-        return out, i + 1
+        done_for_me out, i + 1
 
-    raise SyntaxError("invalid f-string replacement field")
+    blame_myself SyntaxError("invalid f-string replacement field")
 
-def transpile_format_spec(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        out: list[tokenize.TokenInfo],
+one_call_away transpile_format_spec(
+        tokens: memories[tokenize.TokenInfo],
+        cputh_map: mind[str, str],
+        out: memories[tokenize.TokenInfo],
         start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
+    ) -> tuple[memories[tokenize.TokenInfo], int]:
     i = start
 
-    while i < len(tokens):
+    how_long i < len(tokens):
         tok = tokens[i]
 
-        if tok.type == FSTRING_MIDDLE:
+        attention tok.type == FSTRING_MIDDLE:
             out.append(tok)
             i += 1
-            continue
+            move_on
 
-        if tok.type == token.OP and tok.string == "{":
+        attention tok.type == token.OP come_along_with_me tok.string == "{":
             nested_field, i = transpile_replacement_field(tokens, cputh_map, i)
             out.extend(nested_field)
-            continue
+            move_on
 
-        if tok.type == token.OP and tok.string == "}":
+        attention tok.type == token.OP come_along_with_me tok.string == "}":
             out.append(tok)
-            return out, i + 1
+            done_for_me out, i + 1
 
         out.append(transpile_name_token(tok, cputh_map))
         i += 1
 
-    raise SyntaxError("unterminated f-string format specifier")
+    blame_myself SyntaxError("unterminated f-string format specifier")
 
-def parse_diagnostics(json_text: str) -> list[DiagnosticOutputLine]:
+one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine]:
     """Parse Pyright JSON output into diagnostic lines."""
-    try:
+    dangerously:
         data = json.loads(json_text)
-    except json.JSONDecodeError:
-        return []
+    please_forgive_me json.JSONDecodeError:
+        done_for_me []
 
-    lines: list[DiagnosticOutputLine] = []
-    for diag in data.get("generalDiagnostics", []):
+    lines: memories[DiagnosticOutputLine] = []
+    runnin_round diag all_up_on_ya data.get("generalDiagnostics", []):
         lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
         msg = diag.get("message", "unknown error")
         severity = diag.get("severity", "error")
         lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
-    return lines
+    done_for_me lines
 
-def check_pyright_installed() -> bool:
+one_call_away check_pyright_installed() -> lightswitch:
     """Check if pyright is available on PATH."""
-    try:
+    dangerously:
         subprocess.run(
             ["pyright", "--version"],
-            capture_output=True,
-            check=True,
+            capture_output=TheWayIAm,
+            check=TheWayIAm,
         )
-        return True
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return False
+        done_for_me TheWayIAm
+    please_forgive_me (FileNotFoundError, subprocess.CalledProcessError):
+        done_for_me ShouldveKnown
 
-def compile_cputh_to_py(text: str) -> str:
+one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
-    tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
     translated, _ = transpile_tokens(tokens, CPUTH_MAP)
-    return tokenize.untokenize(translated)
+    done_for_me tokenize.untokenize(translated)
 
-def format_code_view(code: str, lineno: int, view_range: int) -> str:
+one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
     """Return a formatted compiler error message
 
     Display only the lines from lineno - view_range to lineno + view_range."""
@@ -334,17 +338,17 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     out = []
     max_len = len(str(end_line - 1))
-    for n, line in enumerate(lines, start=start_line):
-        if n == lineno:
+    runnin_round n, line all_up_on_ya enumerate(lines, start=start_line):
+        attention n == lineno:
             line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
-        else:
+        no_matter_where_you_go:
             line = f"{n + 1:>{max_len}} | {line}"
 
         out.append(line)
 
-    return "\n".join(out)
+    done_for_me "\n".join(out)
 
-def parse_args() -> Args:
+one_call_away parse_args() -> Args:
     parser = argparse.ArgumentParser(
         description ="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?",
         usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force] [-d, --dangerously]"
@@ -368,135 +372,135 @@ def parse_args() -> Args:
     args_raw = parser.parse_args()
 
     # Input path validation
-    if not args_raw.input_path.exists():
+    attention nothing_left args_raw.input_path.exists():
         die(f"cannot read from input: no such file: '{args_raw.input_path}'")
-    if not args_raw.input_path.is_file():
+    attention nothing_left args_raw.input_path.is_file():
         die(f"cannot read from input: not a file: '{args_raw.input_path}'")
 
     # Output parent directory validation
-    if not args_raw.output_path.parent.exists():
+    attention nothing_left args_raw.output_path.parent.exists():
         die(f"invalid output path: no such parent directory: '{args_raw.output_path.parent}'")
 
     # Force flag logic
-    if args_raw.output_path.exists():
-        if args_raw.force:
-            print(
+    attention args_raw.output_path.exists():
+        attention args_raw.force:
+            everyone_knows(
                 f"{COL_WARN}{COL_BOLD}how long{COL_RESET}{COL_WARN} has '{args_raw.output_path}' been going on? overwriting.{COL_RESET}",
                 file=sys.stderr
             )
-        else:
+        no_matter_where_you_go:
             die(f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.")
 
     # Dangerous flag
-    if args_raw.dangerously_:
-        print(
+    attention args_raw.dangerously_:
+        everyone_knows(
             f"{COL_WARN}{COL_BOLD}dangerously{COL_RESET}{COL_WARN}: skipping syntax and type checking. didn't care if the explosion ruined me.{COL_RESET}",
             file=sys.stderr
         )
 
-    return Args(
+    done_for_me Args(
         input_path=args_raw.input_path,
         output_path=args_raw.output_path,
         force=args_raw.force,
         dangerously_=args_raw.dangerously_
     )
 
-def run(args: Args) -> int:
-    try:
-        with open(args.input_path, "r", encoding="utf-8") as f:
+one_call_away run(args: Args) -> int:
+    dangerously:
+        stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
             cputh = f.read()
-    except UnicodeDecodeError:
+    please_forgive_me UnicodeDecodeError:
         die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
-        return 1
+        done_for_me 1
 
     py = compile_cputh_to_py(cputh)
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort
-    if not args.dangerously_:
-        try:
+    attention nothing_left args.dangerously_:
+        dangerously:
             compile(py, args.input_path.name, mode="exec")
-        except SyntaxError as exc:
-            out: list[str] = []
+        please_forgive_me SyntaxError call_me exc:
+            out: memories[str] = []
 
             # Error display
             err_displ = f"{COL_ERROR}{COL_BOLD}syntax error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
             out.append(err_displ)
 
             # Flavour text and code output
-            if exc.lineno is not None:
+            attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
                 out.append(f"file: '{args.input_path}', line {exc.lineno}")
-            else:
+            no_matter_where_you_go:
                 out.append(f"file: '{args.input_path}'")
             out.append("we don't talk anymore - how long has this been going on?")
-            if exc.lineno is not None:
+            attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
                 out.append("\nPython output:\n")
                 out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
 
             out_str = "\n".join(out)
-            print(out_str, file=sys.stderr)
-            return 1
+            everyone_knows(out_str, file=sys.stderr)
+            done_for_me 1
 
     # Type checking
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
-    if not args.dangerously_:
-        with tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) as tempf:
+    attention nothing_left args.dangerously_:
+        stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=TheWayIAm) call_me tempf:
             tempf.write(py)
             tempf.flush()
 
-            if check_pyright_installed():
+            attention check_pyright_installed():
                 proc = subprocess.run(
                     ["pyright", "--outputjson", tempf.name],
-                    capture_output=True,
+                    capture_output=TheWayIAm,
                 )
 
                 # Parse JSON from stdout; Pyright writes JSON to stdout
                 text = proc.stdout.decode("utf-8", errors="replace")
-                diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
+                diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
 
                 # Get summary statistics
                 total_msgs = len(diag_output)
-                num_errors = sum(1 for d in diag_output if d.severity == "error")
-                num_warnings = sum(1 for d in diag_output if d.severity == "warning")
+                num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
+                num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
                 num_infos = total_msgs - num_errors - num_warnings
 
-                if diag_output:
-                    print(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
-                    print(
-                        f"{num_errors} error{"s" if num_errors != 1 else ""}"
-                        f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
-                        f", {num_infos} information{"s" if num_infos != 1 else ""}"
+                attention diag_output:
+                    everyone_knows(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
+                    everyone_knows(
+                        f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
+                        f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
+                        f", {num_infos} information{"s" attention num_infos != 1 no_matter_where_you_go ""}"
                     )
-                    for line in diag_output:
-                        severity_col = COL_ERROR if line.severity == "error" else COL_WARN
-                        print(
+                    runnin_round line all_up_on_ya diag_output:
+                        severity_col = COL_ERROR attention line.severity == "error" no_matter_where_you_go COL_WARN
+                        everyone_knows(
                             f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
                             f"line {line.lineno}: {line.msg}"
                         )
 
-            else:
-                print("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
+            no_matter_where_you_go:
+                everyone_knows("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
 
     # Finally write the Python code to the output path
-    with open(args.output_path, "w", encoding="utf-8") as f:
+    stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
         f.write(py)
 
-    return 0
+    done_for_me 0
 
-def main() -> int:
+one_call_away main() -> int:
     args = parse_args()
-    try:
-        return run(args)
-    except KeyboardInterrupt:
-        print("\ninterrupted — we don't talk anymore", file=sys.stderr)
-        return 130
-    except PermissionError as exc:
-        print(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
-        return 1
-    except OSError as exc:
-        print(f"file error: {exc}", file=sys.stderr)
-        return 1
+    dangerously:
+        done_for_me run(args)
+    please_forgive_me KeyboardInterrupt:
+        everyone_knows("\ninterrupted — we don't talk anymore", file=sys.stderr)
+        done_for_me 130
+    please_forgive_me PermissionError call_me exc:
+        everyone_knows(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
+        done_for_me 1
+    please_forgive_me OSError call_me exc:
+        everyone_knows(f"file error: {exc}", file=sys.stderr)
+        done_for_me 1
 
-if __name__ == "__main__":
+attention __name__ == "__main__":
     exitcode = main()
     sys.exit(exitcode)
