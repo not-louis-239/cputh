@@ -354,6 +354,27 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     return "\n".join(out)
 
+def format_exc(title: str, exc: Exception, fp: Path, src: str, lineno: int | None) -> str:
+    out: list[str] = []
+
+    # Error display
+    err_display = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
+    out.append(err_display)
+
+    # Flavour text and code output
+    if lineno is not None:
+        out.append(f"file: '{fp}', line {lineno}")
+    else:
+        out.append(f"file: '{fp}'")
+
+    out.append("we don't talk anymore - how long has this been going on?")
+    if lineno is not None:
+        out.append("\ncode output:\n")
+        out.append(format_code_view(src, lineno=lineno, view_range=2))
+
+    out_str = "\n".join(out)
+    return out_str
+
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
         description ="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?",
@@ -419,7 +440,17 @@ def run(args: Args) -> int:
         die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
         return 1
 
-    py = compile_cputh_to_py(cputh)
+    try:
+        py = compile_cputh_to_py(cputh)
+    except tokenize.TokenError as exc:
+        print(format_exc(
+            title="tokenisation error",
+            exc=exc,
+            fp=args.input_path,
+            src=cputh,
+            lineno=exc.args[1][0]
+        ))
+        return 1
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort
@@ -427,24 +458,13 @@ def run(args: Args) -> int:
         try:
             compile(py, args.input_path.name, mode="exec")
         except SyntaxError as exc:
-            out: list[str] = []
-
-            # Error display
-            err_displ = f"{COL_ERROR}{COL_BOLD}syntax error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
-            out.append(err_displ)
-
-            # Flavour text and code output
-            if exc.lineno is not None:
-                out.append(f"file: '{args.input_path}', line {exc.lineno}")
-            else:
-                out.append(f"file: '{args.input_path}'")
-            out.append("we don't talk anymore - how long has this been going on?")
-            if exc.lineno is not None:
-                out.append("\nPython output:\n")
-                out.append(format_code_view(py, lineno=exc.lineno, view_range=2))
-
-            out_str = "\n".join(out)
-            print(out_str, file=sys.stderr)
+            print(format_exc(
+                title="syntax error",
+                exc=exc,
+                fp=args.input_path,
+                src=py,
+                lineno=exc.lineno
+            ))
             return 1
 
     # Type checking
