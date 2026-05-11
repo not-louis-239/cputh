@@ -21,6 +21,7 @@ import token
 import json
 import argparse
 import subprocess
+import shutil
 import tempfile
 import tokenize
 from dataclasses import dataclass
@@ -98,6 +99,7 @@ CPUTH_MAP: dict[str, str] = {
     "what_are_you_doin_to_me": "breakpoint"
 }
 
+COL_FAINT = "\033[2m"
 COL_WARN = "\033[95m"
 COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
@@ -335,7 +337,12 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     Display only the lines from lineno - view_range to lineno + view_range."""
 
+    def truncate(line: str, maxwidth: int) -> str:
+        """Truncate a string to the given width."""
+        return line[:maxwidth - 1] + "…" if len(line) > maxwidth else line
+
     lineno -= 1  # SyntaxError line numbers are 1-based
+    term_w, _ = shutil.get_terminal_size()
 
     code_split = code.splitlines()
     start_line: int = max(0, lineno - view_range)
@@ -344,21 +351,31 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     out = []
     max_len = len(str(end_line - 1))
+    gutter = max_len + 3
+
     for n, line in enumerate(lines, start=start_line):
+        line = truncate(line, maxwidth=term_w - gutter)
+
         if n == lineno:
-            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
+            line = (
+                f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | "
+                f"{COL_WARN}{line}{COL_RESET}"
+            )
         else:
-            line = f"{n + 1:>{max_len}} | {line}"
+            line = (
+                f"{COL_FAINT}{n + 1:>{max_len}}{COL_RESET} | "
+                f"{line}"
+            )
 
         out.append(line)
 
     return "\n".join(out)
 
-def format_exc(title: str, exc: Exception, fp: Path, src: str, lineno: int | None) -> str:
+def format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, lineno: int | None) -> str:
     out: list[str] = []
 
     # Error display
-    err_display = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
+    err_display = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc_msg}{COL_RESET}"
     out.append(err_display)
 
     # Flavour text and code output
@@ -367,9 +384,11 @@ def format_exc(title: str, exc: Exception, fp: Path, src: str, lineno: int | Non
     else:
         out.append(f"file: '{fp}'")
 
-    out.append("we don't talk anymore - how long has this been going on?")
+    if flavour_text:
+        out.append(flavour_text)
+
     if lineno is not None:
-        out.append("\ncode output:\n")
+        out.append("\ncode output:")
         out.append(format_code_view(src, lineno=lineno, view_range=2))
 
     out_str = "\n".join(out)
@@ -445,7 +464,8 @@ def run(args: Args) -> int:
     except tokenize.TokenError as exc:
         print(format_exc(
             title="tokenisation error",
-            exc=exc,
+            flavour_text="we don't tokenise anymore",
+            exc_msg=exc.args[0],
             fp=args.input_path,
             src=cputh,
             lineno=exc.args[1][0]
@@ -460,7 +480,8 @@ def run(args: Args) -> int:
         except SyntaxError as exc:
             print(format_exc(
                 title="syntax error",
-                exc=exc,
+                flavour_text="we don't compile anymore",
+                exc_msg=str(exc),
                 fp=args.input_path,
                 src=py,
                 lineno=exc.lineno
