@@ -124,171 +124,177 @@ def die(msg: str, exitcode: int = 1) -> NoReturn:
     print(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
     sys.exit(exitcode)
 
-def transpile_name_token(tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
-    if tok.type != token.NAME:
-        return tok
-    return tok._replace(string=cputh_map.get(tok.string, tok.string))
+class CPuthTranspiler:
+    def _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
+        if tok.type != token.NAME:
+            return tok
+        return tok._replace(string=cputh_map.get(tok.string, tok.string))
 
-def transpile_tokens(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        start: int = 0,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    out: list[tokenize.TokenInfo] = []
-    i = start
+    def _transpile_fstring(
+            self,
+            tokens: list[tokenize.TokenInfo],
+            cputh_map: dict[str, str],
+            start: int,
+        ) -> tuple[list[tokenize.TokenInfo], int]:
+        out = [tokens[start]]
+        i = start + 1
 
-    while i < len(tokens):
-        tok = tokens[i]
+        while i < len(tokens):
+            tok = tokens[i]
 
-        if tok.type == FSTRING_START:
-            fstring_tokens, i = transpile_fstring(tokens, cputh_map, i)
-            out.extend(fstring_tokens)
-            continue
+            if tok.type == FSTRING_MIDDLE:
+                out.append(tok)
+                i += 1
+                continue
 
-        out.append(transpile_name_token(tok, cputh_map))
-        i += 1
+            if tok.type == token.OP and tok.string == "{":
+                field_tokens, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                out.extend(field_tokens)
+                continue
 
-    return out, i
+            if tok.type == FSTRING_END:
+                out.append(tok)
+                return out, i + 1
 
-def transpile_fstring(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    out = [tokens[start]]
-    i = start + 1
-
-    while i < len(tokens):
-        tok = tokens[i]
-
-        if tok.type == FSTRING_MIDDLE:
-            out.append(tok)
+            out.append(self._transpile_name_token(tok, cputh_map))
             i += 1
-            continue
 
-        if tok.type == token.OP and tok.string == "{":
-            field_tokens, i = transpile_replacement_field(tokens, cputh_map, i)
-            out.extend(field_tokens)
-            continue
+        raise SyntaxError("unterminated f-string")
 
-        if tok.type == FSTRING_END:
-            out.append(tok)
-            return out, i + 1
+    def _transpile_replacement_field(
+            self,
+            tokens: list[tokenize.TokenInfo],
+            cputh_map: dict[str, str],
+            start: int,
+        ) -> tuple[list[tokenize.TokenInfo], int]:
+        out = [tokens[start]]
+        i = start + 1
+        nesting = 0
 
-        out.append(transpile_name_token(tok, cputh_map))
-        i += 1
+        while i < len(tokens):
+            tok = tokens[i]
 
-    raise SyntaxError("unterminated f-string")
-
-def transpile_replacement_field(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    out = [tokens[start]]
-    i = start + 1
-    nesting = 0
-
-    while i < len(tokens):
-        tok = tokens[i]
-
-        if tok.type == FSTRING_START:
-            nested_fstring, i = transpile_fstring(tokens, cputh_map, i)
-            out.extend(nested_fstring)
-            continue
-
-        if tok.type == token.OP:
-            if tok.string in "([{":
-                nesting += 1
-                out.append(tok)
-                i += 1
+            if tok.type == FSTRING_START:
+                nested_fstring, i = self._transpile_fstring(tokens, cputh_map, i)
+                out.extend(nested_fstring)
                 continue
 
-            if tok.string in ")]}":
-                if tok.string == "}" and nesting == 0:
+            if tok.type == token.OP:
+                if tok.string in "([{":
+                    nesting += 1
                     out.append(tok)
-                    return out, i + 1
-
-                nesting -= 1
-                out.append(tok)
-                i += 1
-                continue
-
-            if nesting == 0 and tok.string == "=":
-                out.append(tok)
-                return transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
-
-            if nesting == 0 and tok.string == "!":
-                out.append(tok)
-                i += 1
-                if i < len(tokens):
-                    out.append(tokens[i])
                     i += 1
-                return transpile_format_spec(tokens, cputh_map, out, i)
+                    continue
 
-            if nesting == 0 and tok.string == ":":
-                out.append(tok)
-                return transpile_format_spec(tokens, cputh_map, out, i + 1)
+                if tok.string in ")]}":
+                    if tok.string == "}" and nesting == 0:
+                        out.append(tok)
+                        return out, i + 1
 
-        out.append(transpile_name_token(tok, cputh_map))
-        i += 1
+                    nesting -= 1
+                    out.append(tok)
+                    i += 1
+                    continue
 
-    raise SyntaxError("unterminated f-string replacement field")
+                if nesting == 0 and tok.string == "=":
+                    out.append(tok)
+                    return self._transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
 
-def transpile_replacement_field_tail(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        out: list[tokenize.TokenInfo],
-        start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    i = start
+                if nesting == 0 and tok.string == "!":
+                    out.append(tok)
+                    i += 1
+                    if i < len(tokens):
+                        out.append(tokens[i])
+                        i += 1
+                    return self._transpile_format_spec(tokens, cputh_map, out, i)
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "!":
-        out.append(tokens[i])
-        i += 1
-        if i < len(tokens):
+                if nesting == 0 and tok.string == ":":
+                    out.append(tok)
+                    return self._transpile_format_spec(tokens, cputh_map, out, i + 1)
+
+            out.append(self._transpile_name_token(tok, cputh_map))
+            i += 1
+
+        raise SyntaxError("unterminated f-string replacement field")
+
+    def _transpile_replacement_field_tail(
+            self,
+            tokens: list[tokenize.TokenInfo],
+            cputh_map: dict[str, str],
+            out: list[tokenize.TokenInfo],
+            start: int,
+        ) -> tuple[list[tokenize.TokenInfo], int]:
+        i = start
+
+        if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "!":
             out.append(tokens[i])
             i += 1
+            if i < len(tokens):
+                out.append(tokens[i])
+                i += 1
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == ":":
-        out.append(tokens[i])
-        return transpile_format_spec(tokens, cputh_map, out, i + 1)
+        if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == ":":
+            out.append(tokens[i])
+            return self._transpile_format_spec(tokens, cputh_map, out, i + 1)
 
-    if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "}":
-        out.append(tokens[i])
-        return out, i + 1
-
-    raise SyntaxError("invalid f-string replacement field")
-
-def transpile_format_spec(
-        tokens: list[tokenize.TokenInfo],
-        cputh_map: dict[str, str],
-        out: list[tokenize.TokenInfo],
-        start: int,
-    ) -> tuple[list[tokenize.TokenInfo], int]:
-    i = start
-
-    while i < len(tokens):
-        tok = tokens[i]
-
-        if tok.type == FSTRING_MIDDLE:
-            out.append(tok)
-            i += 1
-            continue
-
-        if tok.type == token.OP and tok.string == "{":
-            nested_field, i = transpile_replacement_field(tokens, cputh_map, i)
-            out.extend(nested_field)
-            continue
-
-        if tok.type == token.OP and tok.string == "}":
-            out.append(tok)
+        if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "}":
+            out.append(tokens[i])
             return out, i + 1
 
-        out.append(transpile_name_token(tok, cputh_map))
-        i += 1
+        raise SyntaxError("invalid f-string replacement field")
 
-    raise SyntaxError("unterminated f-string format specifier")
+    def _transpile_format_spec(
+            self,
+            tokens: list[tokenize.TokenInfo],
+            cputh_map: dict[str, str],
+            out: list[tokenize.TokenInfo],
+            start: int,
+        ) -> tuple[list[tokenize.TokenInfo], int]:
+        i = start
+
+        while i < len(tokens):
+            tok = tokens[i]
+
+            if tok.type == FSTRING_MIDDLE:
+                out.append(tok)
+                i += 1
+                continue
+
+            if tok.type == token.OP and tok.string == "{":
+                nested_field, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                out.extend(nested_field)
+                continue
+
+            if tok.type == token.OP and tok.string == "}":
+                out.append(tok)
+                return out, i + 1
+
+            out.append(self._transpile_name_token(tok, cputh_map))
+            i += 1
+
+        raise SyntaxError("unterminated f-string format specifier")
+
+    def transpile_tokens(
+            self,
+            tokens: list[tokenize.TokenInfo],
+            cputh_map: dict[str, str],
+            start: int = 0,
+        ) -> tuple[list[tokenize.TokenInfo], int]:
+        out: list[tokenize.TokenInfo] = []
+        i = start
+
+        while i < len(tokens):
+            tok = tokens[i]
+
+            if tok.type == FSTRING_START:
+                fstring_tokens, i = self._transpile_fstring(tokens, cputh_map, i)
+                out.extend(fstring_tokens)
+                continue
+
+            out.append(self._transpile_name_token(tok, cputh_map))
+            i += 1
+
+        return out, i
 
 def parse_diagnostics(json_text: str) -> list[DiagnosticOutputLine]:
     """Parse Pyright JSON output into diagnostic lines."""
@@ -321,7 +327,7 @@ def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
     tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
-    translated, _ = transpile_tokens(tokens, CPUTH_MAP)
+    translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
     return tokenize.untokenize(translated)
 
 def format_code_view(code: str, lineno: int, view_range: int) -> str:
