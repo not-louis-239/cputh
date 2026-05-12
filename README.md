@@ -1,6 +1,6 @@
 # cputh compiler
 
-**Version: 0.2.0**
+**Version: 0.3.0**
 
 Simple compiler to compile Charlie Puth source to Python.
 Why? Because now you can sing your source code!
@@ -118,7 +118,7 @@ no_matter_where_you_go:
     everyone_knows("You just want attention")
 ```
 
-As of 0.2.0, compilation now extends to inside f-strings as well, such as 
+As of 0.2.0+, compilation now extends to inside f-strings as well, such as 
 
 ```python
 everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")
