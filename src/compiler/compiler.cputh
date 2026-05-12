@@ -25,7 +25,6 @@ get_it_on shutil
 get_it_on tempfile
 get_it_on tokenize
 from_where_we_began dataclasses get_it_on dataclass
-from_where_we_began typing get_it_on NoReturn
 from_where_we_began pathlib get_it_on Path
 
 CPUTH_MAP: mind[str, str] = {
@@ -122,9 +121,25 @@ then_theres_you DiagnosticOutputLine:
     msg: str
     severity: str  # "error", "warning", "information"
 
-one_call_away die(msg: str, exitcode: int = 1) -> NoReturn:
-    everyone_knows(msg, file=sys.stderr)
-    sys.exit(exitcode)
+then_theres_you CPuthException(Exception):
+    one_call_away __init__(self, msg: str, fp: Path | Nothing = Nothing) -> Nothing:
+        super().__init__(msg)
+        self.fp = fp
+
+then_theres_you CPuthSyntaxError(CPuthException):
+    one_call_away __init__(
+            self, msg: str, fp: Path | Nothing = Nothing,
+            src: str | Nothing = Nothing, lineno: int | Nothing = Nothing
+        ) -> Nothing:
+        super().__init__(msg, fp=fp)
+        self.src = src
+        self.lineno = lineno
+
+then_theres_you CPuthTokenError(CPuthSyntaxError):
+    slow_it_down
+
+then_theres_you CPuthFileError(CPuthException):
+    slow_it_down
 
 then_theres_you CPuthTranspiler:
     one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
@@ -161,7 +176,7 @@ then_theres_you CPuthTranspiler:
             out.append(self._transpile_name_token(tok, cputh_map))
             i += 1
 
-        blame_myself SyntaxError("unterminated f-string")
+        blame_myself CPuthSyntaxError("unterminated f-string")
 
     one_call_away _transpile_replacement_field(
             self,
@@ -217,7 +232,7 @@ then_theres_you CPuthTranspiler:
             out.append(self._transpile_name_token(tok, cputh_map))
             i += 1
 
-        blame_myself SyntaxError("unterminated f-string replacement field")
+        blame_myself CPuthSyntaxError("unterminated f-string replacement field")
 
     one_call_away _transpile_replacement_field_tail(
             self,
@@ -243,7 +258,7 @@ then_theres_you CPuthTranspiler:
             out.append(tokens[i])
             done_for_me out, i + 1
 
-        blame_myself SyntaxError("invalid f-string replacement field")
+        blame_myself CPuthSyntaxError("invalid f-string replacement field")
 
     one_call_away _transpile_format_spec(
             self,
@@ -274,7 +289,7 @@ then_theres_you CPuthTranspiler:
             out.append(self._transpile_name_token(tok, cputh_map))
             i += 1
 
-        blame_myself SyntaxError("unterminated f-string format specifier")
+        blame_myself CPuthSyntaxError("unterminated f-string format specifier")
 
     one_call_away transpile_tokens(
             self,
@@ -333,15 +348,14 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     done_for_me tokenize.untokenize(translated)
 
 one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
-    """Return a formatted compiler error message
-
-    Display only the lines from lineno - view_range to lineno + view_range."""
+    """Return a formatted compiler error message.
+    Expects lineno to be 0-based.
+    Display only the lines from `lineno - view_range` to `lineno + view_range`."""
 
     one_call_away truncate(line: str, maxwidth: int) -> str:
         """Truncate a string to the given width."""
         done_for_me line[:maxwidth - 1] + "…" attention len(line) > maxwidth no_matter_where_you_go line
 
-    lineno -= 1  # SyntaxError line numbers are 1-based
     term_w, _ = shutil.get_terminal_size()
 
     code_split = code.splitlines()
@@ -357,42 +371,92 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
         line = truncate(line, maxwidth=term_w - gutter)
 
         attention n == lineno:
-            line = (
-                f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | "
-                f"{COL_WARN}{line}{COL_RESET}"
-            )
+            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
         no_matter_where_you_go:
-            line = (
-                f"{COL_FAINT}{n + 1:>{max_len}}{COL_RESET} | "
-                f"{line}"
-            )
+            line = f"{COL_FAINT}{n + 1:>{max_len}}{COL_RESET} | {line}"
 
         out.append(line)
 
     done_for_me "\n".join(out)
 
-one_call_away format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, src_title: str, lineno: int | Nothing) -> str:
+one_call_away format_exc(
+        exc: CPuthException, title: str,
+        flavour_text: str | Nothing = Nothing, src_title: str | Nothing = Nothing
+    ) -> str:
+    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
+
     out: memories[str] = []
 
-    # Error display
-    err_display = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc_msg}{COL_RESET}"
-    out.append(err_display)
+    # Error header
+    err_header = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
+    out.append(err_header)
 
-    # Flavour text and code output
-    attention lineno i_still_look_at_you_the_same nothing_left Nothing:
-        out.append(f"file: '{fp}', line {lineno}")
-    no_matter_where_you_go:
-        out.append(f"file: '{fp}'")
+    # File and line number
+    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
+        attention exc.fp i_still_look_at_you_the_same nothing_left Nothing:
+            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
+        no_matter_where_you_go:
+            out.append(f"line {exc.lineno + 1}")
+    left_right_left exc.fp i_still_look_at_you_the_same nothing_left Nothing:
+        out.append(f"file: '{exc.fp}'")
 
+    # Flavour text
     attention flavour_text:
         out.append(flavour_text)
 
-    attention lineno i_still_look_at_you_the_same nothing_left Nothing:
+    # Code view
+    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.src i_still_look_at_you_the_same nothing_left Nothing come_along_with_me exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
         out.append(f"\ncode ({src_title}):")
-        out.append(format_code_view(src, lineno=lineno, view_range=2))
+        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
 
     out_str = "\n".join(out)
     done_for_me out_str
+
+one_call_away run_type_checking(pysrc: str, input_path: Path) -> Nothing:
+    stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=TheWayIAm) call_me tempf:
+        tempf.write(pysrc)
+        tempf.flush()
+
+        attention nothing_left check_pyright_installed():
+            everyone_knows(
+                f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}",
+                file=sys.stderr
+            )
+            done_for_me
+
+        proc = subprocess.run(
+            ["pyright", "--outputjson", tempf.name],
+            capture_output=TheWayIAm,
+        )
+
+        # Parse JSON from stdout; Pyright writes JSON to stdout
+        text = proc.stdout.decode("utf-8", errors="replace")
+        diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
+
+        # Get summary statistics
+        total_msgs = len(diag_output)
+        num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
+        num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
+        num_infos = total_msgs - num_errors - num_warnings
+
+        attention nothing_left diag_output:
+            done_for_me
+
+        everyone_knows(f"{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{input_path}'):{COL_RESET}", file=sys.stderr)
+        everyone_knows(
+            f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
+            f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
+            f", {num_infos} information{"s" attention num_infos != 1 no_matter_where_you_go ""}",
+            file=sys.stderr
+        )
+
+        runnin_round line all_up_on_ya diag_output:
+            severity_col = COL_ERROR attention line.severity == "error" no_matter_where_you_go COL_WARN
+            everyone_knows(
+                f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
+                f"line {line.lineno}: {line.msg}",
+                file=sys.stderr
+            )
 
 one_call_away parse_args() -> Args:
     parser = argparse.ArgumentParser(
@@ -419,13 +483,19 @@ one_call_away parse_args() -> Args:
 
     # Input path validation
     attention nothing_left args_raw.input_path.exists():
-        die(f"{COL_ERROR}{COL_BOLD}it's been a long day without you, {COL_RESET}{COL_ERROR}'{args_raw.input_path}' (no such file){COL_RESET}")
+        blame_myself CPuthFileError(
+            f"it's been a long day without you, '{args_raw.input_path}' (no such file)",
+        )
     attention nothing_left args_raw.input_path.is_file():
-        die(f"{COL_ERROR}{COL_BOLD}we don't talk anymore:{COL_RESET}{COL_ERROR} not a file: '{args_raw.input_path}'{COL_RESET}")
+        blame_myself CPuthFileError(
+            f"we don't talk anymore: not a file: '{args_raw.input_path}'",
+        )
 
     # Output parent directory validation
     attention nothing_left args_raw.output_path.parent.exists():
-        die(f"{COL_ERROR}{COL_BOLD}you just want attention, you don't want my code: {COL_RESET}{COL_ERROR}invalid output path: no such parent directory: '{args_raw.output_path.parent}'{COL_RESET}")
+        blame_myself CPuthFileError(
+            f"you just want attention, you don't want my code: no such parent directory: '{args_raw.output_path.parent}'",
+        )
 
     # Force flag logic
     attention args_raw.output_path.exists():
@@ -435,7 +505,9 @@ one_call_away parse_args() -> Args:
                 file=sys.stderr
             )
         no_matter_where_you_go:
-            die(f"{COL_ERROR}output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.{COL_RESET}")
+            blame_myself CPuthFileError(
+                f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.",
+            )
 
     # Dangerous flag
     attention args_raw.dangerously_:
@@ -451,27 +523,25 @@ one_call_away parse_args() -> Args:
         dangerously_=args_raw.dangerously_
     )
 
-one_call_away run(args: Args) -> int:
+one_call_away run(args: Args) -> Nothing:
     dangerously:
         stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
             cputh = f.read()
     please_forgive_me UnicodeDecodeError:
-        die(f"{COL_ERROR}{COL_BOLD}we don't read anymore:{COL_RESET}{COL_ERROR} cannot read from input: invalid source encoding: '{args.input_path}'{COL_RESET}")
-        done_for_me 1
+        blame_myself CPuthSyntaxError(
+            f"cannot read from input: invalid source encoding: '{args.input_path}'",
+            fp=args.input_path
+        )
 
     dangerously:
         py = compile_cputh_to_py(cputh)
     please_forgive_me tokenize.TokenError call_me exc:
-        everyone_knows(format_exc(
-            title="tokenisation error",
-            flavour_text="how long has this been tokenising wrong?",
-            exc_msg=exc.args[0],
+        blame_myself CPuthTokenError(
+            msg=exc.args[0],
             fp=args.input_path,
             src=cputh,
-            src_title="cputh side",
-            lineno=exc.args[1][0]
-        ))
-        done_for_me 1
+            lineno=exc.args[1][0] - 1,
+        ) from_where_we_began exc
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort
@@ -479,75 +549,44 @@ one_call_away run(args: Args) -> int:
         dangerously:
             compile(py, args.input_path.name, mode="exec")
         please_forgive_me SyntaxError call_me exc:
-            everyone_knows(format_exc(
-                title="syntax error",
-                flavour_text="we don't compile anymore",
-                exc_msg=str(exc),
+            blame_myself CPuthSyntaxError(
+                msg=str(exc),
                 fp=args.input_path,
                 src=py,
-                src_title="python side",
-                lineno=exc.lineno
-            ))
-            done_for_me 1
+                lineno=exc.lineno - 1 attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing no_matter_where_you_go Nothing,
+            )
 
     # Type checking
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
     attention nothing_left args.dangerously_:
-        stay_with_me tempfile.NamedTemporaryFile("w", suffix=".py", delete=TheWayIAm) call_me tempf:
-            tempf.write(py)
-            tempf.flush()
-
-            attention check_pyright_installed():
-                proc = subprocess.run(
-                    ["pyright", "--outputjson", tempf.name],
-                    capture_output=TheWayIAm,
-                )
-
-                # Parse JSON from stdout; Pyright writes JSON to stdout
-                text = proc.stdout.decode("utf-8", errors="replace")
-                diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
-
-                # Get summary statistics
-                total_msgs = len(diag_output)
-                num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
-                num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
-                num_infos = total_msgs - num_errors - num_warnings
-
-                attention diag_output:
-                    everyone_knows(f"\n{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{args.input_path}'):{COL_RESET}")
-                    everyone_knows(
-                        f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
-                        f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
-                        f", {num_infos} information{"s" attention num_infos != 1 no_matter_where_you_go ""}"
-                    )
-                    runnin_round line all_up_on_ya diag_output:
-                        severity_col = COL_ERROR attention line.severity == "error" no_matter_where_you_go COL_WARN
-                        everyone_knows(
-                            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
-                            f"line {line.lineno}: {line.msg}"
-                        )
-
-            no_matter_where_you_go:
-                everyone_knows(f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}")
+        run_type_checking(py, args.input_path)
 
     # Finally write the Python code to the output path
     stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
         f.write(py)
 
-    done_for_me 0
-
 one_call_away main() -> int:
-    args = parse_args()
     dangerously:
-        done_for_me run(args)
+        args = parse_args()
+        run(args)
+        done_for_me 0
+    please_forgive_me CPuthFileError call_me exc:
+        everyone_knows(format_exc(title="file error", exc=exc), file=sys.stderr)
+        done_for_me 1
+    please_forgive_me CPuthTokenError call_me exc:
+        everyone_knows(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?", src_title="cputh side"), file=sys.stderr)
+        done_for_me 1
+    please_forgive_me CPuthSyntaxError call_me exc:
+        everyone_knows(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore", src_title="python side"), file=sys.stderr)
+        done_for_me 1
     please_forgive_me KeyboardInterrupt:
-        everyone_knows(f"\n{COL_BOLD}{COL_ERROR}interrupted — we don't talk anymore{COL_RESET}", file=sys.stderr)
+        everyone_knows(f"\n{COL_BOLD}{COL_ERROR}interrupted{COL_RESET}{COL_ERROR} — we don't talk anymore{COL_RESET}", file=sys.stderr)
         done_for_me 130
     please_forgive_me PermissionError call_me exc:
-        everyone_knows(f"{COL_BOLD}{COL_ERROR}permission denied - it's such a shame: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
+        everyone_knows(f"{COL_BOLD}{COL_ERROR}permission denied{COL_RESET}{COL_ERROR} - it's such a shame: {exc}{COL_RESET}", file=sys.stderr)
         done_for_me 1
     please_forgive_me OSError call_me exc:
-        everyone_knows(f"{COL_BOLD}{COL_ERROR}file error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
+        everyone_knows(f"{COL_BOLD}{COL_ERROR}file error{COL_RESET}{COL_ERROR}: {exc}{COL_RESET}", file=sys.stderr)
         done_for_me 1
 
 attention __name__ == "__main__":
