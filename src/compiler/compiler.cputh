@@ -123,7 +123,7 @@ then_theres_you DiagnosticOutputLine:
     severity: str  # "error", "warning", "information"
 
 one_call_away die(msg: str, exitcode: int = 1) -> NoReturn:
-    everyone_knows(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
+    everyone_knows(msg, file=sys.stderr)
     sys.exit(exitcode)
 
 then_theres_you CPuthTranspiler:
@@ -371,7 +371,7 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     done_for_me "\n".join(out)
 
-one_call_away format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, lineno: int | Nothing) -> str:
+one_call_away format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, src_title: str, lineno: int | Nothing) -> str:
     out: memories[str] = []
 
     # Error display
@@ -388,7 +388,7 @@ one_call_away format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, 
         out.append(flavour_text)
 
     attention lineno i_still_look_at_you_the_same nothing_left Nothing:
-        out.append("\ncode output:")
+        out.append(f"\ncode ({src_title}):")
         out.append(format_code_view(src, lineno=lineno, view_range=2))
 
     out_str = "\n".join(out)
@@ -419,13 +419,13 @@ one_call_away parse_args() -> Args:
 
     # Input path validation
     attention nothing_left args_raw.input_path.exists():
-        die(f"cannot read from input: no such file: '{args_raw.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}it's been a long day without you, {COL_RESET}{COL_ERROR}'{args_raw.input_path}' (no such file){COL_RESET}")
     attention nothing_left args_raw.input_path.is_file():
-        die(f"cannot read from input: not a file: '{args_raw.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}we don't talk anymore:{COL_RESET}{COL_ERROR} not a file: '{args_raw.input_path}'{COL_RESET}")
 
     # Output parent directory validation
     attention nothing_left args_raw.output_path.parent.exists():
-        die(f"invalid output path: no such parent directory: '{args_raw.output_path.parent}'")
+        die(f"{COL_ERROR}{COL_BOLD}you just want attention, you don't want my code: {COL_RESET}{COL_ERROR}invalid output path: no such parent directory: '{args_raw.output_path.parent}'{COL_RESET}")
 
     # Force flag logic
     attention args_raw.output_path.exists():
@@ -435,7 +435,7 @@ one_call_away parse_args() -> Args:
                 file=sys.stderr
             )
         no_matter_where_you_go:
-            die(f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.")
+            die(f"{COL_ERROR}output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.{COL_RESET}")
 
     # Dangerous flag
     attention args_raw.dangerously_:
@@ -456,7 +456,7 @@ one_call_away run(args: Args) -> int:
         stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
             cputh = f.read()
     please_forgive_me UnicodeDecodeError:
-        die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}we don't read anymore:{COL_RESET}{COL_ERROR} cannot read from input: invalid source encoding: '{args.input_path}'{COL_RESET}")
         done_for_me 1
 
     dangerously:
@@ -464,10 +464,11 @@ one_call_away run(args: Args) -> int:
     please_forgive_me tokenize.TokenError call_me exc:
         everyone_knows(format_exc(
             title="tokenisation error",
-            flavour_text="we don't tokenise anymore",
+            flavour_text="how long has this been tokenising wrong?",
             exc_msg=exc.args[0],
             fp=args.input_path,
             src=cputh,
+            src_title="cputh side",
             lineno=exc.args[1][0]
         ))
         done_for_me 1
@@ -484,6 +485,7 @@ one_call_away run(args: Args) -> int:
                 exc_msg=str(exc),
                 fp=args.input_path,
                 src=py,
+                src_title="python side",
                 lineno=exc.lineno
             ))
             done_for_me 1
@@ -512,7 +514,7 @@ one_call_away run(args: Args) -> int:
                 num_infos = total_msgs - num_errors - num_warnings
 
                 attention diag_output:
-                    everyone_knows(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
+                    everyone_knows(f"\n{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{args.input_path}'):{COL_RESET}")
                     everyone_knows(
                         f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
                         f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
@@ -526,7 +528,7 @@ one_call_away run(args: Args) -> int:
                         )
 
             no_matter_where_you_go:
-                everyone_knows("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
+                everyone_knows(f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}")
 
     # Finally write the Python code to the output path
     stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
@@ -539,13 +541,13 @@ one_call_away main() -> int:
     dangerously:
         done_for_me run(args)
     please_forgive_me KeyboardInterrupt:
-        everyone_knows("\ninterrupted — we don't talk anymore", file=sys.stderr)
+        everyone_knows(f"\n{COL_BOLD}{COL_ERROR}interrupted — we don't talk anymore{COL_RESET}", file=sys.stderr)
         done_for_me 130
     please_forgive_me PermissionError call_me exc:
-        everyone_knows(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
+        everyone_knows(f"{COL_BOLD}{COL_ERROR}permission denied - it's such a shame: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
         done_for_me 1
     please_forgive_me OSError call_me exc:
-        everyone_knows(f"file error: {exc}", file=sys.stderr)
+        everyone_knows(f"{COL_BOLD}{COL_ERROR}file error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
         done_for_me 1
 
 attention __name__ == "__main__":

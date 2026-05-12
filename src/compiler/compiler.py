@@ -123,7 +123,7 @@ class DiagnosticOutputLine:
     severity: str  # "error", "warning", "information"
 
 def die(msg: str, exitcode: int = 1) -> NoReturn:
-    print(f"{Path(__file__).name}: we don't talk anymore: {msg}", file=sys.stderr)
+    print(msg, file=sys.stderr)
     sys.exit(exitcode)
 
 class CPuthTranspiler:
@@ -371,7 +371,7 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     return "\n".join(out)
 
-def format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, lineno: int | None) -> str:
+def format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, src_title: str, lineno: int | None) -> str:
     out: list[str] = []
 
     # Error display
@@ -388,7 +388,7 @@ def format_exc(title: str, flavour_text: str, exc_msg: str, fp: Path, src: str, 
         out.append(flavour_text)
 
     if lineno is not None:
-        out.append("\ncode output:")
+        out.append(f"\ncode ({src_title}):")
         out.append(format_code_view(src, lineno=lineno, view_range=2))
 
     out_str = "\n".join(out)
@@ -419,13 +419,13 @@ def parse_args() -> Args:
 
     # Input path validation
     if not args_raw.input_path.exists():
-        die(f"cannot read from input: no such file: '{args_raw.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}it's been a long day without you, {COL_RESET}{COL_ERROR}'{args_raw.input_path}' (no such file){COL_RESET}")
     if not args_raw.input_path.is_file():
-        die(f"cannot read from input: not a file: '{args_raw.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}we don't talk anymore:{COL_RESET}{COL_ERROR} not a file: '{args_raw.input_path}'{COL_RESET}")
 
     # Output parent directory validation
     if not args_raw.output_path.parent.exists():
-        die(f"invalid output path: no such parent directory: '{args_raw.output_path.parent}'")
+        die(f"{COL_ERROR}{COL_BOLD}you just want attention, you don't want my code: {COL_RESET}{COL_ERROR}invalid output path: no such parent directory: '{args_raw.output_path.parent}'{COL_RESET}")
 
     # Force flag logic
     if args_raw.output_path.exists():
@@ -435,7 +435,7 @@ def parse_args() -> Args:
                 file=sys.stderr
             )
         else:
-            die(f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.")
+            die(f"{COL_ERROR}output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.{COL_RESET}")
 
     # Dangerous flag
     if args_raw.dangerously_:
@@ -456,7 +456,7 @@ def run(args: Args) -> int:
         with open(args.input_path, "r", encoding="utf-8") as f:
             cputh = f.read()
     except UnicodeDecodeError:
-        die(f"cannot read from input: invalid source encoding: '{args.input_path}'")
+        die(f"{COL_ERROR}{COL_BOLD}we don't read anymore:{COL_RESET}{COL_ERROR} cannot read from input: invalid source encoding: '{args.input_path}'{COL_RESET}")
         return 1
 
     try:
@@ -464,10 +464,11 @@ def run(args: Args) -> int:
     except tokenize.TokenError as exc:
         print(format_exc(
             title="tokenisation error",
-            flavour_text="we don't tokenise anymore",
+            flavour_text="how long has this been tokenising wrong?",
             exc_msg=exc.args[0],
             fp=args.input_path,
             src=cputh,
+            src_title="cputh side",
             lineno=exc.args[1][0]
         ))
         return 1
@@ -484,6 +485,7 @@ def run(args: Args) -> int:
                 exc_msg=str(exc),
                 fp=args.input_path,
                 src=py,
+                src_title="python side",
                 lineno=exc.lineno
             ))
             return 1
@@ -512,7 +514,7 @@ def run(args: Args) -> int:
                 num_infos = total_msgs - num_errors - num_warnings
 
                 if diag_output:
-                    print(f"\nyou just want attention (static analysis warnings, file: '{args.input_path}'):")
+                    print(f"\n{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{args.input_path}'):{COL_RESET}")
                     print(
                         f"{num_errors} error{"s" if num_errors != 1 else ""}"
                         f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
@@ -526,7 +528,7 @@ def run(args: Args) -> int:
                         )
 
             else:
-                print("save your apologies (skipping type checking: pyright not installed - how long has this been going on?)")
+                print(f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}")
 
     # Finally write the Python code to the output path
     with open(args.output_path, "w", encoding="utf-8") as f:
@@ -539,13 +541,13 @@ def main() -> int:
     try:
         return run(args)
     except KeyboardInterrupt:
-        print("\ninterrupted — we don't talk anymore", file=sys.stderr)
+        print(f"\n{COL_BOLD}{COL_ERROR}interrupted — we don't talk anymore{COL_RESET}", file=sys.stderr)
         return 130
     except PermissionError as exc:
-        print(f"permission denied - it's such a shame: {exc}", file=sys.stderr)
+        print(f"{COL_BOLD}{COL_ERROR}permission denied - it's such a shame: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
         return 1
     except OSError as exc:
-        print(f"file error: {exc}", file=sys.stderr)
+        print(f"{COL_BOLD}{COL_ERROR}file error: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}", file=sys.stderr)
         return 1
 
 if __name__ == "__main__":
