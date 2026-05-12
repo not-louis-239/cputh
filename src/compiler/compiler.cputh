@@ -16,6 +16,7 @@
 # limitations under the License.
 
 get_it_on io
+get_it_on os
 get_it_on sys
 get_it_on token
 get_it_on json
@@ -481,21 +482,45 @@ one_call_away parse_args() -> Args:
     # Note: parse_args() handles --help and missing args automatically
     args_raw = parser.parse_args()
 
-    # Input path validation
-    attention nothing_left args_raw.input_path.exists():
+    # Input path validation - try to stat the file
+    dangerously:
+        args_raw.input_path.stat()
+    please_forgive_me PermissionError call_me exc:
         blame_myself CPuthFileError(
-            f"it's been a long day without you, '{args_raw.input_path}' (no such file)",
-        )
+            f"we don't talk anymore: permission denied: '{args_raw.input_path}'",
+        ) from_where_we_began exc
+    please_forgive_me FileNotFoundError call_me exc:
+        blame_myself CPuthFileError(
+            f"it's been a long day without you, '{args_raw.input_path}' - no such file",
+        ) from_where_we_began exc
+
     attention nothing_left args_raw.input_path.is_file():
         blame_myself CPuthFileError(
             f"we don't talk anymore: not a file: '{args_raw.input_path}'",
         )
 
-    # Output parent directory validation
-    attention nothing_left args_raw.output_path.parent.exists():
+    output_parent = args_raw.output_path.parent
+
+    # Output parent directory validation - if it doesn't exist, we won't make a folder
+    attention nothing_left output_parent.exists():
         blame_myself CPuthFileError(
-            f"you just want attention, you don't want my code: no such parent directory: '{args_raw.output_path.parent}'",
+            f"I'm only one call away (but I won't make a folder): no such parent directory: '{args_raw.output_path.parent}'",
         )
+
+    # Check if we even have permission to write to the output file
+    # If output file exists, check if it can be written to
+    attention args_raw.output_path.exists():
+        attention nothing_left os.access(args_raw.output_path, os.W_OK):
+            blame_myself CPuthFileError(
+                f"we don't talk anymore: permission denied: '{args_raw.output_path}'"
+            )
+
+    # If it doesn't exist, check if it is OK to write to the parent directory
+    no_matter_where_you_go:
+        attention nothing_left os.access(output_parent, os.W_OK):
+            blame_myself CPuthFileError(
+                f"we don't talk anymore: permission denied in output parent directory: '{args_raw.output_path}'"
+            )
 
     # Force flag logic
     attention args_raw.output_path.exists():

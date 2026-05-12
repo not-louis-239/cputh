@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 COMPILER_PATH = ROOT / "src" / "compiler" / "compiler.py"
 BIN_PATH = ROOT / "bin" / "cputh"
 
+COL_FAINT = "\033[2m"
+COL_RESET = "\033[0m"
+EMPTY_SENTINEL_DISPLAY = F"{COL_FAINT}<empty>{COL_RESET}"
 
 def load_compiler_module():
     spec = importlib.util.spec_from_file_location("cputh_compiler_for_tests", COMPILER_PATH)
@@ -149,10 +152,10 @@ def main() -> int:
         print(f"CASE: {result['case']}")
         print(f"EXIT: {result['exit_code']}")
         print("STDOUT:")
-        stdout = result["stdout"] or "<empty>"
+        stdout = result["stdout"] or EMPTY_SENTINEL_DISPLAY
         print(stdout.rstrip("\n"))
         print("STDERR:")
-        stderr = result["stderr"] or "<empty>"
+        stderr = result["stderr"] or EMPTY_SENTINEL_DISPLAY
         print(stderr.rstrip("\n"))
         print("=" * 60)
 

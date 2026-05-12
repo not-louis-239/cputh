@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import io
+import os
 import sys
 import token
 import json
@@ -481,21 +482,45 @@ def parse_args() -> Args:
     # Note: parse_args() handles --help and missing args automatically
     args_raw = parser.parse_args()
 
-    # Input path validation
-    if not args_raw.input_path.exists():
+    # Input path validation - try to stat the file
+    try:
+        args_raw.input_path.stat()
+    except PermissionError as exc:
         raise CPuthFileError(
-            f"it's been a long day without you, '{args_raw.input_path}' (no such file)",
-        )
+            f"we don't talk anymore: permission denied: '{args_raw.input_path}'",
+        ) from exc
+    except FileNotFoundError as exc:
+        raise CPuthFileError(
+            f"it's been a long day without you, '{args_raw.input_path}' - no such file",
+        ) from exc
+
     if not args_raw.input_path.is_file():
         raise CPuthFileError(
             f"we don't talk anymore: not a file: '{args_raw.input_path}'",
         )
 
-    # Output parent directory validation
-    if not args_raw.output_path.parent.exists():
+    output_parent = args_raw.output_path.parent
+
+    # Output parent directory validation - if it doesn't exist, we won't make a folder
+    if not output_parent.exists():
         raise CPuthFileError(
-            f"you just want attention, you don't want my code: no such parent directory: '{args_raw.output_path.parent}'",
+            f"I'm only one call away (but I won't make a folder): no such parent directory: '{args_raw.output_path.parent}'",
         )
+
+    # Check if we even have permission to write to the output file
+    # If output file exists, check if it can be written to
+    if args_raw.output_path.exists():
+        if not os.access(args_raw.output_path, os.W_OK):
+            raise CPuthFileError(
+                f"we don't talk anymore: permission denied: '{args_raw.output_path}'"
+            )
+
+    # If it doesn't exist, check if it is OK to write to the parent directory
+    else:
+        if not os.access(output_parent, os.W_OK):
+            raise CPuthFileError(
+                f"we don't talk anymore: permission denied in output parent directory: '{args_raw.output_path}'"
+            )
 
     # Force flag logic
     if args_raw.output_path.exists():
