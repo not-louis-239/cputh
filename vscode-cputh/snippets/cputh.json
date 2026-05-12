@@ -66,6 +66,16 @@
         "body": ["slow_it_down$0"],
         "description": "pass statement"
     },
+    "switch": {
+        "prefix": "switch",
+        "body": ["switch$0"],
+        "description": "match statement"
+    },
+    "you_got_that": {
+        "prefix": "you_got_that",
+        "body": ["you_got_that$0"],
+        "description": "case statement"
+    },
 
     "then_theres_you": {
         "prefix": "then_theres_you",

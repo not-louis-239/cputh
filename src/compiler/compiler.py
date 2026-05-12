@@ -37,6 +37,8 @@ CPUTH_MAP: dict[str, str] = {
     "attention": "if",
     "left_right_left": "elif",
     "no_matter_where_you_go": "else",
+    "switch": "match",
+    "you_got_that": "case",
 
     # membership / logic
     "i_still_look_at_you_the_same": "is",

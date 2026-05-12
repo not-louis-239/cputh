@@ -5,6 +5,8 @@ workflow/
 *.pyc
 *.env
 __pycache__/
+dist/
+build/
 .vscode/
 .DS_Store
 vscode-cputh/*.vsix

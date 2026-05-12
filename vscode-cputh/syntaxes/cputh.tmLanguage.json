@@ -18,7 +18,7 @@
                 {
                     "comment": "control flow",
                     "name": "keyword.control.flow.cputh",
-                    "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|runnin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you)\\b"
+                    "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|runnin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you|switch|you_got_that)\\b"
                 },
                 {
                     "comment": "exceptions",

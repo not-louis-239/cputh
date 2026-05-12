@@ -1,6 +1,6 @@
 # cputh compiler
 
-**Version: 0.3.0**
+**Version: 0.3.1**
 
 Simple compiler to compile Charlie Puth source to Python.
 Why? Because now you can sing your source code!
@@ -39,6 +39,8 @@ CPuth is now officially an ecosystem of unresolved feelings that just happen to 
 - `attention` -> `if` (Attention)
 - `left_right_left` -> `elif` (album: Nine Track Mind)
 - `no_matter_where_you_go` -> `else` (One Call Away)
+- `switch` -> `match` (Light Switch)
+- `you_got_that` -> `case` (Light Switch)
 
 ### Membership, Logical Operators
 - `i_still_look_at_you_the_same` -> `is` (Hey Brother)
