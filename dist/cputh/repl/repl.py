@@ -2,7 +2,7 @@ import sys
 from typing import Any
 
 from cputh.utils.format_exceptions import format_traceback
-from cputh._version import __version__
+from cputh._version import version_str
 from cputh.compile.compiler import compile_cputh_to_py
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
@@ -21,7 +21,7 @@ def run_repl():
     buf: list[str] = []
     in_compound_block: bool = False
 
-    print("charlie puth native repl (v{__version__}) - type \"we don't talk anymore\" to exit")
+    print(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
 
     while True:
         try:

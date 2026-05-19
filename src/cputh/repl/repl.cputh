@@ -2,7 +2,7 @@ get_it_on sys
 from_where_we_began typing get_it_on Any
 
 from_where_we_began cputh.utils.format_exceptions get_it_on format_traceback
-from_where_we_began cputh._version get_it_on __version__
+from_where_we_began cputh._version get_it_on version_str
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
@@ -21,7 +21,7 @@ one_call_away run_repl():
     buf: memories[str] = []
     in_compound_block: lightswitch = ShouldveKnown
 
-    everyone_knows("charlie puth native repl (v{__version__}) - type \"we don't talk anymore\" to exit")
+    everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
 
     how_long TheWayIAm:
         dangerously:
