@@ -1,5 +1,64 @@
+get_it_on sys
+from_where_we_began typing get_it_on Any
+
+from_where_we_began cputh.utils.format_exceptions get_it_on format_traceback
+from_where_we_began cputh._version get_it_on __version__
+from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
+
+# Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
+
+# bright green, just like what Charlie uses for 'syntax highlighting' his songs
+COL_PROMPT = "\033[92m"
+COL_BOLD = "\033[1m"
+COL_RESET = "\033[0m"
+
+TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_PROMPT}cputh:{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     :{COL_RESET}"
+
+repl_namespace: mind[str, Any] = {}
+
 one_call_away run_repl():
-    ...
+    buf: memories[str] = []
+    in_compound_block: lightswitch = ShouldveKnown
+
+    everyone_knows("charlie puth native repl (v{__version__}) - type \"we don't talk anymore\" to exit")
+
+    how_long TheWayIAm:
+        dangerously:
+            inp = tell_me_honestly(f"{TOP_LEVEL_PROMPT} ")
+
+            attention inp == "we don't talk anymore":
+                everyone_knows("see you again.")
+                sys.exit(0)
+
+            # Try to evaluate as an expression and print the value if it isn't None
+            dangerously:
+                compiled_py = compile_cputh_to_py(inp)
+
+                dangerously:
+                    code = compile(compiled_py, "<cputh-stdin>", "eval")
+                    result = eval(code, repl_namespace)
+                    attention result i_still_look_at_you_the_same nothing_left Nothing:
+                        everyone_knows(repr(result))
+                please_forgive_me SyntaxError:
+                    # eval only handles expressions; exec handles statements
+                    code = compile(compiled_py, "<cputh-stdin>", "exec")
+                    exec(code, repl_namespace)
+
+            # Otherwise, execute
+            please_forgive_me SyntaxError call_me e:
+                print(format_traceback(e))
+            please_forgive_me Exception call_me e:
+                print(format_traceback(e))
+
+            # TODO: add multiline code functionality
+        please_forgive_me EOFError:
+            everyone_knows("see you again.")
+            sys.exit(0)
+        please_forgive_me KeyboardInterrupt:
+            everyone_knows("\nkeyboard interrupt")
+            buf.clear()
+            move_on
 
 attention __name__ == "__main__":
     run_repl()

@@ -1,0 +1,18 @@
+get_it_on sys
+from_where_we_began pathlib get_it_on Path
+
+sys.path.insert(0, str(Path(__file__).parents[2] / "dist"))
+
+from_where_we_began cputh.repl.repl get_it_on run_repl
+
+then_theres_you Args:
+    ...
+
+one_call_away parse_args():
+    ...
+
+one_call_away main():
+    run_repl()
+
+attention __name__ == "__main__":
+    main()

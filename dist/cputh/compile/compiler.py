@@ -27,9 +27,15 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-sys.path.insert(0, (path := str(Path(__file__).parents[3] / "dist")))
+sys.path.insert(0, str(Path(__file__).parents[3] / "dist"))
 
 from cputh.utils.utils import check_pyright_installed
+from cputh.exceptions.errors import (
+    CPuthException,
+    CPuthSyntaxError,
+    CPuthTokenError,
+    CPuthFileError,
+)
 
 CPUTH_MAP: dict[str, str] = {
     # imports
@@ -126,26 +132,6 @@ class DiagnosticOutputLine:
     lineno: int
     msg: str
     severity: str  # "error", "warning", "information"
-
-class CPuthException(Exception):
-    def __init__(self, msg: str, fp: Path | None = None) -> None:
-        super().__init__(msg)
-        self.fp = fp
-
-class CPuthSyntaxError(CPuthException):
-    def __init__(
-            self, msg: str, fp: Path | None = None,
-            src: str | None = None, lineno: int | None = None
-        ) -> None:
-        super().__init__(msg, fp=fp)
-        self.src = src
-        self.lineno = lineno
-
-class CPuthTokenError(CPuthSyntaxError):
-    pass
-
-class CPuthFileError(CPuthException):
-    pass
 
 class CPuthTranspiler:
     def _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:

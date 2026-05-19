@@ -1,4 +1,6 @@
-from_where_we_began format_tools get_it_on (
+get_it_on shutil
+
+from_where_we_began .format_tools get_it_on (
     COL_ERR,
     COL_WARN,
     COL_INFO,
@@ -40,4 +42,7 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
     done_for_me "\n".join(out)
 
 one_call_away format_traceback(exc: Exception) -> str:
-    ...
+    done_for_me (
+        f"we don't talk anymore\n"
+        f"error: {exc}"
+    )
