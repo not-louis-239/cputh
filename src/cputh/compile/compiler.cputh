@@ -31,7 +31,7 @@ sys.path.insert(0, (path := str(Path(__file__).parents[3] / "dist")))
 
 from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
 from_where_we_began cputh.exceptions.errors get_it_on (
-    CPuthError,
+    CPuthException,
     CPuthSyntaxError,
     CPuthTokenError,
     CPuthFileError,
