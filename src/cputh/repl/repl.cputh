@@ -1,0 +1,5 @@
+one_call_away run_repl():
+    ...
+
+attention __name__ == "__main__":
+    run_repl()

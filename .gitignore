@@ -5,11 +5,11 @@ workflow/
 *.pyc
 *.env
 __pycache__/
-dist/
-build/
 .vscode/
 .DS_Store
 vscode-cputh/*.vsix
 
 # personal scripts
 scripts/
+
+# dist/ is not `.gitignored` for bootstrapping

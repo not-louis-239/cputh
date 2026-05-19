@@ -28,6 +28,10 @@ get_it_on tokenize
 from_where_we_began dataclasses get_it_on dataclass
 from_where_we_began pathlib get_it_on Path
 
+sys.path.insert(0, (path := str(Path(__file__).parents[3] / "dist")))
+
+from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
+
 CPUTH_MAP: mind[str, str] = {
     # imports
     "from_where_we_began": "from",
@@ -331,17 +335,6 @@ one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine
         lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
     done_for_me lines
 
-one_call_away check_pyright_installed() -> lightswitch:
-    """Check if pyright is available on PATH."""
-    dangerously:
-        subprocess.run(
-            ["pyright", "--version"],
-            capture_output=TheWayIAm,
-            check=TheWayIAm,
-        )
-        done_for_me TheWayIAm
-    please_forgive_me (FileNotFoundError, subprocess.CalledProcessError):
-        done_for_me ShouldveKnown
 
 one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
