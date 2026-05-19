@@ -23,10 +23,13 @@ import json
 import argparse
 import subprocess
 import shutil
-import tempfile
 import tokenize
 from dataclasses import dataclass
 from pathlib import Path
+
+sys.path.insert(0, (path := str(Path(__file__).parents[3] / "dist")))
+
+from cputh.utils.utils import check_pyright_installed
 
 CPUTH_MAP: dict[str, str] = {
     # imports
@@ -331,17 +334,6 @@ def parse_diagnostics(json_text: str) -> list[DiagnosticOutputLine]:
         lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
     return lines
 
-def check_pyright_installed() -> bool:
-    """Check if pyright is available on PATH."""
-    try:
-        subprocess.run(
-            ["pyright", "--version"],
-            capture_output=True,
-            check=True,
-        )
-        return True
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return False
 
 def compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
@@ -415,51 +407,53 @@ def format_exc(
     out_str = "\n".join(out)
     return out_str
 
-def run_type_checking(pysrc: str, input_path: Path) -> None:
-    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=True) as tempf:
-        tempf.write(pysrc)
-        tempf.flush()
+def run_type_checking(py_path: Path, display_input_path: Path) -> None:
+    # py_path            = path to the compiled Python output
+    # display_input_path = the input source file that Charlie 'blames' when there are errors
 
-        if not check_pyright_installed():
-            print(
-                f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}",
-                file=sys.stderr
-            )
-            return
-
-        proc = subprocess.run(
-            ["pyright", "--outputjson", tempf.name],
-            capture_output=True,
-        )
-
-        # Parse JSON from stdout; Pyright writes JSON to stdout
-        text = proc.stdout.decode("utf-8", errors="replace")
-        diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
-
-        # Get summary statistics
-        total_msgs = len(diag_output)
-        num_errors = sum(1 for d in diag_output if d.severity == "error")
-        num_warnings = sum(1 for d in diag_output if d.severity == "warning")
-        num_infos = total_msgs - num_errors - num_warnings
-
-        if not diag_output:
-            return
-
-        print(f"{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{input_path}'):{COL_RESET}", file=sys.stderr)
+    # If Pyright not installed, can't do type checking
+    if not check_pyright_installed():
         print(
-            f"{num_errors} error{"s" if num_errors != 1 else ""}"
-            f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
-            f", {num_infos} information{"s" if num_infos != 1 else ""}",
+            f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}",
             file=sys.stderr
         )
+        return
 
-        for line in diag_output:
-            severity_col = COL_ERROR if line.severity == "error" else COL_WARN
-            print(
-                f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
-                f"line {line.lineno}: {line.msg}",
-                file=sys.stderr
-            )
+    proc = subprocess.run(
+        ["pyright", "--outputjson", py_path],
+        capture_output=True,
+    )
+
+    # Parse JSON from stdout; Pyright writes JSON to stdout
+    text = proc.stdout.decode("utf-8", errors="replace")
+    diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
+
+    # Get summary statistics
+    total_msgs = len(diag_output)
+    num_errors = sum(1 for d in diag_output if d.severity == "error")
+    num_warnings = sum(1 for d in diag_output if d.severity == "warning")
+    num_infos = total_msgs - num_errors - num_warnings
+
+    # If no diagnostic output, early return
+    if not diag_output:
+        return
+
+    # Print summary of Pyright output
+    print(f"{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{display_input_path}'):{COL_RESET}", file=sys.stderr)
+    print(
+        f"{num_errors} error{"s" if num_errors != 1 else ""}"
+        f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
+        f", {num_infos} information{"s" if num_infos != 1 else ""}",
+        file=sys.stderr
+    )
+
+    for line in diag_output:
+        severity_col = COL_ERROR if line.severity == "error" else COL_WARN
+        print(
+            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
+            f"line {line.lineno}: {line.msg}",
+            file=sys.stderr
+        )
 
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
@@ -586,7 +580,7 @@ def run(args: Args) -> None:
     # Type checking
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
     if not args.dangerously_:
-        run_type_checking(py, args.input_path)
+        run_type_checking(py_path=args.output_path, display_input_path=args.input_path)
 
     # Finally write the Python code to the output path
     with open(args.output_path, "w", encoding="utf-8") as f:
