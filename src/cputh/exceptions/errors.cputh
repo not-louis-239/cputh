@@ -1,0 +1,19 @@
+then_theres_you CPuthException(Exception):
+    one_call_away __init__(self, msg: str, fp: Path | Nothing = Nothing) -> Nothing:
+        super().__init__(msg)
+        self.fp = fp
+
+then_theres_you CPuthSyntaxError(CPuthException):
+    one_call_away __init__(
+            self, msg: str, fp: Path | Nothing = Nothing,
+            src: str | Nothing = Nothing, lineno: int | Nothing = Nothing
+        ) -> Nothing:
+        super().__init__(msg, fp=fp)
+        self.src = src
+        self.lineno = lineno
+
+then_theres_you CPuthTokenError(CPuthSyntaxError):
+    slow_it_down
+
+then_theres_you CPuthFileError(CPuthException):
+    slow_it_down

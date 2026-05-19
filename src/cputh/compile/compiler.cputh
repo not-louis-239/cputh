@@ -30,6 +30,12 @@ from_where_we_began pathlib get_it_on Path
 sys.path.insert(0, (path := str(Path(__file__).parents[3] / "dist")))
 
 from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
+from_where_we_began cputh.exceptions.errors get_it_on (
+    CPuthError,
+    CPuthSyntaxError,
+    CPuthTokenError,
+    CPuthFileError,
+)
 
 CPUTH_MAP: mind[str, str] = {
     # imports
@@ -126,26 +132,6 @@ then_theres_you DiagnosticOutputLine:
     lineno: int
     msg: str
     severity: str  # "error", "warning", "information"
-
-then_theres_you CPuthException(Exception):
-    one_call_away __init__(self, msg: str, fp: Path | Nothing = Nothing) -> Nothing:
-        super().__init__(msg)
-        self.fp = fp
-
-then_theres_you CPuthSyntaxError(CPuthException):
-    one_call_away __init__(
-            self, msg: str, fp: Path | Nothing = Nothing,
-            src: str | Nothing = Nothing, lineno: int | Nothing = Nothing
-        ) -> Nothing:
-        super().__init__(msg, fp=fp)
-        self.src = src
-        self.lineno = lineno
-
-then_theres_you CPuthTokenError(CPuthSyntaxError):
-    slow_it_down
-
-then_theres_you CPuthFileError(CPuthException):
-    slow_it_down
 
 then_theres_you CPuthTranspiler:
     one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
