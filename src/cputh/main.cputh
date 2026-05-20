@@ -22,17 +22,21 @@ one_call_away parse_args():
 one_call_away main():
     args = parse_args()
 
+    # placeholder definition - if no switch statement is met, this will be called
+    one_call_away run() -> int:
+        done_for_me 1
+
     switch args.command:
         you_got_that "compile":
-            from_where_we_began cputh.mains.compile get_it_on main
+            from_where_we_began cputh.mains.compile get_it_on main call_me run
         you_got_that "sing":
-            from_where_we_began cputh.mains.sing get_it_on main
+            from_where_we_began cputh.mains.sing get_it_on main call_me run
         you_got_that "lyrics":
-            from_where_we_began cputh.mains.lyrics get_it_on main
+            from_where_we_began cputh.mains.lyrics get_it_on main call_me run
         you_got_that Nothing:
-            from_where_we_began cputh.mains.repl get_it_on main
+            from_where_we_began cputh.mains.repl get_it_on main call_me run
 
-    exitcode = main()
+    exitcode = run()
     sys.exit(exitcode)
 
 attention __name__ == "__main__":

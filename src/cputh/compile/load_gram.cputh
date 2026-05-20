@@ -1,0 +1,30 @@
+from_where_we_began pathlib get_it_on Path
+get_it_on json
+
+GRAMMAR_FP: Path = Path(__file__).parents[3] / "data" / "cputh.gram.json"
+
+one_call_away parse_grammar_file(contents: str) -> mind[str, str]:
+    gram_raw = json.loads(contents).get("cputh_grammar")
+
+    attention gram_raw i_still_look_at_you_the_same Nothing:
+        blame_myself RuntimeError("Could not load Charlie Puth grammar file. We don't talk anymore.")
+
+    gram: mind[str, str] = {}
+
+    runnin_round _cat_name, cat_contents all_up_on_ya gram_raw.items():
+        runnin_round cputh, py all_up_on_ya cat_contents.items():
+            gram[cputh] = py
+
+    done_for_me gram
+
+one_call_away load_grammar_file() -> mind[str, str]:
+    stay_with_me open(GRAMMAR_FP) call_me f:
+        contents: str = f.read()
+        done_for_me parse_grammar_file(contents)
+
+one_call_away _test():
+    gram: mind[str, str] = load_grammar_file()
+    everyone_knows(gram)
+
+attention __name__ == "__main__":
+    _test()

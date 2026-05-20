@@ -37,79 +37,6 @@ from_where_we_began cputh.exceptions.errors get_it_on (
     CPuthFileError,
 )
 
-CPUTH_MAP: mind[str, str] = {
-    # imports
-    "from_where_we_began": "from",
-    "get_it_on": "import",
-
-    # conditionals
-    "attention": "if",
-    "left_right_left": "elif",
-    "no_matter_where_you_go": "else",
-    "switch": "match",
-    "you_got_that": "case",
-
-    # membership / logic
-    "i_still_look_at_you_the_same": "is",
-    "all_up_on_ya": "in",
-    "nothing_left": "not",
-    "come_along_with_me": "and",
-    "share_our_fears": "or",
-
-    # loops
-    "how_long": "while",
-    "runnin_round": "for",
-    "move_on": "continue",
-    "we_dont_talk_anymore": "break",
-    "slow_it_down": "pass",
-
-    # functions / classes
-    "then_theres_you": "class",
-    "one_call_away": "def",
-    "smaller_talks": "lambda",
-    "done_for_me": "return",
-    "cheating_on_you": "yield",
-
-    # scope
-    "this_whole_world": "global",
-    "not_alone": "nonlocal",
-    "erase": "del",
-
-    # async
-    "i_still_can_hear_you": "async",
-    "it_wont_be_long": "await",
-
-    # exceptions
-    "promise_me": "assert",
-    "dangerously": "try",
-    "please_forgive_me": "except",
-    "see_you_again": "finally",
-    "blame_myself": "raise",
-
-    # constants
-    "TheWayIAm": "True",
-    "ShouldveKnown": "False",
-    "Nothing": "None",
-
-    # i/o
-    "everyone_knows": "print",
-    "tell_me_honestly": "input",
-
-    # data structures
-    "lightswitch": "bool",
-    "memories": "list",
-    "mind": "dict",
-
-    # context
-    "stay_with_me": "with",
-    "call_me": "as",
-
-    # ...
-    "__my_gospel__": "__all__",
-    "marvin_gaye": "from __future__ import",
-    "what_are_you_doin_to_me": "breakpoint"
-}
-
 COL_FAINT = "\033[2m"
 COL_WARN = "\033[95m"
 COL_ERROR = "\033[91m"
@@ -128,12 +55,6 @@ then_theres_you Args:
 
 
 
-one_call_away compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python."""
-
-    tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
-    translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
-    done_for_me tokenize.untokenize(translated)
 
 one_call_away format_exc(
         exc: CPuthException, title: str,

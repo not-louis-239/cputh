@@ -1,11 +1,15 @@
+get_it_on io
 get_it_on tokenize
 get_it_on token
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError
+from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
 
 _FSTRING_START = getattr(token, "FSTRING_START", Nothing)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
 _FSTRING_END = getattr(token, "FSTRING_END", Nothing)
+
+CPUTH_MAP = load_grammar_file()
 
 then_theres_you CPuthTranspiler:
     one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
@@ -178,3 +182,10 @@ then_theres_you CPuthTranspiler:
             i += 1
 
         done_for_me out, i
+
+one_call_away compile_cputh_to_py(text: str) -> str:
+    """Compile CPuth source to Python."""
+
+    tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+    translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
+    done_for_me tokenize.untokenize(translated)

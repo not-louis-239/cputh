@@ -1,14 +1,14 @@
 get_it_on sys
 from_where_we_began typing get_it_on Any
 
-from_where_we_began cputh.utils.format_exceptions get_it_on format_traceback
+from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 from_where_we_began cputh._version get_it_on version_str
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 # bright green, just like what Charlie uses for 'syntax highlighting' his songs
-COL_PROMPT = "\033[92m"
+COL_PROMPT = "\033[93m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
@@ -17,13 +17,15 @@ NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     >{COL_RESET}"
 
 repl_namespace: mind[str, Any] = {}
 
+then_theres_you _CPuthReplExit(Exception): slow_it_down
+
 one_call_away read_interactive_input() -> str:
     buf: memories[str] = []
     inp = tell_me_honestly(f"{TOP_LEVEL_PROMPT} ").rstrip()
 
     attention inp == "we don't talk anymore":
         everyone_knows("see you again.")
-        sys.exit(0)
+        blame_myself _CPuthReplExit
 
     buf.append(inp)
 
@@ -37,12 +39,15 @@ one_call_away read_interactive_input() -> str:
 
     done_for_me "\n".join(buf)
 
-one_call_away run_repl():
+one_call_away run_repl() -> int:
     everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
 
     how_long TheWayIAm:
         dangerously:
-            inp = read_interactive_input()
+            dangerously:
+                inp = read_interactive_input()
+            please_forgive_me _CPuthReplExit:
+                done_for_me 0
 
             # Try to evaluate or execute the buffer
 
@@ -62,13 +67,13 @@ one_call_away run_repl():
 
             # Otherwise, execute
             please_forgive_me SyntaxError call_me e:
-                print(format_traceback(e))
+                print(format_exc(e))
             please_forgive_me Exception call_me e:
-                print(format_traceback(e))
+                print(format_exc(e))
 
         please_forgive_me EOFError:
             everyone_knows("^D\nsee you again.")
-            sys.exit(0)
+            done_for_me 0
         please_forgive_me KeyboardInterrupt:
             everyone_knows("\nkeyboard interrupt")
             move_on

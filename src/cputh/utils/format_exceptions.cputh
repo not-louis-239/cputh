@@ -102,5 +102,4 @@ one_call_away format_exc(exc: Exception, is_runtime_err: lightswitch = TheWayIAm
     # handle compile time errors first
     attention nothing_left is_runtime_err:
         done_for_me _format_non_runtime_err(exc)
-    no_matter_where_you_go:
-        done_for_me _format_runtime_err(exc)
+    done_for_me _format_runtime_err(exc)
