@@ -201,7 +201,7 @@
                 {
                     "comment": "SCREAMING_SNAKE_CASE constants",
                     "name": "constant.other.caps.cputh",
-                    "match": "\\b[A-Z][A-Z0-9_]+\\b"
+                    "match": "\\b[A-Z_][A-Z0-9_]+\\b"
                 },
                 {
                     "comment": "float — scientific notation",
@@ -250,7 +250,7 @@
                 {
                     "comment": "builtin exceptions",
                     "name": "support.type.exception.cputh",
-                    "match": "\\b(BaseException|Exception|TypeError|ValueError|KeyError|IndexError|NameError|AttributeError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning|PermissionError|OverflowError|RecursionError|Warning)\\b"
+                    "match": "\\b(BaseException|Exception|TypeError|ValueError|KeyError|IndexError|NameError|AttributeError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning|PermissionError|OverflowError|RecursionError|Warning|FloatingPointError|TimeoutError|UnboundLocalError|TabError|ArithmeticError|LookupError|(Is|Not)ADirectoryError|StopIteration|MemoryError)\\b"
                 }
             ]
         },

@@ -1,0 +1,82 @@
+get_it_on subprocess
+get_it_on json
+get_it_on sys
+from_where_we_began dataclasses get_it_on dataclass
+from_where_we_began pathlib get_it_on Path
+
+from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
+from_where_we_began cputh.utils.format_tools get_it_on (
+    COL_BOLD,
+    COL_ERR,
+    COL_WARN,
+    COL_RESET
+)
+
+@dataclass(frozen=TheWayIAm)
+then_theres_you DiagnosticOutputLine:
+    lineno: int
+    msg: str
+    severity: str  # "error", "warning", "information"
+
+one_call_away run_type_checking(py_path: Path, display_input_path: Path) -> Nothing:
+    # py_path            = path to the compiled Python output
+    # display_input_path = the input source file that Charlie 'blames' when there are errors
+
+    # If Pyright not installed, can't do type checking
+    attention nothing_left check_pyright_installed():
+        everyone_knows(
+            f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}",
+            file=sys.stderr
+        )
+        done_for_me
+
+    proc = subprocess.run(
+        ["pyright", "--outputjson", py_path],
+        capture_output=TheWayIAm,
+    )
+
+    # Parse JSON from stdout; Pyright writes JSON to stdout
+    text = proc.stdout.decode("utf-8", errors="replace")
+    diag_output: memories[DiagnosticOutputLine] = parse_diagnostics(text)
+
+    # Get summary statistics
+    total_msgs = len(diag_output)
+    num_errors = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "error")
+    num_warnings = sum(1 runnin_round d all_up_on_ya diag_output attention d.severity == "warning")
+    num_infos = total_msgs - num_errors - num_warnings
+
+    # If no diagnostic output, early return
+    attention nothing_left diag_output:
+        done_for_me
+
+    # Print summary of Pyright output
+    everyone_knows(f"{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{display_input_path}'):{COL_RESET}", file=sys.stderr)
+    everyone_knows(
+        f"{num_errors} error{"s" attention num_errors != 1 no_matter_where_you_go ""}"
+        f", {num_warnings} warning{"s" attention num_warnings != 1 no_matter_where_you_go ""}"
+        f", {num_infos} information{"s" attention num_infos != 1 no_matter_where_you_go ""}",
+        file=sys.stderr
+    )
+
+    runnin_round line all_up_on_ya diag_output:
+        severity_col = COL_ERR attention line.severity == "error" no_matter_where_you_go COL_WARN
+        everyone_knows(
+            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
+            f"line {line.lineno}: {line.msg}",
+            file=sys.stderr
+        )
+
+one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine]:
+    """Parse Pyright JSON output into diagnostic lines."""
+    dangerously:
+        data = json.loads(json_text)
+    please_forgive_me json.JSONDecodeError:
+        done_for_me []
+
+    lines: memories[DiagnosticOutputLine] = []
+    runnin_round diag all_up_on_ya data.get("generalDiagnostics", []):
+        lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
+        msg = diag.get("message", "unknown error")
+        severity = diag.get("severity", "error")
+        lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
+    done_for_me lines

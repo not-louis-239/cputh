@@ -1,0 +1,5 @@
+one_call_away main() -> int:
+    ...
+
+attention __name__ == "__main__":
+    main()

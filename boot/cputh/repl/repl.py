@@ -12,26 +12,41 @@ COL_PROMPT = "\033[92m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
-TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_PROMPT}cputh:{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     :{COL_RESET}"
+TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_PROMPT}cputh>{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     >{COL_RESET}"
 
 repl_namespace: dict[str, Any] = {}
 
-def run_repl():
+def read_interactive_input() -> str:
     buf: list[str] = []
-    in_compound_block: bool = False
+    inp = input(f"{TOP_LEVEL_PROMPT} ").rstrip()
 
+    if inp == "we don't talk anymore":
+        print("see you again.")
+        sys.exit(0)
+
+    buf.append(inp)
+
+    # If input ends in a colon, start taking multiline input
+    if inp.endswith(":"):
+        while inp:
+            inp = input(f"{NESTED_PROMPT} ")
+            if not inp:
+                continue
+            buf.append(inp)
+
+    return "\n".join(buf)
+
+def run_repl():
     print(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
 
     while True:
         try:
-            inp = input(f"{TOP_LEVEL_PROMPT} ")
+            inp = read_interactive_input()
 
-            if inp == "we don't talk anymore":
-                print("see you again.")
-                sys.exit(0)
+            # Try to evaluate or execute the buffer
 
-            # Try to evaluate as an expression and print the value if it isn't None
+            # Attempt to evaluate as an expression and print the value if it isn't None
             try:
                 compiled_py = compile_cputh_to_py(inp)
 
@@ -51,13 +66,11 @@ def run_repl():
             except Exception as e:
                 print(format_traceback(e))
 
-            # TODO: add multiline code functionality
         except EOFError:
-            print("see you again.")
+            print("^D\nsee you again.")
             sys.exit(0)
         except KeyboardInterrupt:
             print("\nkeyboard interrupt")
-            buf.clear()
             continue
 
 if __name__ == "__main__":

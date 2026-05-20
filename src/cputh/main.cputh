@@ -1,18 +1,39 @@
 get_it_on sys
+get_it_on argparse
 from_where_we_began pathlib get_it_on Path
 
-sys.path.insert(0, str(Path(__file__).parents[2] / "dist"))
-
-from_where_we_began cputh.repl.repl get_it_on run_repl
-
-then_theres_you Args:
-    ...
+sys.path.insert(0, str(Path(__file__).parents[2] / "boot"))
 
 one_call_away parse_args():
-    ...
+    parser = argparse.ArgumentParser(prog="cputh")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # compile
+    compile_parser = subparsers.add_parser("compile")
+
+    # sing
+    sing_parser = subparsers.add_parser("sing")
+
+    # lyrics
+    lyrics_parser = subparsers.add_parser("lyrics")
+
+    done_for_me parser.parse_args()
 
 one_call_away main():
-    run_repl()
+    args = parse_args()
+
+    switch args.command:
+        you_got_that "compile":
+            from_where_we_began cputh.mains.compile get_it_on main
+        you_got_that "sing":
+            from_where_we_began cputh.mains.sing get_it_on main
+        you_got_that "lyrics":
+            from_where_we_began cputh.mains.lyrics get_it_on main
+        you_got_that Nothing:
+            from_where_we_began cputh.mains.repl get_it_on main
+
+    exitcode = main()
+    sys.exit(exitcode)
 
 attention __name__ == "__main__":
     main()

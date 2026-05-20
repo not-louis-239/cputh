@@ -1,4 +1,5 @@
 import shutil
+import tokenize
 
 from .format_tools import (
     COL_ERR,
@@ -8,6 +9,31 @@ from .format_tools import (
     COL_BOLD,
     COL_FAINT
 )
+
+ERR_WRAPPER_NAMES = {
+    BaseException: "error",
+    AssertionError: "assertion error",
+    RuntimeError: "runtime error",
+    NameError: "name error",
+    UnboundLocalError: "unbound local error",
+    TypeError: "type error",
+    ValueError: "value error",
+    SyntaxError: "syntax error",
+    IndentationError: "indentation error",
+    TabError: "tab error",
+    LookupError: "lookup error",
+    ArithmeticError: "math error",
+    ZeroDivisionError: "zero division error",
+    KeyError: "key error",
+    IndexError: "index error",
+    AttributeError: "attribute error",
+    tokenize.TokenError: "token error",
+    OSError: "os error",
+    PermissionError: "permission error",
+    FileNotFoundError: "file error",
+    IsADirectoryError: "is a directory error",
+    NotADirectoryError: "not a directory error"
+}
 
 def format_code_view(code: str, lineno: int, view_range: int) -> str:
     """Return a formatted code view.
@@ -42,6 +68,10 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
     return "\n".join(out)
 
 def format_traceback(exc: Exception) -> str:
+    # TODO: this is a stub, finish later
+
+
+
     return (
         f"we don't talk anymore\n"
         f"error: {exc}"

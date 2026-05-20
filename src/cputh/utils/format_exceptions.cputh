@@ -1,4 +1,5 @@
 get_it_on shutil
+get_it_on tokenize
 
 from_where_we_began .format_tools get_it_on (
     COL_ERR,
@@ -9,9 +10,55 @@ from_where_we_began .format_tools get_it_on (
     COL_FAINT
 )
 
+# Charlie's names for errors - most specific must come first
+ERR_WRAPPER_NAMES = {
+    UnboundLocalError: "unbound local error",          # NameError
+    TabError: "tab error",                             # IndentationError
+    FileNotFoundError: "file error",                   # OSError
+    IsADirectoryError: "is a directory error",         # OSError
+    NotADirectoryError: "not a directory error",       # OSError
+    PermissionError: "permission error",               # OSError
+    ModuleNotFoundError: "module not found error",     # ImportError
+    ZeroDivisionError: "zero division error",          # ArithmeticError
+    OverflowError: "overflow error",                   # ArithmeticError
+    FloatingPointError: "floating point error",        # ArithmeticError
+    IndexError: "index error",                         # LookupError
+    KeyError: "key error",                             # LookupError
+    IndentationError: "indentation error",             # SyntaxError
+
+    NameError: "name error",
+    SyntaxError: "syntax error",
+    ImportError: "import error",
+    ArithmeticError: "math error",
+    LookupError: "lookup error",
+    OSError: "os error",
+    RuntimeError: "runtime error",
+
+    AssertionError: "assertion error",
+    AttributeError: "attribute error",
+    EOFError: "eof error",
+    MemoryError: "memory error",
+    RecursionError: "depth error",
+    StopIteration: "stop iteration",
+    TimeoutError: "timeout error",
+    TypeError: "type error",
+    ValueError: "value error",
+    tokenize.TokenError: "token error",
+    KeyboardInterrupt: "keyboard interrupt",
+
+    Exception: "error",
+}
+
+one_call_away get_err_wrapper_name(err: BaseException) -> str:
+    runnin_round klass all_up_on_ya ERR_WRAPPER_NAMES:
+        attention isinstance(err, klass):
+            done_for_me ERR_WRAPPER_NAMES[klass]
+    done_for_me "error"
+
 one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
-    """Return a formatted code view.
+    """Return a formatted code view for a block of code.
     Expects lineno to be 0-based.
+    Do not use for a single line.
     Display only the lines from `lineno - view_range` to `lineno + view_range`."""
 
     one_call_away truncate(line: str, maxwidth: int) -> str:
@@ -41,8 +88,19 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     done_for_me "\n".join(out)
 
-one_call_away format_traceback(exc: Exception) -> str:
-    done_for_me (
-        f"we don't talk anymore\n"
-        f"error: {exc}"
-    )
+one_call_away _format_non_runtime_err(exc: Exception) -> str:
+    buf: memories[str] = []
+
+    ...
+
+one_call_away _format_runtime_err(exc: Exception) -> str:
+    buf: memories[str] = []
+
+    ...
+
+one_call_away format_exc(exc: Exception, is_runtime_err: lightswitch = TheWayIAm) -> str:
+    # handle compile time errors first
+    attention nothing_left is_runtime_err:
+        done_for_me _format_non_runtime_err(exc)
+    no_matter_where_you_go:
+        done_for_me _format_runtime_err(exc)

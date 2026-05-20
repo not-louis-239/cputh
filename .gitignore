@@ -12,4 +12,6 @@ vscode-cputh/*.vsix
 # personal scripts
 scripts/
 
-# dist/ is not `.gitignored` for bootstrapping
+# `boot/` is not `.gitignored`, because it is needed for bootstrapping
+# but `dist/` is.
+dist/

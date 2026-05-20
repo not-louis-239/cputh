@@ -27,7 +27,7 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "dist"))
+sys.path.insert(0, str(Path(__file__).parents[3] / "boot"))
 
 from cputh.utils.utils import check_pyright_installed
 from cputh.exceptions.errors import (
@@ -563,14 +563,13 @@ def run(args: Args) -> None:
                 lineno=exc.lineno - 1 if exc.lineno is not None else None,
             )
 
-    # Type checking
-    # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
-    if not args.dangerously_:
-        run_type_checking(py_path=args.output_path, display_input_path=args.input_path)
-
-    # Finally write the Python code to the output path
+    # Write the Python code to the input path
     with open(args.output_path, "w", encoding="utf-8") as f:
         f.write(py)
+
+    # Type checking
+    if not args.dangerously_:
+        run_type_checking(py_path=args.output_path, display_input_path=args.input_path)
 
 def main() -> int:
     try:
