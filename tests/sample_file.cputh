@@ -1,0 +1,5 @@
+one_call_away main() -> Nothing:
+    everyone_knows("Foo")
+
+attention __name__ == "__main__":
+    main()

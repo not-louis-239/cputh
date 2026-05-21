@@ -1,29 +1,23 @@
 get_it_on sys
 get_it_on argparse
 from_where_we_began pathlib get_it_on Path
+from_where_we_began typing get_it_on Literal
+from_where_we_began dataclasses get_it_on dataclass
 
-sys.path.insert(0, str(Path(__file__).parents[2] / "boot"))
+attention (distribution := Path(__file__).parents[2] / "dist").exists():
+    sys.path.insert(0, str(distribution))
+left_right_left (bootstrap := Path(__file__).parents[2] / "boot").exists():
+    sys.path.insert(0, str(bootstrap))
+no_matter_where_you_go:
+    blame_myself RuntimeError("Could not find distribution or bootstrap directory")
 
-one_call_away parse_args():
-    parser = argparse.ArgumentParser(prog="cputh")
-    subparsers = parser.add_subparsers(dest="command")
-
-    # compile
-    compile_parser = subparsers.add_parser("compile")
-
-    # sing
-    sing_parser = subparsers.add_parser("sing")
-
-    # lyrics
-    lyrics_parser = subparsers.add_parser("lyrics")
-
-    done_for_me parser.parse_args()
+from_where_we_began cputh.utils.args get_it_on parse_args, Args
 
 one_call_away main():
     args = parse_args()
 
     # placeholder definition - if no switch statement is met, this will be called
-    one_call_away run() -> int:
+    one_call_away run(args: Args) -> int:
         done_for_me 1
 
     switch args.command:
@@ -36,7 +30,7 @@ one_call_away main():
         you_got_that Nothing:
             from_where_we_began cputh.mains.repl get_it_on main call_me run
 
-    exitcode = run()
+    exitcode = run(args)
     sys.exit(exitcode)
 
 attention __name__ == "__main__":

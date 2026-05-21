@@ -89,16 +89,28 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
     done_for_me "\n".join(out)
 
 one_call_away _format_non_runtime_err(exc: Exception) -> str:
-    buf: memories[str] = []
+    attention str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    no_matter_where_you_go:
+        footer_line = f"{get_err_wrapper_name(exc)}"
 
-    ...
+    done_for_me (
+        f"we don't talk anymore\n"
+        f"{footer_line}"
+    )
 
 one_call_away _format_runtime_err(exc: Exception) -> str:
-    buf: memories[str] = []
+    attention str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    no_matter_where_you_go:
+        footer_line = f"{get_err_wrapper_name(exc)}"
 
-    ...
+    done_for_me (
+        f"we don't talk anymore (most recent call last)\n"
+        f"{footer_line}"
+    )
 
-one_call_away format_exc(exc: Exception, is_runtime_err: lightswitch = TheWayIAm) -> str:
+one_call_away format_exc(exc: BaseException, is_runtime_err: lightswitch = TheWayIAm) -> str:
     # handle compile time errors first
     attention nothing_left is_runtime_err:
         done_for_me _format_non_runtime_err(exc)

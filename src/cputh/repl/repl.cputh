@@ -7,7 +7,6 @@ from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
-# bright green, just like what Charlie uses for 'syntax highlighting' his songs
 COL_PROMPT = "\033[93m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
@@ -67,9 +66,9 @@ one_call_away run_repl() -> int:
 
             # Otherwise, execute
             please_forgive_me SyntaxError call_me e:
-                print(format_exc(e))
+                everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             please_forgive_me Exception call_me e:
-                print(format_exc(e))
+                everyone_knows(format_exc(e))
 
         please_forgive_me EOFError:
             everyone_knows("^D\nsee you again.")
@@ -77,6 +76,13 @@ one_call_away run_repl() -> int:
         please_forgive_me KeyboardInterrupt:
             everyone_knows("\nkeyboard interrupt")
             move_on
+        please_forgive_me BaseException call_me e:
+            # Let SystemExit pass through
+            attention nothing_left isinstance(e, SystemExit):
+                everyone_knows(format_exc(e))
+                move_on
+            no_matter_where_you_go:
+                blame_myself e
 
 attention __name__ == "__main__":
     run_repl()

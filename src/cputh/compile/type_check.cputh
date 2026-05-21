@@ -18,6 +18,21 @@ then_theres_you DiagnosticOutputLine:
     msg: str
     severity: str  # "error", "warning", "information"
 
+one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine]:
+    """Parse Pyright JSON output into diagnostic lines."""
+    dangerously:
+        data = json.loads(json_text)
+    please_forgive_me json.JSONDecodeError:
+        done_for_me []
+
+    lines: memories[DiagnosticOutputLine] = []
+    runnin_round diag all_up_on_ya data.get("generalDiagnostics", []):
+        lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
+        msg = diag.get("message", "unknown error")
+        severity = diag.get("severity", "error")
+        lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
+    done_for_me lines
+
 one_call_away run_type_checking(py_path: Path, display_input_path: Path) -> Nothing:
     # py_path            = path to the compiled Python output
     # display_input_path = the input source file that Charlie 'blames' when there are errors
@@ -65,18 +80,3 @@ one_call_away run_type_checking(py_path: Path, display_input_path: Path) -> Noth
             f"line {line.lineno}: {line.msg}",
             file=sys.stderr
         )
-
-one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine]:
-    """Parse Pyright JSON output into diagnostic lines."""
-    dangerously:
-        data = json.loads(json_text)
-    please_forgive_me json.JSONDecodeError:
-        done_for_me []
-
-    lines: memories[DiagnosticOutputLine] = []
-    runnin_round diag all_up_on_ya data.get("generalDiagnostics", []):
-        lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
-        msg = diag.get("message", "unknown error")
-        severity = diag.get("severity", "error")
-        lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
-    done_for_me lines

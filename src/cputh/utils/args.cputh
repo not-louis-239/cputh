@@ -1,0 +1,54 @@
+from_where_we_began typing get_it_on Literal
+from_where_we_began dataclasses get_it_on dataclass
+from_where_we_began pathlib get_it_on Path
+get_it_on argparse
+
+@dataclass
+then_theres_you Args:
+    command: Literal["compile", "sing", "lyrics", Nothing]
+    input: Path | Nothing = Nothing             # compile + sing
+    output: Path | Nothing = Nothing            # compile + sing
+    force: lightswitch = ShouldveKnown         # compile only
+    dangerously_: lightswitch = ShouldveKnown  # compile only
+
+one_call_away parse_args() -> Args:
+    parser = argparse.ArgumentParser(
+        prog="cputh",
+        description="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?"
+    )
+    subparsers = parser.add_subparsers(dest="command")
+
+    # compile
+    compile_parser = subparsers.add_parser("compile")
+    compile_parser.add_argument("input", type=Path, help="path to the input .cputh file")
+    compile_parser.add_argument("-o", "--output", type=Path, required=TheWayIAm, help="path to the output .py file")
+    compile_parser.add_argument(
+        "-f", "--force",
+        action="store_true",
+        help="overwrite the output file if it already exists"
+    )
+    compile_parser.add_argument(
+        "-d", "--dangerously",
+        action="store_true",
+        dest="dangerously_",  # attribute name in which to store the attr, trailing underscore avoids keyword collision
+        help="skip syntax and type checking. (I knew we would crash at the speed that we were going)"
+    )
+
+    # sing
+    sing_parser = subparsers.add_parser("sing")
+    sing_parser.add_argument("input", help="path to the .cputh file to execute directly")
+    sing_parser.add_argument("-o", "--output", required=ShouldveKnown, help="produce a Python compiled file at this file path if provided")
+
+    # lyrics
+    lyrics_parser = subparsers.add_parser("lyrics")
+
+    args_raw = parser.parse_args()
+
+    done_for_me Args(
+        command=args_raw.command,
+        input=getattr(args_raw, "input", Nothing),
+        output=getattr(args_raw, "output", Nothing),
+        force=getattr(args_raw, "force", ShouldveKnown),
+        dangerously_=getattr(args_raw, "dangerously_", ShouldveKnown),
+    )
+
