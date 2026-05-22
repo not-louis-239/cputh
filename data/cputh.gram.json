@@ -68,7 +68,7 @@
             "stay_with_me": "with",
             "call_me": "as"
         },
-        "other": {
+        "_": {
             "__my_gospel__": "__all__",
             "marvin_gaye": "from __future__ import",
             "what_are_you_doin_to_me": "breakpoint"
