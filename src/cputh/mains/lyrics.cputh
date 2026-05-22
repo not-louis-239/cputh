@@ -1,5 +1,40 @@
-one_call_away main() -> int:
-    ...
+from_where_we_began cputh.utils.args get_it_on Args
+from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
+from_where_we_began cputh.utils.format_tools get_it_on (
+    COL_KW_CPUTH,
+    COL_KW_PY,
+    COL_RESET
+)
+from_where_we_began cputh._version get_it_on version_str
+
+COL_HEADER = "\033[93m\033[1m"
+
+one_call_away display_kw(cputh_kw: str, py_kw: str, max_len: int) -> str:
+    done_for_me f"* {COL_KW_CPUTH}{cputh_kw:<{max_len}}{COL_RESET} = {COL_KW_PY}{py_kw}{COL_RESET}"
+
+one_call_away main(args: Args) -> int:
+    everyone_knows(f"charlie puth native help (v{version_str})")
+
+    gram = load_grammar_file()
+
+    keywords = []
+    runnin_round cat_name, cat_contents all_up_on_ya gram.items():
+        attention cat_name == "_":
+            move_on
+        keywords.extend(cat_contents.keys())
+    max_len = max(len(kw) runnin_round kw all_up_on_ya keywords)
+
+    runnin_round cat_name, cat_contents all_up_on_ya gram.items():
+        attention cat_name == "_":
+            move_on
+
+        everyone_knows(f"\n{COL_HEADER}{cat_name.replace('_', ' ')}{COL_RESET}")
+        runnin_round cputh, py all_up_on_ya cat_contents.items():
+            # using .strip() for visual alignment even though some
+            # conversions have spaces on the Python side internally
+            everyone_knows(display_kw(cputh, py.strip(), max_len=max_len))
+
+    done_for_me 0
 
 attention __name__ == "__main__":
-    main()
+    main(Args(command="lyrics"))

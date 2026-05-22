@@ -68,6 +68,15 @@
             "stay_with_me": "with",
             "call_me": "as"
         },
+        "shorthand": {
+            "++": " += 1",
+            "--": " -= 1",
+            "theres_been_some_changes": "is not",
+            "goin_round_in_circles": "while True",
+            "i_wouldnt_know_what_to_do": "raise NotImplementedError",
+            "stay_here_for_a_while": "is not None",
+            "hear_me_out": "if __name__ == \"__main__\""
+        },
         "_": {
             "__my_gospel__": "__all__",
             "marvin_gaye": "from __future__ import",
