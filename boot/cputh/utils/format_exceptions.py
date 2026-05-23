@@ -1,7 +1,13 @@
 import shutil
 import tokenize
 
-from .format_tools import (
+from cputh.exceptions.errors import (
+    CPuthException,
+    CPuthSyntaxError,
+    CPuthTokenError,
+    CPuthFileError
+)
+from cputh.utils.format_tools import (
     COL_ERR,
     COL_WARN,
     COL_INFO,
@@ -10,34 +16,60 @@ from .format_tools import (
     COL_FAINT
 )
 
+# Charlie's names for errors - most specific must come first
 ERR_WRAPPER_NAMES = {
-    BaseException: "error",
-    AssertionError: "assertion error",
-    RuntimeError: "runtime error",
+    UnboundLocalError: "unbound local error",          # NameError
+    TabError: "tab error",                             # IndentationError
+    FileNotFoundError: "file error",                   # OSError
+    IsADirectoryError: "is a directory error",         # OSError
+    NotADirectoryError: "not a directory error",       # OSError
+    PermissionError: "permission error",               # OSError
+    ModuleNotFoundError: "module not found error",     # ImportError
+    ZeroDivisionError: "zero division error",          # ArithmeticError
+    OverflowError: "overflow error",                   # ArithmeticError
+    FloatingPointError: "floating point error",        # ArithmeticError
+    IndexError: "index error",                         # LookupError
+    KeyError: "key error",                             # LookupError
+    IndentationError: "indentation error",             # SyntaxError
+
     NameError: "name error",
-    UnboundLocalError: "unbound local error",
+    SyntaxError: "syntax error",
+    ImportError: "import error",
+    ArithmeticError: "math error",
+    LookupError: "lookup error",
+    OSError: "os error",
+    RuntimeError: "runtime error",
+
+    AssertionError: "assertion error",
+    AttributeError: "attribute error",
+    EOFError: "eof error",
+    MemoryError: "memory error",
+    RecursionError: "depth error",
+    StopIteration: "stop iteration",
+    TimeoutError: "timeout error",
     TypeError: "type error",
     ValueError: "value error",
-    SyntaxError: "syntax error",
-    IndentationError: "indentation error",
-    TabError: "tab error",
-    LookupError: "lookup error",
-    ArithmeticError: "math error",
-    ZeroDivisionError: "zero division error",
-    KeyError: "key error",
-    IndexError: "index error",
-    AttributeError: "attribute error",
+    KeyboardInterrupt: "keyboard interrupt",
+
     tokenize.TokenError: "token error",
-    OSError: "os error",
-    PermissionError: "permission error",
-    FileNotFoundError: "file error",
-    IsADirectoryError: "is a directory error",
-    NotADirectoryError: "not a directory error"
+    CPuthTokenError: "token error",
+    CPuthFileError: "file error",
+    CPuthSyntaxError: "syntax error",
+    CPuthException: "error",
+
+    Exception: "error",
 }
 
+def get_err_wrapper_name(err: BaseException) -> str:
+    for class_ in ERR_WRAPPER_NAMES:
+        if isinstance(err, class_):
+            return ERR_WRAPPER_NAMES[class_]
+    return "error"
+
 def format_code_view(code: str, lineno: int, view_range: int) -> str:
-    """Return a formatted code view.
+    """Return a formatted code view for a block of code.
     Expects lineno to be 0-based.
+    Do not use for a single line.
     Display only the lines from `lineno - view_range` to `lineno + view_range`."""
 
     def truncate(line: str, maxwidth: int) -> str:
@@ -67,12 +99,36 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     return "\n".join(out)
 
-def format_traceback(exc: Exception) -> str:
-    # TODO: this is a stub, finish later
+# TODO: these format functions are stubs right now. Finish later.
 
+def _format_non_runtime_err(exc: BaseException) -> str:
+    # TODO: Show code view (the function's already there!)
 
+    if str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    else:
+        footer_line = f"{get_err_wrapper_name(exc)}"
 
     return (
         f"we don't talk anymore\n"
-        f"error: {exc}"
+        f"{footer_line}"
     )
+
+def _format_runtime_err(exc: BaseException) -> str:
+    # TODO: Show all frames in traceback.
+
+    if str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    else:
+        footer_line = f"{get_err_wrapper_name(exc)}"
+
+    return (
+        f"we don't talk anymore (most recent call last)\n"
+        f"{footer_line}"
+    )
+
+def format_exc(exc: BaseException, is_runtime_err: bool = True) -> str:
+    # handle compile time errors first
+    if not is_runtime_err:
+        return _format_non_runtime_err(exc)
+    return _format_runtime_err(exc)

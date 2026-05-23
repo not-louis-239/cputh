@@ -1,18 +1,36 @@
 import sys
+import argparse
 from pathlib import Path
+from typing import Literal
+from dataclasses import dataclass
 
-sys.path.insert(0, str(Path(__file__).parents[2] / "dist"))
+if (distribution := Path(__file__).parents[2] / "dist").exists():
+    sys.path.insert(0, str(distribution))
+elif (bootstrap := Path(__file__).parents[2] / "boot").exists():
+    sys.path.insert(0, str(bootstrap))
+else:
+    raise RuntimeError("Could not find distribution or bootstrap directory. We don't talk anymore.")
 
-from cputh.repl.repl import run_repl
+from cputh.utils.args import parse_args, Args
 
-class Args:
-    ...
+def main() -> None:
+    args = parse_args()
 
-def parse_args():
-    ...
+    match args.command:
+        case "compile":
+            from cputh.mains.compile import main as sub_main
+        case "sing":
+            from cputh.mains.sing import main as sub_main
+        case "lyrics":
+            from cputh.mains.lyrics import main as sub_main
+        case None:
+            from cputh.mains.repl import main as sub_main
+        case _:
+            print(f"Unknown command: {args.command}")
+            return 1
 
-def main():
-    run_repl()
+    exitcode = sub_main(args)
+    sys.exit(exitcode)
 
 if __name__ == "__main__":
     main()

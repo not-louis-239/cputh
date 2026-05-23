@@ -1,4 +1,4 @@
-# cputh v0.3.1
+# cputh v0.4.0
 
 <p align="center">
   <img src="./docs/cputh_logo.png" alt="CPuth Logo" width="180">
@@ -84,7 +84,7 @@ CPuth also has a standard library. You can find ports of common Python standard 
 
 ### Shorthand
 
-Because CPuth keywords are quite long, we have shorthand for common combinations of keywords:
+Because CPuth keywords are quite long, we have shorthand for common combinations of keywords, as well as small conveniences like increment and decrement:
 
 - `++` -> `+= 1`
 - `--` -> `-= 1`
@@ -95,18 +95,6 @@ Because CPuth keywords are quite long, we have shorthand for common combinations
 - `hear_me_out` -> `if __name__ == '__main__'` (Beat Yourself Up)
 
 Plus some secrets...
-
-### About F-Strings
-
-As of 0.2.0+, compilation now extends to inside f-strings, such as 
-
-```python
-everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")
-```
-...which compiles to:
-```python
-print(f"{1 if True else 0}")
-```
 
 ## Examples
 

@@ -1,137 +1,69 @@
-#!/usr/bin/env python3
-# The shebang retains its functionality when transpiled to Python
-
-# Copyright 2026 Louis Masarei-Boulton
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import io
-import os
-import sys
-import token
-import json
-import argparse
-import subprocess
-import shutil
+import re
 import tokenize
-from dataclasses import dataclass
-from pathlib import Path
+import token
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "boot"))
+from cputh.exceptions.errors import CPuthSyntaxError, CPuthTokenError
+from cputh.compile.load_gram import load_grammar_file
 
-from cputh.utils.utils import check_pyright_installed
-from cputh.exceptions.errors import (
-    CPuthException,
-    CPuthSyntaxError,
-    CPuthTokenError,
-    CPuthFileError,
-)
+_FSTRING_START = getattr(token, "FSTRING_START", None)
+_FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", None)
+_FSTRING_END = getattr(token, "FSTRING_END", None)
 
-CPUTH_MAP: dict[str, str] = {
-    # imports
-    "from_where_we_began": "from",
-    "get_it_on": "import",
+def _convert_grammar_file_to_flatdict(gfile: dict[str, dict[str, str]]):
+    """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
+    to a flat dictionary of {cputh_kw: py_kw}"""
 
-    # conditionals
-    "attention": "if",
-    "left_right_left": "elif",
-    "no_matter_where_you_go": "else",
-    "switch": "match",
-    "you_got_that": "case",
+    mapping: dict[str, str] = {}
+    for cat_name, cat_contents in gfile.items():
+        for cputh, py in cat_contents.items():
+            mapping[cputh] = py
+    return mapping
 
-    # membership / logic
-    "i_still_look_at_you_the_same": "is",
-    "all_up_on_ya": "in",
-    "nothing_left": "not",
-    "come_along_with_me": "and",
-    "share_our_fears": "or",
+CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
+_INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
 
-    # loops
-    "how_long": "while",
-    "runnin_round": "for",
-    "move_on": "continue",
-    "we_dont_talk_anymore": "break",
-    "slow_it_down": "pass",
+def _rewrite_increment_decrement_lines(text: str) -> str:
+    """Rewrite lines that use the increment (++) or decrement (--)
+    operators to their equivalent += 1 or -= 1 forms.
+    This is a pre-processing step before tokenization, since the Python
+    tokenizer doesn't understand ++ or -- as valid operators."""
 
-    # functions / classes
-    "then_theres_you": "class",
-    "one_call_away": "def",
-    "smaller_talks": "lambda",
-    "done_for_me": "return",
-    "cheating_on_you": "yield",
+    out: list[str] = []
 
-    # scope
-    "this_whole_world": "global",
-    "not_alone": "nonlocal",
-    "erase": "del",
+    for line in text.splitlines(keepends=True):
+        newline = ""
+        body = line
 
-    # async
-    "i_still_can_hear_you": "async",
-    "it_wont_be_long": "await",
+        if body.endswith("\r\n"):
+            newline = "\r\n"
+            body = body[:-2]
+        elif body.endswith("\n"):
+            newline = "\n"
+            body = body[:-1]
 
-    # exceptions
-    "promise_me": "assert",
-    "dangerously": "try",
-    "please_forgive_me": "except",
-    "see_you_again": "finally",
-    "blame_myself": "raise",
+        match = _INC_DEC_STMT.fullmatch(body)
+        if match:
+            indent = match.group("indent")
+            target = match.group("target").rstrip()
+            op = match.group("op")
+            comment_match = match.group("comment")
+            comment = comment_match if comment_match else ""
 
-    # constants
-    "TheWayIAm": "True",
-    "ShouldveKnown": "False",
-    "Nothing": "None",
+            if op == "++":
+                body = f"{indent}{target} += 1"
+            else:
+                body = f"{indent}{target} -= 1"
 
-    # i/o
-    "everyone_knows": "print",
-    "tell_me_honestly": "input",
+            if comment:
+                body += f"  {comment}"
 
-    # data structures
-    "lightswitch": "bool",
-    "memories": "list",
-    "mind": "dict",
+        out.append(body + newline)
 
-    # context
-    "stay_with_me": "with",
-    "call_me": "as",
+    return "".join(out)
 
-    # ...
-    "__my_gospel__": "__all__",
-    "marvin_gaye": "from __future__ import",
-    "what_are_you_doin_to_me": "breakpoint"
-}
-
-COL_FAINT = "\033[2m"
-COL_WARN = "\033[95m"
-COL_ERROR = "\033[91m"
-COL_BOLD = "\033[1m"
-COL_RESET = "\033[0m"
-
-FSTRING_START = getattr(token, "FSTRING_START", None)
-FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", None)
-FSTRING_END = getattr(token, "FSTRING_END", None)
-
-@dataclass(frozen=True)
-class Args:
-    input_path: Path    # .cputh
-    output_path: Path   # .py
-    force: bool  # overwrite the output file if it already exists
-    dangerously_: bool  # skip syntax and type-checking, trailing underscore to avoid keyword collision
-
-@dataclass(frozen=True)
-class DiagnosticOutputLine:
-    lineno: int
-    msg: str
-    severity: str  # "error", "warning", "information"
+# XXX: I don't like the name "Transpiler", just call it a god damn compiler!!
+# But that's for the next commit.
 
 class CPuthTranspiler:
     def _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
@@ -151,7 +83,7 @@ class CPuthTranspiler:
         while i < len(tokens):
             tok = tokens[i]
 
-            if tok.type == FSTRING_MIDDLE:
+            if tok.type == _FSTRING_MIDDLE:
                 out.append(tok)
                 i += 1
                 continue
@@ -161,7 +93,7 @@ class CPuthTranspiler:
                 out.extend(field_tokens)
                 continue
 
-            if tok.type == FSTRING_END:
+            if tok.type == _FSTRING_END:
                 out.append(tok)
                 return out, i + 1
 
@@ -183,7 +115,7 @@ class CPuthTranspiler:
         while i < len(tokens):
             tok = tokens[i]
 
-            if tok.type == FSTRING_START:
+            if tok.type == _FSTRING_START:
                 nested_fstring, i = self._transpile_fstring(tokens, cputh_map, i)
                 out.extend(nested_fstring)
                 continue
@@ -264,7 +196,7 @@ class CPuthTranspiler:
         while i < len(tokens):
             tok = tokens[i]
 
-            if tok.type == FSTRING_MIDDLE:
+            if tok.type == _FSTRING_MIDDLE:
                 out.append(tok)
                 i += 1
                 continue
@@ -295,7 +227,7 @@ class CPuthTranspiler:
         while i < len(tokens):
             tok = tokens[i]
 
-            if tok.type == FSTRING_START:
+            if tok.type == _FSTRING_START:
                 fstring_tokens, i = self._transpile_fstring(tokens, cputh_map, i)
                 out.extend(fstring_tokens)
                 continue
@@ -305,296 +237,18 @@ class CPuthTranspiler:
 
         return out, i
 
-def parse_diagnostics(json_text: str) -> list[DiagnosticOutputLine]:
-    """Parse Pyright JSON output into diagnostic lines."""
-    try:
-        data = json.loads(json_text)
-    except json.JSONDecodeError:
-        return []
-
-    lines: list[DiagnosticOutputLine] = []
-    for diag in data.get("generalDiagnostics", []):
-        lineno = diag.get("range", {}).get("start", {}).get("line", 0) + 1  # Pyright is 0-indexed
-        msg = diag.get("message", "unknown error")
-        severity = diag.get("severity", "error")
-        lines.append(DiagnosticOutputLine(lineno=lineno, msg=msg, severity=severity))
-    return lines
-
-
 def compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python."""
-
-    tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
-    translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
-    return tokenize.untokenize(translated)
-
-def format_code_view(code: str, lineno: int, view_range: int) -> str:
-    """Return a formatted compiler error message.
-    Expects lineno to be 0-based.
-    Display only the lines from `lineno - view_range` to `lineno + view_range`."""
-
-    def truncate(line: str, maxwidth: int) -> str:
-        """Truncate a string to the given width."""
-        return line[:maxwidth - 1] + "…" if len(line) > maxwidth else line
-
-    term_w, _ = shutil.get_terminal_size()
-
-    code_split = code.splitlines()
-    start_line: int = max(0, lineno - view_range)
-    end_line: int = min(len(code_split), lineno + view_range + 1)
-    lines = code_split[start_line:end_line]
-
-    out = []
-    max_len = len(str(end_line - 1))
-    gutter = max_len + 3
-
-    for n, line in enumerate(lines, start=start_line):
-        line = truncate(line, maxwidth=term_w - gutter)
-
-        if n == lineno:
-            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
-        else:
-            line = f"{COL_FAINT}{n + 1:>{max_len}}{COL_RESET} | {line}"
-
-        out.append(line)
-
-    return "\n".join(out)
-
-def format_exc(
-        exc: CPuthException, title: str,
-        flavour_text: str | None = None, src_title: str | None = None
-    ) -> str:
-    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
-
-    out: list[str] = []
-
-    # Error header
-    err_header = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
-    out.append(err_header)
-
-    # File and line number
-    if isinstance(exc, CPuthSyntaxError) and exc.lineno is not None:
-        if exc.fp is not None:
-            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
-        else:
-            out.append(f"line {exc.lineno + 1}")
-    elif exc.fp is not None:
-        out.append(f"file: '{exc.fp}'")
-
-    # Flavour text
-    if flavour_text:
-        out.append(flavour_text)
-
-    # Code view
-    if isinstance(exc, CPuthSyntaxError) and exc.src is not None and exc.lineno is not None:
-        out.append(f"\ncode ({src_title}):")
-        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
-
-    out_str = "\n".join(out)
-    return out_str
-
-def run_type_checking(py_path: Path, display_input_path: Path) -> None:
-    # py_path            = path to the compiled Python output
-    # display_input_path = the input source file that Charlie 'blames' when there are errors
-
-    # If Pyright not installed, can't do type checking
-    if not check_pyright_installed():
-        print(
-            f"{COL_WARN}{COL_BOLD}save your apologies {COL_RESET}{COL_WARN}(skipping type checking: pyright not installed - how long has this been going on?){COL_RESET}",
-            file=sys.stderr
-        )
-        return
-
-    proc = subprocess.run(
-        ["pyright", "--outputjson", py_path],
-        capture_output=True,
-    )
-
-    # Parse JSON from stdout; Pyright writes JSON to stdout
-    text = proc.stdout.decode("utf-8", errors="replace")
-    diag_output: list[DiagnosticOutputLine] = parse_diagnostics(text)
-
-    # Get summary statistics
-    total_msgs = len(diag_output)
-    num_errors = sum(1 for d in diag_output if d.severity == "error")
-    num_warnings = sum(1 for d in diag_output if d.severity == "warning")
-    num_infos = total_msgs - num_errors - num_warnings
-
-    # If no diagnostic output, early return
-    if not diag_output:
-        return
-
-    # Print summary of Pyright output
-    print(f"{COL_WARN}{COL_BOLD}you just want attention {COL_RESET}{COL_WARN}(static analysis warnings, file: '{display_input_path}'):{COL_RESET}", file=sys.stderr)
-    print(
-        f"{num_errors} error{"s" if num_errors != 1 else ""}"
-        f", {num_warnings} warning{"s" if num_warnings != 1 else ""}"
-        f", {num_infos} information{"s" if num_infos != 1 else ""}",
-        file=sys.stderr
-    )
-
-    for line in diag_output:
-        severity_col = COL_ERROR if line.severity == "error" else COL_WARN
-        print(
-            f"{severity_col}{COL_BOLD}{line.severity}{COL_RESET}: "
-            f"line {line.lineno}: {line.msg}",
-            file=sys.stderr
-        )
-
-def parse_args() -> Args:
-    parser = argparse.ArgumentParser(
-        description ="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?",
-        usage=f"{Path(__file__).name} <input_path> <output_path> [-f, --force] [-d, --dangerously]"
-    )
-
-    parser.add_argument("input_path", type=Path, help="path to the .cputh file (from where we began)")
-    parser.add_argument("output_path", type=Path, help="path to the output .py file (see you again)")
-    parser.add_argument(
-        "-f", "--force",
-        action="store_true",
-        help="overwrite the output file if it already exists"
-    )
-    parser.add_argument(
-        "-d", "--dangerously",
-        action="store_true",
-        dest="dangerously_",  # attribute name in which to store the attr
-        help="skip syntax and type checking. (I knew we would crash at the speed that we were going)"
-    )
-
-    # Note: parse_args() handles --help and missing args automatically
-    args_raw = parser.parse_args()
-
-    # Input path validation - try to stat the file
-    try:
-        args_raw.input_path.stat()
-    except PermissionError as exc:
-        raise CPuthFileError(
-            f"we don't talk anymore: permission denied: '{args_raw.input_path}'",
-        ) from exc
-    except FileNotFoundError as exc:
-        raise CPuthFileError(
-            f"it's been a long day without you, '{args_raw.input_path}' - no such file",
-        ) from exc
-
-    if not args_raw.input_path.is_file():
-        raise CPuthFileError(
-            f"we don't talk anymore: not a file: '{args_raw.input_path}'",
-        )
-
-    output_parent = args_raw.output_path.parent
-
-    # Output parent directory validation - if it doesn't exist, we won't make a folder
-    if not output_parent.exists():
-        raise CPuthFileError(
-            f"I'm only one call away (but I won't make a folder): no such parent directory: '{args_raw.output_path.parent}'",
-        )
-
-    # Check if we even have permission to write to the output file
-    # If output file exists, check if it can be written to
-    if args_raw.output_path.exists():
-        if not os.access(args_raw.output_path, os.W_OK):
-            raise CPuthFileError(
-                f"we don't talk anymore: permission denied: '{args_raw.output_path}'"
-            )
-
-    # If it doesn't exist, check if it is OK to write to the parent directory
-    else:
-        if not os.access(output_parent, os.W_OK):
-            raise CPuthFileError(
-                f"we don't talk anymore: permission denied in output parent directory: '{args_raw.output_path}'"
-            )
-
-    # Force flag logic
-    if args_raw.output_path.exists():
-        if args_raw.force:
-            print(
-                f"{COL_WARN}{COL_BOLD}how long{COL_RESET}{COL_WARN} has '{args_raw.output_path}' been going on? overwriting.{COL_RESET}",
-                file=sys.stderr
-            )
-        else:
-            raise CPuthFileError(
-                f"output file '{args_raw.output_path}' already exists (how long?). use -f or --force to overwrite.",
-            )
-
-    # Dangerous flag
-    if args_raw.dangerously_:
-        print(
-            f"{COL_WARN}{COL_BOLD}dangerously{COL_RESET}{COL_WARN}: skipping syntax and type checking. didn't care if the explosion ruined me.{COL_RESET}",
-            file=sys.stderr
-        )
-
-    return Args(
-        input_path=args_raw.input_path,
-        output_path=args_raw.output_path,
-        force=args_raw.force,
-        dangerously_=args_raw.dangerously_
-    )
-
-def run(args: Args) -> None:
-    try:
-        with open(args.input_path, "r", encoding="utf-8") as f:
-            cputh = f.read()
-    except UnicodeDecodeError:
-        raise CPuthSyntaxError(
-            f"cannot read from input: invalid source encoding: '{args.input_path}'",
-            fp=args.input_path
-        )
+    """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
 
     try:
-        py = compile_cputh_to_py(cputh)
+        text = _rewrite_increment_decrement_lines(text)
+        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
+        return tokenize.untokenize(translated)
     except tokenize.TokenError as exc:
         raise CPuthTokenError(
             msg=exc.args[0],
-            fp=args.input_path,
-            src=cputh,
-            lineno=exc.args[1][0] - 1,
+            fp=None,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
+            src=text,
+            lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
         ) from exc
-
-    # Syntax checking
-    # If the Python is syntactically incorrect, early abort
-    if not args.dangerously_:
-        try:
-            compile(py, args.input_path.name, mode="exec")
-        except SyntaxError as exc:
-            raise CPuthSyntaxError(
-                msg=str(exc),
-                fp=args.input_path,
-                src=py,
-                lineno=exc.lineno - 1 if exc.lineno is not None else None,
-            )
-
-    # Write the Python code to the input path
-    with open(args.output_path, "w", encoding="utf-8") as f:
-        f.write(py)
-
-    # Type checking
-    if not args.dangerously_:
-        run_type_checking(py_path=args.output_path, display_input_path=args.input_path)
-
-def main() -> int:
-    try:
-        args = parse_args()
-        run(args)
-        return 0
-    except CPuthFileError as exc:
-        print(format_exc(title="file error", exc=exc), file=sys.stderr)
-        return 1
-    except CPuthTokenError as exc:
-        print(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?", src_title="cputh side"), file=sys.stderr)
-        return 1
-    except CPuthSyntaxError as exc:
-        print(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore", src_title="python side"), file=sys.stderr)
-        return 1
-    except KeyboardInterrupt:
-        print(f"\n{COL_BOLD}{COL_ERROR}interrupted{COL_RESET}{COL_ERROR} — we don't talk anymore{COL_RESET}", file=sys.stderr)
-        return 130
-    except PermissionError as exc:
-        print(f"{COL_BOLD}{COL_ERROR}permission denied{COL_RESET}{COL_ERROR} - it's such a shame: {exc}{COL_RESET}", file=sys.stderr)
-        return 1
-    except OSError as exc:
-        print(f"{COL_BOLD}{COL_ERROR}file error{COL_RESET}{COL_ERROR}: {exc}{COL_RESET}", file=sys.stderr)
-        return 1
-
-if __name__ == "__main__":
-    exitcode = main()
-    sys.exit(exitcode)
