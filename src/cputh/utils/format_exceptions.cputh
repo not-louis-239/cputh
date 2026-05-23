@@ -1,6 +1,12 @@
 get_it_on shutil
 get_it_on tokenize
 
+from_where_we_began .exceptions.errors get_it_on (
+    CPuthException,
+    CPuthSyntaxError,
+    CPuthTokenError,
+    CPuthFileError
+)
 from_where_we_began .format_tools get_it_on (
     COL_ERR,
     COL_WARN,
@@ -43,8 +49,13 @@ ERR_WRAPPER_NAMES = {
     TimeoutError: "timeout error",
     TypeError: "type error",
     ValueError: "value error",
-    tokenize.TokenError: "token error",
     KeyboardInterrupt: "keyboard interrupt",
+
+    tokenize.TokenError: "token error",
+    CPuthTokenError: "token error",
+    CPuthFileError: "file error",
+    CPuthSyntaxError: "syntax error",
+    CPuthException: "error",
 
     Exception: "error",
 }

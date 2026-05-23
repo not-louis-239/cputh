@@ -3,6 +3,7 @@ from_where_we_began enum get_it_on StrEnum
 from_where_we_began typing get_it_on Any
 from_where_we_began types get_it_on CodeType
 
+from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError
 from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 from_where_we_began cputh._version get_it_on version_str
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
@@ -84,6 +85,9 @@ one_call_away run_repl() -> int:
             compiled_py = compile_cputh_to_py(inp)
             bytecode, mode = compile_python(compiled_py)
         please_forgive_me SyntaxError call_me e:
+            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            move_on
+        please_forgive_me CPuthTokenError call_me e:
             everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             move_on
 
