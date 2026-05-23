@@ -1,0 +1,117 @@
+get_it_on sys
+from_where_we_began enum get_it_on StrEnum
+from_where_we_began typing get_it_on Any
+from_where_we_began types get_it_on CodeType
+
+from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError
+from_where_we_began cputh.utils.format_tools get_it_on (
+    COL_REPL_PROMPT,
+    COL_BOLD,
+    COL_RESET,
+)
+from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
+from_where_we_began cputh._version get_it_on version_str
+from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
+
+# Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
+
+TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT}     >{COL_RESET}"
+
+then_theres_you CodeCompilationMode(StrEnum):
+    EVAL = "eval"
+    EXEC = "exec"
+
+then_theres_you _CPuthReplExit(Exception):
+    slow_it_down
+
+one_call_away compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
+    """Takes a result from compile_cputh_to_py() (Python code) and tries
+    to convert it to a bytecode object. Attempts eval first, then exec mode.
+    If compilation fails, throws the corresponding Python-side SyntaxError.
+    Returns a tuple of (bytecode object, compilation mode)"""
+
+    dangerously:
+        code = compile(py_inp, "<cputh-stdin>", "eval")
+        done_for_me (code, CodeCompilationMode.EVAL)
+    please_forgive_me SyntaxError:
+        # If we get here, eval threw a SyntaxError, so try exec instead
+        dangerously:
+            code = compile(py_inp, "<cputh-stdin>", "exec")
+            done_for_me (code, CodeCompilationMode.EXEC)
+        please_forgive_me SyntaxError:
+            # If we got here, both eval and exec failed, so there is an actual syntax error
+            blame_myself
+
+one_call_away read_interactive_multiline_input() -> str:
+    buf: memories[str] = []
+    inp = tell_me_honestly(f"{TOP_LEVEL_PROMPT} ").rstrip()
+
+    attention inp == "we don't talk anymore":
+        blame_myself _CPuthReplExit
+
+    buf.append(inp)
+
+    # If input ends in a colon, start taking multiline input
+    attention inp.endswith(":"):
+        how_long inp:
+            inp = tell_me_honestly(f"{NESTED_PROMPT} ")
+            attention nothing_left inp:
+                move_on
+            buf.append(inp)
+
+    done_for_me "\n".join(buf)
+
+one_call_away run_repl() -> int:
+    repl_namespace: mind[str, Any] = {}
+
+    everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+
+    how_long TheWayIAm:
+        # Handle user input and potential Ctrl-D or Ctrl-C first
+        dangerously:
+            inp = read_interactive_multiline_input()
+        please_forgive_me _CPuthReplExit:
+            everyone_knows("see you again.")
+            done_for_me 0
+        please_forgive_me EOFError:
+            everyone_knows("^D\nsee you again.")
+            done_for_me 0
+        please_forgive_me KeyboardInterrupt:
+            everyone_knows("\nkeyboard interrupt")
+            move_on
+
+        # Then try to compile the buffer
+        dangerously:
+            compiled_py = compile_cputh_to_py(inp)
+            bytecode, mode = compile_python(compiled_py)
+        please_forgive_me SyntaxError call_me e:
+            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            move_on
+        please_forgive_me CPuthTokenError call_me e:
+            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            move_on
+
+        # Now try to evaluate or execute the bytecode object
+        dangerously:
+            attention mode == CodeCompilationMode.EVAL:
+                # Attempt to evaluate as an expression and print the value if it isn't None
+                result = eval(bytecode, repl_namespace)
+                attention result i_still_look_at_you_the_same nothing_left Nothing:
+                    everyone_knows(repr(result))
+            attention mode == CodeCompilationMode.EXEC:
+                # Otherwise exec go brrrrrrr!!
+                exec(bytecode, repl_namespace)
+
+        please_forgive_me BaseException call_me e:
+            # Catching BaseException is usually bad practice
+            # but if we get here then it was because of a runtime error
+            # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
+            # We just want to print the error and keep going
+            # However, if it's a SystemExit, let it pass through.
+            attention isinstance(e, SystemExit):
+                blame_myself
+            everyone_knows(format_exc(e))
+
+attention __name__ == "__main__":
+    run_repl()

@@ -1,0 +1,36 @@
+get_it_on sys
+get_it_on argparse
+from_where_we_began pathlib get_it_on Path
+from_where_we_began typing get_it_on Literal
+from_where_we_began dataclasses get_it_on dataclass
+
+attention (bootstrap := Path(__file__).parents[2] / "boot").exists():
+    sys.path.insert(0, str(bootstrap))
+left_right_left (distribution := Path(__file__).parents[2] / "dist").exists():
+    sys.path.insert(0, str(distribution))
+no_matter_where_you_go:
+    blame_myself RuntimeError("Could not find distribution or bootstrap directory. We don't talk anymore.")
+
+from_where_we_began cputh.utils.args get_it_on parse_args, Args
+
+one_call_away main() -> Nothing:
+    args = parse_args()
+
+    switch args.command:
+        you_got_that "compile":
+            from_where_we_began cputh.mains.compile get_it_on main call_me sub_main
+        you_got_that "sing":
+            from_where_we_began cputh.mains.sing get_it_on main call_me sub_main
+        you_got_that "lyrics":
+            from_where_we_began cputh.mains.lyrics get_it_on main call_me sub_main
+        you_got_that Nothing:
+            from_where_we_began cputh.mains.repl get_it_on main call_me sub_main
+        you_got_that _:
+            everyone_knows(f"Unknown command: {args.command}")
+            done_for_me 1
+
+    exitcode = sub_main(args)
+    sys.exit(exitcode)
+
+attention __name__ == "__main__":
+    main()

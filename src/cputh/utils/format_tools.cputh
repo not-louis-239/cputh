@@ -1,0 +1,16 @@
+# CPuth format tools
+
+# Specific colours
+COL_REPL_PROMPT = "\033[93m"
+COL_KW_CPUTH = "\033[95m"
+COL_KW_PY = "\033[94m"
+
+# Colours
+COL_ERR = "\033[91m"
+COL_WARN = "\033[95m"
+COL_INFO = "\033[94m"
+
+# Colourless formatting options
+COL_RESET = "\033[0m"
+COL_BOLD = "\033[1m"
+COL_FAINT = "\033[2m"

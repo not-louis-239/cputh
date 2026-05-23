@@ -1,0 +1,251 @@
+get_it_on io
+get_it_on re
+get_it_on tokenize
+get_it_on token
+
+from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
+from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
+
+_FSTRING_START = getattr(token, "FSTRING_START", Nothing)
+_FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
+_FSTRING_END = getattr(token, "FSTRING_END", Nothing)
+
+one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
+    """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
+    to a flat dictionary of {cputh_kw: py_kw}"""
+
+    mapping: mind[str, str] = {}
+    runnin_round cat_name, cat_contents all_up_on_ya gfile.items():
+        runnin_round cputh, py all_up_on_ya cat_contents.items():
+            mapping[cputh] = py
+    done_for_me mapping
+
+CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
+_INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
+
+one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
+    """Rewrite lines that use the increment (++) or decrement (--)
+    operators to their equivalent += 1 or -= 1 forms.
+    This is a pre-processing step before tokenization, since the Python
+    tokenizer doesn't understand ++ or -- as valid operators."""
+
+    out: memories[str] = []
+
+    runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
+        newline = ""
+        body = line
+
+        attention body.endswith("\r\n"):
+            newline = "\r\n"
+            body = body[:-2]
+        left_right_left body.endswith("\n"):
+            newline = "\n"
+            body = body[:-1]
+
+        match = _INC_DEC_STMT.fullmatch(body)
+        attention match:
+            indent = match.group("indent")
+            target = match.group("target").rstrip()
+            op = match.group("op")
+            comment_match = match.group("comment")
+            comment = comment_match attention comment_match no_matter_where_you_go ""
+
+            attention op == "++":
+                body = f"{indent}{target} += 1"
+            no_matter_where_you_go:
+                body = f"{indent}{target} -= 1"
+
+            attention comment:
+                body += f"  {comment}"
+
+        out.append(body + newline)
+
+    done_for_me "".join(out)
+
+then_theres_you CPuthCompiler:
+    one_call_away _compile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
+        attention tok.type != token.NAME:
+            done_for_me tok
+        done_for_me tok._replace(string=cputh_map.get(tok.string, tok.string))
+
+    one_call_away _compile_fstring(
+            self,
+            tokens: memories[tokenize.TokenInfo],
+            cputh_map: mind[str, str],
+            start: int,
+        ) -> tuple[memories[tokenize.TokenInfo], int]:
+        out = [tokens[start]]
+        i = start + 1
+
+        how_long i < len(tokens):
+            tok = tokens[i]
+
+            attention tok.type == _FSTRING_MIDDLE:
+                out.append(tok)
+                i += 1
+                move_on
+
+            attention tok.type == token.OP come_along_with_me tok.string == "{":
+                field_tokens, i = self._compile_replacement_field(tokens, cputh_map, i)
+                out.extend(field_tokens)
+                move_on
+
+            attention tok.type == _FSTRING_END:
+                out.append(tok)
+                done_for_me out, i + 1
+
+            out.append(self._compile_name_token(tok, cputh_map))
+            i += 1
+
+        blame_myself CPuthSyntaxError("unterminated f-string")
+
+    one_call_away _compile_replacement_field(
+            self,
+            tokens: memories[tokenize.TokenInfo],
+            cputh_map: mind[str, str],
+            start: int,
+        ) -> tuple[memories[tokenize.TokenInfo], int]:
+        out = [tokens[start]]
+        i = start + 1
+        nesting = 0
+
+        how_long i < len(tokens):
+            tok = tokens[i]
+
+            attention tok.type == _FSTRING_START:
+                nested_fstring, i = self._compile_fstring(tokens, cputh_map, i)
+                out.extend(nested_fstring)
+                move_on
+
+            attention tok.type == token.OP:
+                attention tok.string all_up_on_ya "([{":
+                    nesting += 1
+                    out.append(tok)
+                    i += 1
+                    move_on
+
+                attention tok.string all_up_on_ya ")]}":
+                    attention tok.string == "}" come_along_with_me nesting == 0:
+                        out.append(tok)
+                        done_for_me out, i + 1
+
+                    nesting -= 1
+                    out.append(tok)
+                    i += 1
+                    move_on
+
+                attention nesting == 0 come_along_with_me tok.string == "=":
+                    out.append(tok)
+                    done_for_me self._compile_replacement_field_tail(tokens, cputh_map, out, i + 1)
+
+                attention nesting == 0 come_along_with_me tok.string == "!":
+                    out.append(tok)
+                    i += 1
+                    attention i < len(tokens):
+                        out.append(tokens[i])
+                        i += 1
+                    done_for_me self._compile_format_spec(tokens, cputh_map, out, i)
+
+                attention nesting == 0 come_along_with_me tok.string == ":":
+                    out.append(tok)
+                    done_for_me self._compile_format_spec(tokens, cputh_map, out, i + 1)
+
+            out.append(self._compile_name_token(tok, cputh_map))
+            i += 1
+
+        blame_myself CPuthSyntaxError("unterminated f-string replacement field")
+
+    one_call_away _compile_replacement_field_tail(
+            self,
+            tokens: memories[tokenize.TokenInfo],
+            cputh_map: mind[str, str],
+            out: memories[tokenize.TokenInfo],
+            start: int,
+        ) -> tuple[memories[tokenize.TokenInfo], int]:
+        i = start
+
+        attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "!":
+            out.append(tokens[i])
+            i += 1
+            attention i < len(tokens):
+                out.append(tokens[i])
+                i += 1
+
+        attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == ":":
+            out.append(tokens[i])
+            done_for_me self._compile_format_spec(tokens, cputh_map, out, i + 1)
+
+        attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "}":
+            out.append(tokens[i])
+            done_for_me out, i + 1
+
+        blame_myself CPuthSyntaxError("invalid f-string replacement field")
+
+    one_call_away _compile_format_spec(
+            self,
+            tokens: memories[tokenize.TokenInfo],
+            cputh_map: mind[str, str],
+            out: memories[tokenize.TokenInfo],
+            start: int,
+        ) -> tuple[memories[tokenize.TokenInfo], int]:
+        i = start
+
+        how_long i < len(tokens):
+            tok = tokens[i]
+
+            attention tok.type == _FSTRING_MIDDLE:
+                out.append(tok)
+                i += 1
+                move_on
+
+            attention tok.type == token.OP come_along_with_me tok.string == "{":
+                nested_field, i = self._compile_replacement_field(tokens, cputh_map, i)
+                out.extend(nested_field)
+                move_on
+
+            attention tok.type == token.OP come_along_with_me tok.string == "}":
+                out.append(tok)
+                done_for_me out, i + 1
+
+            out.append(self._compile_name_token(tok, cputh_map))
+            i += 1
+
+        blame_myself CPuthSyntaxError("unterminated f-string format specifier")
+
+    one_call_away compile_tokens(
+            self,
+            tokens: memories[tokenize.TokenInfo],
+            cputh_map: mind[str, str],
+            start: int = 0,
+        ) -> tuple[memories[tokenize.TokenInfo], int]:
+        out: memories[tokenize.TokenInfo] = []
+        i = start
+
+        how_long i < len(tokens):
+            tok = tokens[i]
+
+            attention tok.type == _FSTRING_START:
+                fstring_tokens, i = self._compile_fstring(tokens, cputh_map, i)
+                out.extend(fstring_tokens)
+                move_on
+
+            out.append(self._compile_name_token(tok, cputh_map))
+            i += 1
+
+        done_for_me out, i
+
+one_call_away compile_cputh_to_py(text: str) -> str:
+    """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
+
+    dangerously:
+        text = _rewrite_increment_decrement_lines(text)
+        tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+        translated, _ = CPuthCompiler().compile_tokens(tokens, CPUTH_MAP)
+        done_for_me tokenize.untokenize(translated)
+    please_forgive_me tokenize.TokenError call_me exc:
+        blame_myself CPuthTokenError(
+            msg=exc.args[0],
+            fp=Nothing,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
+            src=text,
+            lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
+        ) from_where_we_began exc

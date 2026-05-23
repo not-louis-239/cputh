@@ -18,7 +18,7 @@
                 {
                     "comment": "control flow",
                     "name": "keyword.control.flow.cputh",
-                    "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|runnin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you|switch|you_got_that)\\b"
+                    "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|runnin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you|switch|you_got_that|goin_round_in_circles|hear_me_out)\\b"
                 },
                 {
                     "comment": "exceptions",
@@ -26,7 +26,17 @@
                     "match": "\\b(dangerously|please_forgive_me|see_you_again|blame_myself)\\b"
                 },
                 {
-                    "comment": "future imports",
+                    "comment": "raise NotImplementedError shorthand",
+                    "name": "keyword.control.exception.not_implemented.cputh",
+                    "match": "\\bi_wouldnt_know_what_to_do\\b"
+                },
+                {
+                    "comment": "null coalescence - equivalent of is not None",
+                    "name": "keyword.control.null_coalescence.cputh",
+                    "match": "\\b(stay_here_for_a_while)\\b"
+                },
+                {
+                    "comment": "future imports shorthand",
                     "name": "keyword.control.import.future.cputh",
                     "match": "\\bmarvin_gaye\\b"
                 },
@@ -76,9 +86,14 @@
                     "match": "\\bsmaller_talks\\b"
                 },
                 {
+                    "comment": "identity checks - equivalent of is and is not",
+                    "name": "keyword.operator.identity.cputh",
+                    "match": "\\b(i_still_look_at_you_the_same|theres_been_some_changes)\\b"
+                },
+                {
                     "comment": "logical operators",
                     "name": "keyword.operator.logical.cputh",
-                    "match": "\\b(i_still_look_at_you_the_same|all_up_on_ya|nothing_left|come_along_with_me|share_our_fears)\\b"
+                    "match": "\\b(all_up_on_ya|nothing_left|come_along_with_me|share_our_fears)\\b"
                 }
             ]
         },
@@ -201,7 +216,7 @@
                 {
                     "comment": "SCREAMING_SNAKE_CASE constants",
                     "name": "constant.other.caps.cputh",
-                    "match": "\\b[A-Z][A-Z0-9_]+\\b"
+                    "match": "\\b[A-Z_][A-Z0-9_]+\\b"
                 },
                 {
                     "comment": "float — scientific notation",
@@ -250,7 +265,7 @@
                 {
                     "comment": "builtin exceptions",
                     "name": "support.type.exception.cputh",
-                    "match": "\\b(BaseException|Exception|TypeError|ValueError|KeyError|IndexError|NameError|AttributeError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning|PermissionError|OverflowError|RecursionError|Warning)\\b"
+                    "match": "\\b(BaseException|Exception|TypeError|ValueError|KeyError|IndexError|NameError|AttributeError|FileNotFoundError|SyntaxError|IndentationError|ZeroDivisionError|AssertionError|RuntimeError|ModuleNotFoundError|ImportError|NotImplementedError|KeyboardInterrupt|SystemExit|OSError|EOFError|UserWarning|DeprecationWarning|SyntaxWarning|RuntimeWarning|FutureWarning|PendingDeprecationWarning|PermissionError|OverflowError|RecursionError|Warning|FloatingPointError|TimeoutError|UnboundLocalError|TabError|ArithmeticError|LookupError|(Is|Not)ADirectoryError|StopIteration|MemoryError)\\b"
                 }
             ]
         },
@@ -340,6 +355,16 @@
                     "comment": "annotations",
                     "name": "punctuation.separator.annotation.result.cputh",
                     "match": "->"
+                },
+                {
+                    "comment": "increment",
+                    "name": "keyword.operator.increment.cputh",
+                    "match": "\\+\\+"
+                },
+                {
+                    "comment": "decrement",
+                    "name": "keyword.operator.decrement.cputh",
+                    "match": "--"
                 },
                 {
                     "comment": "assignment operators",

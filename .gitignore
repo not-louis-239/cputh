@@ -5,11 +5,13 @@ workflow/
 *.pyc
 *.env
 __pycache__/
-dist/
-build/
 .vscode/
 .DS_Store
 vscode-cputh/*.vsix
 
 # personal scripts
 scripts/
+
+# `boot/` is not `.gitignored`, because it is needed for bootstrapping
+# but `dist/` is.
+dist/

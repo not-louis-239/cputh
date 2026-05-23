@@ -1,0 +1,134 @@
+get_it_on shutil
+get_it_on tokenize
+
+from_where_we_began cputh.exceptions.errors get_it_on (
+    CPuthException,
+    CPuthSyntaxError,
+    CPuthTokenError,
+    CPuthFileError
+)
+from_where_we_began cputh.utils.format_tools get_it_on (
+    COL_ERR,
+    COL_WARN,
+    COL_INFO,
+    COL_RESET,
+    COL_BOLD,
+    COL_FAINT
+)
+
+# Charlie's names for errors - most specific must come first
+ERR_WRAPPER_NAMES = {
+    UnboundLocalError: "unbound local error",          # NameError
+    TabError: "tab error",                             # IndentationError
+    FileNotFoundError: "file error",                   # OSError
+    IsADirectoryError: "is a directory error",         # OSError
+    NotADirectoryError: "not a directory error",       # OSError
+    PermissionError: "permission error",               # OSError
+    ModuleNotFoundError: "module not found error",     # ImportError
+    ZeroDivisionError: "zero division error",          # ArithmeticError
+    OverflowError: "overflow error",                   # ArithmeticError
+    FloatingPointError: "floating point error",        # ArithmeticError
+    IndexError: "index error",                         # LookupError
+    KeyError: "key error",                             # LookupError
+    IndentationError: "indentation error",             # SyntaxError
+
+    NameError: "name error",
+    SyntaxError: "syntax error",
+    ImportError: "import error",
+    ArithmeticError: "math error",
+    LookupError: "lookup error",
+    OSError: "os error",
+    RuntimeError: "runtime error",
+
+    AssertionError: "assertion error",
+    AttributeError: "attribute error",
+    EOFError: "eof error",
+    MemoryError: "memory error",
+    RecursionError: "depth error",
+    StopIteration: "stop iteration",
+    TimeoutError: "timeout error",
+    TypeError: "type error",
+    ValueError: "value error",
+    KeyboardInterrupt: "keyboard interrupt",
+
+    tokenize.TokenError: "token error",
+    CPuthTokenError: "token error",
+    CPuthFileError: "file error",
+    CPuthSyntaxError: "syntax error",
+    CPuthException: "error",
+
+    Exception: "error",
+}
+
+one_call_away get_err_wrapper_name(err: BaseException) -> str:
+    runnin_round class_ all_up_on_ya ERR_WRAPPER_NAMES:
+        attention isinstance(err, class_):
+            done_for_me ERR_WRAPPER_NAMES[class_]
+    done_for_me "error"
+
+one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
+    """Return a formatted code view for a block of code.
+    Expects lineno to be 0-based.
+    Do not use for a single line.
+    Display only the lines from `lineno - view_range` to `lineno + view_range`."""
+
+    one_call_away truncate(line: str, maxwidth: int) -> str:
+        """Truncate a string to the given width."""
+        done_for_me line[:maxwidth - 1] + "…" attention len(line) > maxwidth no_matter_where_you_go line
+
+    term_w, _ = shutil.get_terminal_size()
+
+    code_split = code.splitlines()
+    start_line: int = max(0, lineno - view_range)
+    end_line: int = min(len(code_split), lineno + view_range + 1)
+    lines = code_split[start_line:end_line]
+
+    out = []
+    max_len = len(str(end_line - 1))
+    gutter = max_len + 3
+
+    runnin_round n, line all_up_on_ya enumerate(lines, start=start_line):
+        line = truncate(line, maxwidth=term_w - gutter)
+
+        attention n == lineno:
+            line = f"{COL_WARN}{COL_BOLD}{n + 1:>{max_len}}{COL_RESET} | {COL_WARN}{line}{COL_RESET}"
+        no_matter_where_you_go:
+            line = f"{COL_FAINT}{n + 1:>{max_len}}{COL_RESET} | {line}"
+
+        out.append(line)
+
+    done_for_me "\n".join(out)
+
+# TODO: these format functions are stubs right now. Finish later.
+
+one_call_away _format_non_runtime_err(exc: BaseException) -> str:
+    # TODO: Show code view (the function's already there!)
+
+    attention str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    no_matter_where_you_go:
+        footer_line = f"{get_err_wrapper_name(exc)}"
+
+    done_for_me (
+        f"we don't talk anymore\n"
+        f"{footer_line}"
+    )
+
+one_call_away _format_runtime_err(exc: BaseException) -> str:
+    # TODO: Show all frames in traceback.
+
+    attention str(exc):
+        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    no_matter_where_you_go:
+        footer_line = f"{get_err_wrapper_name(exc)}"
+
+    done_for_me (
+        f"we don't talk anymore (most recent call last)\n"
+        f"{footer_line}"
+    )
+
+one_call_away format_exc(exc: BaseException, is_runtime_err: lightswitch = TheWayIAm) -> str:
+    # handle compile time errors first
+    attention nothing_left is_runtime_err:
+        done_for_me _format_non_runtime_err(exc)
+    done_for_me _format_runtime_err(exc)

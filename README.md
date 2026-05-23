@@ -1,33 +1,18 @@
-# cputh compiler
+# cputh v0.4.0
 
-**Version: 0.3.1**
+<p align="center">
+  <img src="./docs/cputh_logo.png" alt="CPuth Logo" width="180">
+</p>
 
-Simple compiler to compile Charlie Puth source to Python.
-Why? Because now you can sing your source code!
+You just want attention, you don't want my error. Maybe you just hate the thought of line 42. 
 
-`cputh` is a soulful, rhythmic transpiler that converts Charlie Puth lyrics to working Python code. Why use boring keywords like `if` and `while` when you could be demanding `attention` or asking `how_long` your loop has been going on?
+Python but all the keywords are Charlie Puth lyrics. Inspired by the man the myth the legend's new album, *Changes*, and the personality injection of ArnoldC, now the compiler has feelings about that extra space, and the REPL cries in falsetto. On top of that, the CPuth compiler is written in CPuth, because why not?
 
-Inspired by ArnoldC. Same energy, different discography. Arnold lifts while barking at the computer. Charlie cries in falsetto.
-
-Free syntax highlighting extension for VS Code included!
-
-The compiler is written in CPuth itself. `src/compiler.cputh` compiles to `src/compiler.py`, which is what actually runs. You might interpret this as a cry for help.
+Free syntax highlighting extension for VS Code included! (see install details under Installation)
 
 ## Standard Library
 
-Yes. There is a standard library now.
-
-Originally this project was just a token substitution joke. Then it became self-hosted. Then it became emotionally unstable. Now it has a standard library. Nobody voted on this.
-
-The CPuth standard library is a thinly disguised rewrite of Python's stdlib, where modules have been translated into lyrical, emotional syntax.
-- functools
-- random
-- threading
-- dataclasses
-- types
-- re
-
-CPuth is now officially an ecosystem of unresolved feelings that just happen to compile to Python.
+CPuth also has a standard library. You can find ports of common Python standard library modules in [here](./stdlib/).
 
 ## Mapping
 
@@ -97,63 +82,58 @@ CPuth is now officially an ecosystem of unresolved feelings that just happen to 
 - `stay_with_me` -> `with` (Stay)
 - `call_me` -> `as` (One Call Away)
 
-## Example
+### Shorthand
 
-```python
-# hello_world.cputh
-everyone_knows("Hello, World!")
-```
+Because CPuth keywords are quite long, we have shorthand for common combinations of keywords, as well as small conveniences like increment and decrement:
 
-```python
-# hello_world.py (compiled output)
-print("Hello, World!")
-```
+- `++` -> `+= 1`
+- `--` -> `-= 1`
+- `theres_been_some_changes` -> `is not` (Changes)
+- `goin_round_in_circles` -> `while True` (Left and Right)
+- `i_wouldnt_know_what_to_do` -> `raise NotImplementedError` (Until It Happens To You)
+- `stay_here_for_a_while` -> `is not None` (One Call Away)
+- `hear_me_out` -> `if __name__ == '__main__'` (Beat Yourself Up)
 
-Or something slightly more emotionally complex:
+Plus some secrets...
 
-```python
-# emotional.cputh
-x = 5
-attention x > 3:
-    everyone_knows("I knew from the start")
-no_matter_where_you_go:
-    everyone_knows("You just want attention")
-```
+## Examples
 
-As of 0.2.0+, compilation now extends to inside f-strings as well, such as 
+The `examples/` directory contains some sample CPuth programs. 
 
-```python
-everyone_knows(f"{1 attention TheWayIAm no_matter_where_you_go 0}")
+## Installation
 
-# compiles to
+To install:
+1. Clone this repository
+2. Run `bin/cputh` on your CPuth file, e.g. `bin/cputh input.cputh output.py`
+3. Run the freshly produced Python code: `python3 output.py`
 
-print(f"{1 if True else 0}")
+Free syntax highlighting extension for VS Code included in `vscode-cputh/`! Run the following commands from that directory:
+
+```bash
+vsce package
+code --install-extension *.vsix  # replace *.vsix with the name of the vsix file that `vsce package` creates
 ```
 
 ## Development Status
 
-I made this as a joke. It is not affiliated with, endorsed by, or known to Charlie Puth. If something explodes, open an issue (at `https://github.com/not-louis-239/cputh/issues`) — I'll admit it's my fault, but you gotta believe me when I say it only happened once.
+I made this as a joke. It is not affiliated with, endorsed by or probably even known to Charlie Puth. If something explodes, open an issue (at `https://github.com/not-louis-239/cputh/issues`) — I'll admit it's my fault, but you gotta believe me when I say it only happened once.
 
 ## Requirements
 
-- Python 3.x (tested on 3.14.0) (`brew install python` or from `python.org`)
+- Python 3.x (tested on 3.14.0)
 - Pyright (`npm install -g pyright`)
-  - Not strictly required but facilitates compiler static analysis.
+  - Not strictly required but facilitates Charlie's static analysis.
 - `pip install requirements.txt`
-  - Not required for compiler but used by `examples/`:
+  - Packages not required for the compiler but used by programs in `examples/`:
     - `pygame`
     - `numpy`
     - `sounddevice`
     - Visualiser requires `blackhole-2ch` (`brew install blackhole-2ch`)
 
-## Installation & Usage
-
-1. Clone this repository
-2. Run binary: `bin/cputh input.cputh output.py`
-3. Run the freshly produced Python code: `python3 output.py`
-
 ## Licence
 
 Licensed under the Apache License 2.0. See [LICENCE](./LICENCE) for more details.
+
+CPuth ports of Python stdlib are adapted from Python stdlib modules, which are licensed under the Python Software Foundation License 2.0.
 
 **Disclaimer**: Please do not sue Monkey.
