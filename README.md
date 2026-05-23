@@ -82,6 +82,18 @@ CPuth also has a standard library. You can find ports of common Python standard 
 - `stay_with_me` -> `with` (Stay)
 - `call_me` -> `as` (One Call Away)
 
+### Shorthand
+
+Because CPuth keywords are quite long, we have shorthand for common combinations of keywords:
+
+- `++` -> `+= 1`
+- `--` -> `-= 1`
+- `theres_been_some_changes` -> `is not` (Changes)
+- `goin_round_in_circles` -> `while True` (Left and Right)
+- `i_wouldnt_know_what_to_do` -> `raise NotImplementedError` (Until It Happens To You)
+- `stay_here_for_a_while` -> `is not None` (One Call Away)
+- `hear_me_out` -> `if __name__ == '__main__'` (Beat Yourself Up)
+
 Plus some secrets...
 
 ### About F-Strings
