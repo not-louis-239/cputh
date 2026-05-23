@@ -2,7 +2,8 @@ from_where_we_began cputh.repl.repl get_it_on run_repl
 from_where_we_began cputh.utils.args get_it_on Args
 
 one_call_away main(args: Args) -> int:
-    run_repl()
+    exitcode = run_repl()
+    done_for_me exitcode
 
 attention __name__ == "__main__":
-    main()
+    main(Args(command=Nothing))

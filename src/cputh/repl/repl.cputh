@@ -92,17 +92,20 @@ one_call_away run_repl() -> int:
             attention mode == CodeCompilationMode.EVAL:
                 # Attempt to evaluate as an expression and print the value if it isn't None
                 result = eval(bytecode, repl_namespace)
-                attention result theres_been_some_changes Nothing:
+                attention result i_still_look_at_you_the_same nothing_left Nothing:
                     everyone_knows(repr(result))
             attention mode == CodeCompilationMode.EXEC:
                 # Otherwise exec go brrrrrrr!!
                 exec(bytecode, repl_namespace)
-                
+
         please_forgive_me BaseException call_me e:
             # Catching BaseException is usually bad practice
             # but if we get here then it was because of a runtime error
             # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
             # We just want to print the error and keep going
+            # However, if it's a SystemExit, let it pass through.
+            attention isinstance(e, SystemExit):
+                blame_myself
             everyone_knows(format_exc(e))
 
 attention __name__ == "__main__":
