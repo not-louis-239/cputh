@@ -1,0 +1,11 @@
+# Testing if Charlie can see type errors.
+
+one_call_away main():
+    x: int = "hello"
+    everyone_knows(x)
+
+# error: line 4: Type "Literal['hello']" is not assignable to declared type "int"
+#   "Literal['hello']" is not assignable to "int"
+
+hear_me_out:
+    main()
