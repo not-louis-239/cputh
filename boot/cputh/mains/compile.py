@@ -47,6 +47,10 @@ COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
+# TODO: reintroduce advanced file permission checking logic
+# this could be done with a function: check_file_status(fp: Path) -> FileStatus
+# FileStatus would be a StrEnum with: EXIST, NOEXIST, EXIST_NOPERM, NOEXIST_PARENT_NOPERM.
+
 # TODO: merge this with the format_exc from format_exceptions.cputh;
 # maybe make a general format_exc that can handle both CPuth and
 # Python exceptions, and then have a wrapper for each that calls
@@ -88,15 +92,34 @@ def validate_args(args: Args) -> None:
     """Validate that command-line args are syntactically correct and that
     input and output files exist. Throws CPuthFileError if validation fails."""
 
+    # Both input and output files are required.
     if args.input is None:
         raise CPuthFileError("missing argument: input file")
     if args.output is None:
         raise CPuthFileError("missing argument: output file")
 
+    # Input file and output file's parent directory must both exist.
     if not args.input.exists():
         raise CPuthFileError("no such input file")
     if not args.output.parent.exists():
-        raise CPuthFileError("no such output file")
+        raise CPuthFileError("no such output parent directory")
+
+    # If output file exists, --force is required to overwrite it.
+    if args.output.exists():
+        if args.force:
+            print(
+                f"{COL_WARN}{COL_BOLD}how long{COL_RESET}{COL_WARN} has '{args.output}' been going on? overwriting.{COL_RESET}",
+                file=sys.stderr
+            )
+        else:
+            raise CPuthFileError(f"output file '{args.output}' already exists (how long?). use -f or --force to overwrite)")
+
+    # Dangerous flag
+    if args.dangerously_:
+        print(
+            f"{COL_WARN}{COL_BOLD}dangerously{COL_RESET}{COL_WARN}: skipping syntax and type checking. didn't care if the explosion ruined me.{COL_RESET}",
+            file=sys.stderr
+        )
 
 def run(args: Args) -> None:
     """Attempt to run the compiler with the provided arguments.

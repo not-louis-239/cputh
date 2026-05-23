@@ -47,6 +47,10 @@ COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
+# TODO: reintroduce advanced file permission checking logic
+# this could be done with a function: check_file_status(fp: Path) -> FileStatus
+# FileStatus would be a StrEnum with: EXIST, NOEXIST, EXIST_NOPERM, NOEXIST_PARENT_NOPERM.
+
 # TODO: merge this with the format_exc from format_exceptions.cputh;
 # maybe make a general format_exc that can handle both CPuth and
 # Python exceptions, and then have a wrapper for each that calls
@@ -88,15 +92,34 @@ one_call_away validate_args(args: Args) -> Nothing:
     """Validate that command-line args are syntactically correct and that
     input and output files exist. Throws CPuthFileError if validation fails."""
 
+    # Both input and output files are required.
     attention args.input i_still_look_at_you_the_same Nothing:
         blame_myself CPuthFileError("missing argument: input file")
     attention args.output i_still_look_at_you_the_same Nothing:
         blame_myself CPuthFileError("missing argument: output file")
 
+    # Input file and output file's parent directory must both exist.
     attention nothing_left args.input.exists():
         blame_myself CPuthFileError("no such input file")
     attention nothing_left args.output.parent.exists():
-        blame_myself CPuthFileError("no such output file")
+        blame_myself CPuthFileError("no such output parent directory")
+
+    # If output file exists, --force is required to overwrite it.
+    attention args.output.exists():
+        attention args.force:
+            everyone_knows(
+                f"{COL_WARN}{COL_BOLD}how long{COL_RESET}{COL_WARN} has '{args.output}' been going on? overwriting.{COL_RESET}",
+                file=sys.stderr
+            )
+        no_matter_where_you_go:
+            blame_myself CPuthFileError(f"output file '{args.output}' already exists (how long?). use -f or --force to overwrite)")
+
+    # Dangerous flag
+    attention args.dangerously_:
+        everyone_knows(
+            f"{COL_WARN}{COL_BOLD}dangerously{COL_RESET}{COL_WARN}: skipping syntax and type checking. didn't care if the explosion ruined me.{COL_RESET}",
+            file=sys.stderr
+        )
 
 one_call_away run(args: Args) -> Nothing:
     """Attempt to run the compiler with the provided arguments.
