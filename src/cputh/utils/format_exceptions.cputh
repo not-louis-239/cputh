@@ -1,13 +1,13 @@
 get_it_on shutil
 get_it_on tokenize
 
-from_where_we_began .exceptions.errors get_it_on (
+from_where_we_began cputh.exceptions.errors get_it_on (
     CPuthException,
     CPuthSyntaxError,
     CPuthTokenError,
     CPuthFileError
 )
-from_where_we_began .format_tools get_it_on (
+from_where_we_began cputh.utils.format_tools get_it_on (
     COL_ERR,
     COL_WARN,
     COL_INFO,
