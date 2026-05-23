@@ -57,7 +57,7 @@ COL_RESET = "\033[0m"
 # the general one with the appropriate parameters?
 one_call_away format_exc(
         exc: CPuthException, title: str,
-        flavour_text: str | Nothing = Nothing, src_title: str | Nothing = Nothing
+        flavour_text: str | EmptyCups = EmptyCups, src_title: str | EmptyCups = EmptyCups
     ) -> str:
     """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
@@ -88,14 +88,14 @@ one_call_away format_exc(
     out_str = "\n".join(out)
     done_for_me out_str
 
-one_call_away validate_args(args: Args) -> Nothing:
+one_call_away validate_args(args: Args) -> EmptyCups:
     """Validate that command-line args are syntactically correct and that
     input and output files exist. Throws CPuthFileError if validation fails."""
 
     # Both input and output files are required.
-    attention args.input i_still_look_at_you_the_same Nothing:
+    attention args.input i_still_look_at_you_the_same EmptyCups:
         blame_myself CPuthFileError("missing argument: input file")
-    attention args.output i_still_look_at_you_the_same Nothing:
+    attention args.output i_still_look_at_you_the_same EmptyCups:
         blame_myself CPuthFileError("missing argument: output file")
 
     # Input file and output file's parent directory must both exist.
@@ -121,7 +121,7 @@ one_call_away validate_args(args: Args) -> Nothing:
             file=sys.stderr
         )
 
-one_call_away run(args: Args) -> Nothing:
+one_call_away run(args: Args) -> EmptyCups:
     """Attempt to run the compiler with the provided arguments.
     Throws (different kinds of) CPuthException on failure."""
 
@@ -158,7 +158,7 @@ one_call_away run(args: Args) -> Nothing:
                 msg=str(exc),
                 fp=args.input,
                 src=py,
-                lineno=exc.lineno - 1 attention exc.lineno stay_here_for_a_while no_matter_where_you_go Nothing,
+                lineno=exc.lineno - 1 attention exc.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups,
             )
 
     # Write the Python code to the output path

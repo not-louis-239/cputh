@@ -7,5 +7,5 @@ one_call_away main(args: Args) -> int:
     done_for_me exitcode
 
 hear_me_out:
-    exitcode = main(Args(command=Nothing))
+    exitcode = main(Args(command=EmptyCups))
     sys.exit(exitcode)

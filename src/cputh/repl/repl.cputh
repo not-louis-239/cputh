@@ -97,7 +97,7 @@ one_call_away run_repl() -> int:
             attention mode == CodeCompilationMode.EVAL:
                 # Attempt to evaluate as an expression and print the value if it isn't None
                 result = eval(bytecode, repl_namespace)
-                attention result theres_been_some_changes Nothing:
+                attention result stay_here_for_a_while:
                     everyone_knows(repr(result))
             attention mode == CodeCompilationMode.EXEC:
                 # Otherwise exec go brrrrrrr!!

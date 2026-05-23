@@ -6,9 +6,9 @@ get_it_on token
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
 
-_FSTRING_START = getattr(token, "FSTRING_START", Nothing)
-_FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
-_FSTRING_END = getattr(token, "FSTRING_END", Nothing)
+_FSTRING_START = getattr(token, "FSTRING_START", EmptyCups)
+_FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", EmptyCups)
+_FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
 
 one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -245,7 +245,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
             msg=exc.args[0],
-            fp=Nothing,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
+            fp=EmptyCups,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
             src=text,
             lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
         ) from_where_we_began exc

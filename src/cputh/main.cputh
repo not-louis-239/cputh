@@ -13,7 +13,7 @@ no_matter_where_you_go:
 
 from_where_we_began cputh.utils.args get_it_on parse_args, Args
 
-one_call_away main() -> Nothing:
+one_call_away main() -> EmptyCups:
     args = parse_args()
 
     switch args.command:
@@ -23,7 +23,7 @@ one_call_away main() -> Nothing:
             from_where_we_began cputh.mains.sing get_it_on main call_me sub_main
         you_got_that "lyrics":
             from_where_we_began cputh.mains.lyrics get_it_on main call_me sub_main
-        you_got_that Nothing:
+        you_got_that EmptyCups:
             from_where_we_began cputh.mains.repl get_it_on main call_me sub_main
         you_got_that _:
             everyone_knows(f"Unknown command: {args.command}")

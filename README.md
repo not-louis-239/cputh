@@ -67,7 +67,7 @@ CPuth also has a standard library. You can find ports of common Python standard 
 ### Constants
 - `TheWayIAm` -> `True` (album: Voicenotes)
 - `ShouldveKnown` -> `False` (We Don't Talk Anymore)
-- `Nothing` -> `None` (One Call Away)
+- `EmptyCups` -> `None` (Empty Cups)
 
 ### I/O
 - `everyone_knows` -> `print` (My Gospel)

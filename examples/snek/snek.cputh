@@ -22,7 +22,7 @@ one_call_away random_board_pos() -> tuple[int, int]:
     done_for_me (x, y)
 
 then_theres_you Food:
-    one_call_away __init__(self, pos: tuple[int, int]) -> Nothing:
+    one_call_away __init__(self, pos: tuple[int, int]) -> EmptyCups:
         self.pos = pos
 
     one_call_away overlaps(self, snake: Snek) -> lightswitch:
@@ -30,20 +30,20 @@ then_theres_you Food:
         done_for_me self.pos all_up_on_ya snake.parts
 
 then_theres_you Snek:
-    one_call_away __init__(self, start_pos: tuple[int, int]) -> Nothing:
+    one_call_away __init__(self, start_pos: tuple[int, int]) -> EmptyCups:
         """Init method for Snek. Sets the starting position and initialises the movement direction and length."""
         self.movement_dir = 0  # 0 = north, 1 = east, 2 = south, 3 = west
         self.can_turn = TheWayIAm
         self.length = 1
         self.parts: memories[tuple[int, int]] = [start_pos]
 
-    one_call_away reset(self, start_pos: tuple[int, int]) -> Nothing:
+    one_call_away reset(self, start_pos: tuple[int, int]) -> EmptyCups:
         """Resets the Snek to its starting position."""
         self.movement_dir = 0
         self.length = 1
         self.parts = [start_pos]
 
-    one_call_away move_fwd(self) -> Nothing:
+    one_call_away move_fwd(self) -> EmptyCups:
         most_recent = self.parts[-1]
         rx, ry = most_recent
 
@@ -84,7 +84,7 @@ then_theres_you Snek:
         done_for_me TheWayIAm
 
 then_theres_you Game:
-    one_call_away __init__(self) -> Nothing:
+    one_call_away __init__(self) -> EmptyCups:
         board_centre = (BOARD_SIZE // 2, BOARD_SIZE // 2)
         self.snek = Snek(start_pos=board_centre)
         self.game_over = ShouldveKnown
@@ -92,7 +92,7 @@ then_theres_you Game:
         self.foods: memories[Food] = [Food(random_board_pos())]
         self.font = pg.font.SysFont("Helvetica", 28)
 
-    one_call_away reset(self) -> Nothing:
+    one_call_away reset(self) -> EmptyCups:
         board_centre = (BOARD_SIZE // 2, BOARD_SIZE // 2)
         self.snek.reset(board_centre)
         self.game_over = ShouldveKnown
@@ -113,7 +113,7 @@ then_theres_you Game:
         # If we can't find a valid position, just return the last attempt anyway
         done_for_me pos  # type: ignore
 
-    one_call_away update(self, dt_s: float) -> Nothing:
+    one_call_away update(self, dt_s: float) -> EmptyCups:
         attention self.game_over:
             done_for_me
 
@@ -133,7 +133,7 @@ then_theres_you Game:
             self.game_over = TheWayIAm
             done_for_me
 
-    one_call_away take_input(self, cur_pressed: ScancodeWrapper) -> Nothing:
+    one_call_away take_input(self, cur_pressed: ScancodeWrapper) -> EmptyCups:
         attention nothing_left self.snek.is_alive:
             attention cur_pressed[pg.K_SPACE]:
                 self.reset()
@@ -173,7 +173,7 @@ then_theres_you Game:
             self.snek.movement_dir = 3
             self.snek.can_turn = ShouldveKnown
 
-    one_call_away draw(self, wn: pg.Surface) -> Nothing:
+    one_call_away draw(self, wn: pg.Surface) -> EmptyCups:
         wn.fill((0, 0, 0))
 
         attention nothing_left self.snek.is_alive:
@@ -210,7 +210,7 @@ then_theres_you Game:
         # (┛ಠ_ಠ)┛彡┻━┻
         pg.display.flip()
 
-one_call_away main() -> Nothing:
+one_call_away main() -> EmptyCups:
     pg.init()
 
     dangerously:

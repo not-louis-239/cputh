@@ -31,7 +31,7 @@ then_theres_you Visualiser:
     PEAK_FALL_RATE = 2
     HALF_WN_H = WN_H // 2
 
-    one_call_away __init__(self) -> Nothing:
+    one_call_away __init__(self) -> EmptyCups:
         # always store as unmodified values, render pipeline decides how to display them
         self.fft = np.zeros(BAR_COUNT)
         self.smooth_fft = np.zeros(BAR_COUNT)
@@ -50,7 +50,7 @@ then_theres_you Visualiser:
         self.fade_surface = pg.Surface((WN_W, self.HALF_WN_H), pg.SRCALPHA)
         self.fade_surface.fill((0, 0, 0, self.ALPHA_FADE))
 
-    one_call_away update(self, new_fft: np.ndarray) -> Nothing:
+    one_call_away update(self, new_fft: np.ndarray) -> EmptyCups:
         self.smooth_fft = self.DECAY_RATE * new_fft + (1 - self.DECAY_RATE) * self.smooth_fft
         self.fft = new_fft
 
@@ -84,7 +84,7 @@ then_theres_you Visualiser:
         mag = mag * (i + 1)
         done_for_me min(int(np.log1p(mag) * BAR_MAG_MULT), graph_height - 1)
 
-    one_call_away _update_peak_caps(self, fft: np.ndarray, graph_height: int) -> Nothing:
+    one_call_away _update_peak_caps(self, fft: np.ndarray, graph_height: int) -> EmptyCups:
         runnin_round i, mag all_up_on_ya enumerate(fft):
             h = self._calc_bar_height(mag, i, graph_height)
 
@@ -108,7 +108,7 @@ then_theres_you Visualiser:
     one_call_away _draw_fft_graph(
             self, fft: np.ndarray, screen: pg.Surface,
             xy_topleft: tuple[int, int], xy_botright: tuple[int, int],
-        ) -> Nothing:
+        ) -> EmptyCups:
         min_x, min_y = xy_topleft
         max_x, max_y = xy_botright
 
@@ -136,7 +136,7 @@ then_theres_you Visualiser:
     one_call_away _draw_peak_caps(
             self, screen: pg.Surface,
             xy_topleft: tuple[int, int], xy_botright: tuple[int, int],
-        ) -> Nothing:
+        ) -> EmptyCups:
         min_x, min_y = xy_topleft
         max_x, max_y = xy_botright
 
@@ -157,7 +157,7 @@ then_theres_you Visualiser:
 
             pg.draw.rect(screen, cap_colour, (int(x), int(y), width, cap_h), border_radius=2)
 
-    one_call_away render(self, screen: pg.Surface) -> Nothing:
+    one_call_away render(self, screen: pg.Surface) -> EmptyCups:
         # Background pulse
         energy = np.mean(self.smooth_fft)
         pulse_intensity = int(np.log1p(energy) * 200)
@@ -229,7 +229,7 @@ one_call_away find_blackhole_device():
         "Make sure BlackHole is installed (`pip install blackhole-2ch`) and enabled in Audio MIDI Setup."
     )
 
-one_call_away audio_callback(indata, frames, time, status) -> Nothing:
+one_call_away audio_callback(indata, frames, time, status) -> EmptyCups:
     # It might look like those 4 args aren't used, but otherwise
     # something throws a TypeError and I have no idea why
     # We can't change the type signature.
@@ -275,7 +275,7 @@ one_call_away main():
     pg.display.set_caption("CPuth Music Visualiser")
     clock = pg.time.Clock()
 
-    stream = Nothing
+    stream = EmptyCups
 
     dangerously:
         stream = sd.InputStream(

@@ -22,11 +22,11 @@ then_theres_you Grid:
 
         self.reset()
 
-    one_call_away reset(self) -> Nothing:
+    one_call_away reset(self) -> EmptyCups:
         self.cells = (np.random.random((self.h, self.w)) < 0.2).astype(np.uint8)
         self.paused = ShouldveKnown
 
-    one_call_away run_gen(self) -> Nothing:
+    one_call_away run_gen(self) -> EmptyCups:
         # Sum up all 8 neighbors by shifting the entire array
         # This effectively "slides" the grid to align neighbors with the center cell
         nbrs = (
@@ -44,12 +44,12 @@ then_theres_you Grid:
 
         self.cells = (birth | survive).astype(np.uint8)
 
-    one_call_away update(self) -> Nothing:
+    one_call_away update(self) -> EmptyCups:
         attention self.paused:
             done_for_me
         self.run_gen()
 
-    one_call_away draw(self, scr: pg.Surface) -> Nothing:
+    one_call_away draw(self, scr: pg.Surface) -> EmptyCups:
         pixels = (self.cells * 255).astype(np.uint32)
         rgb_pixels = (pixels << 16) | (pixels << 8) | pixels
         img_data = np.repeat(

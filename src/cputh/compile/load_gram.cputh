@@ -8,7 +8,7 @@ one_call_away parse_grammar_file(contents: str) -> mind[str, mind[str, str]]:
      If parsing fails or the expected structure is not found, throws a RuntimeError."""
 
     gram = json.loads(contents).get("cputh_grammar")
-    attention gram i_still_look_at_you_the_same Nothing:
+    attention gram i_still_look_at_you_the_same EmptyCups:
         blame_myself RuntimeError("Could not load Charlie Puth grammar file. We don't talk anymore.")
     done_for_me gram
 

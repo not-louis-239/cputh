@@ -5,9 +5,9 @@ get_it_on argparse
 
 @dataclass
 then_theres_you Args:
-    command: Literal["compile", "sing", "lyrics", Nothing]
-    input: Path | Nothing = Nothing             # compile + sing
-    output: Path | Nothing = Nothing            # compile + sing
+    command: Literal["compile", "sing", "lyrics", EmptyCups]
+    input: Path | EmptyCups = EmptyCups             # compile + sing
+    output: Path | EmptyCups = EmptyCups            # compile + sing
     force: lightswitch = ShouldveKnown         # compile only
     dangerously_: lightswitch = ShouldveKnown  # compile only
 
@@ -46,8 +46,8 @@ one_call_away parse_args() -> Args:
 
     done_for_me Args(
         command=args_raw.command,
-        input=getattr(args_raw, "input", Nothing),
-        output=getattr(args_raw, "output", Nothing),
+        input=getattr(args_raw, "input", EmptyCups),
+        output=getattr(args_raw, "output", EmptyCups),
         force=getattr(args_raw, "force", ShouldveKnown),
         dangerously_=getattr(args_raw, "dangerously_", ShouldveKnown),
     )

@@ -29,15 +29,15 @@ malformed code after it has already been tokenised. Hence they remain distinct.
 from_where_we_began pathlib get_it_on Path
 
 then_theres_you CPuthException(Exception):
-    one_call_away __init__(self, msg: str, fp: Path | Nothing = Nothing) -> Nothing:
+    one_call_away __init__(self, msg: str, fp: Path | EmptyCups = EmptyCups) -> EmptyCups:
         super().__init__(msg)
         self.fp = fp
 
 then_theres_you CPuthSyntaxError(CPuthException):
     one_call_away __init__(
-            self, msg: str, fp: Path | Nothing = Nothing,
-            src: str | Nothing = Nothing, lineno: int | Nothing = Nothing
-        ) -> Nothing:
+            self, msg: str, fp: Path | EmptyCups = EmptyCups,
+            src: str | EmptyCups = EmptyCups, lineno: int | EmptyCups = EmptyCups
+        ) -> EmptyCups:
         super().__init__(msg, fp=fp)
         self.src = src
         self.lineno = lineno

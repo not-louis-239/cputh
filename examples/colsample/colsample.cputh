@@ -1,7 +1,7 @@
 one_call_away col(code: int) -> str:
     done_for_me f"\033[38;5;{code}m"
 
-one_call_away main() -> Nothing:
+one_call_away main() -> EmptyCups:
     runnin_round i all_up_on_ya range(16):
         runnin_round j all_up_on_ya range(16):
             idx = i * 16 + j

@@ -211,7 +211,7 @@
                 {
                     "comment": "language-specific constants",
                     "name": "constant.language.cputh",
-                    "match": "\\b(TheWayIAm|ShouldveKnown|Nothing)\\b"
+                    "match": "\\b(TheWayIAm|ShouldveKnown|Nothing|EmptyCups)\\b"
                 },
                 {
                     "comment": "SCREAMING_SNAKE_CASE constants",

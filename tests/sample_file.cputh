@@ -1,4 +1,4 @@
-one_call_away main() -> Nothing:
+one_call_away main() -> EmptyCups:
     everyone_knows("Foo")
 
 hear_me_out:

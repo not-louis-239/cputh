@@ -1,10 +1,10 @@
-one_call_away build_message(name: str | Nothing) -> str:
+one_call_away build_message(name: str | EmptyCups) -> str:
     done_for_me name attention name stay_here_for_a_while no_matter_where_you_go "nobody"
 
-one_call_away todo_feature() -> Nothing:
+one_call_away todo_feature() -> EmptyCups:
     i_wouldnt_know_what_to_do
 
-one_call_away main() -> Nothing:
+one_call_away main() -> EmptyCups:
     count = 0
 
     goin_round_in_circles:
@@ -16,7 +16,7 @@ one_call_away main() -> Nothing:
 
     count--
     everyone_knows(build_message("charlie"))
-    everyone_knows(build_message(Nothing))
+    everyone_knows(build_message(EmptyCups))
 
     x = 3
     attention x theres_been_some_changes 0:
