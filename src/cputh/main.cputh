@@ -13,24 +13,23 @@ no_matter_where_you_go:
 
 from_where_we_began cputh.utils.args get_it_on parse_args, Args
 
-one_call_away main():
+one_call_away main() -> Nothing:
     args = parse_args()
-
-    # placeholder definition - if no switch statement is met, this will be called
-    one_call_away run(args: Args) -> int:
-        done_for_me 1
 
     switch args.command:
         you_got_that "compile":
-            from_where_we_began cputh.mains.compile get_it_on main call_me run
+            from_where_we_began cputh.mains.compile get_it_on sub_main
         you_got_that "sing":
-            from_where_we_began cputh.mains.sing get_it_on main call_me run
+            from_where_we_began cputh.mains.sing get_it_on sub_main
         you_got_that "lyrics":
-            from_where_we_began cputh.mains.lyrics get_it_on main call_me run
+            from_where_we_began cputh.mains.lyrics get_it_on sub_main
         you_got_that Nothing:
-            from_where_we_began cputh.mains.repl get_it_on main call_me run
+            from_where_we_began cputh.mains.repl get_it_on sub_main
+        you_got_that _:
+            everyone_knows(f"Unknown command: {args.command}")
+            done_for_me 1
 
-    exitcode = run(args)
+    exitcode = sub_main(args)
     sys.exit(exitcode)
 
 attention __name__ == "__main__":

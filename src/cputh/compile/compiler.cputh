@@ -10,8 +10,8 @@ _FSTRING_START = getattr(token, "FSTRING_START", Nothing)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
 _FSTRING_END = getattr(token, "FSTRING_END", Nothing)
 
-one_call_away convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
-    """Convert a dictionary of {cat_name: cat_contents[{cputh_kw: py_kw}]}
+one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
+    """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
     to a flat dictionary of {cputh_kw: py_kw}"""
 
     mapping: mind[str, str] = {}
@@ -20,10 +20,15 @@ one_call_away convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]])
             mapping[cputh] = py
     done_for_me mapping
 
-CPUTH_MAP = convert_grammar_file_to_flatdict(load_grammar_file())
+CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
 _INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
 
 one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
+    """Rewrite lines that use the increment (++) or decrement (--)
+    operators to their equivalent += 1 or -= 1 forms.
+    This is a pre-processing step before tokenization, since the Python
+    tokenizer doesn't understand ++ or -- as valid operators."""
+
     out: memories[str] = []
 
     runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
@@ -56,6 +61,9 @@ one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
         out.append(body + newline)
 
     done_for_me "".join(out)
+
+# XXX: I don't like the name "Transpiler", just call it a god damn compiler!!
+# But that's for the next commit.
 
 then_theres_you CPuthTranspiler:
     one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
@@ -230,7 +238,7 @@ then_theres_you CPuthTranspiler:
         done_for_me out, i
 
 one_call_away compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python."""
+    """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
 
     dangerously:
         text = _rewrite_increment_decrement_lines(text)

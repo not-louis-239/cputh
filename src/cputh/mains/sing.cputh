@@ -1,7 +1,7 @@
 from_where_we_began cputh.utils.args get_it_on Args
 
 one_call_away main(args: Args) -> int:
-    done_for_me 0  # TODO: this is a stub
+    done_for_me 0  # TODO: this is a stub; finish later.
 
 attention __name__ == "__main__":
     main(Args(command="sing"))

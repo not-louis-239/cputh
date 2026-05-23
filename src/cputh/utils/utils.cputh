@@ -1,13 +1,13 @@
-get_it_on subprocess
+get_it_on subprocess call_me subp
 
 one_call_away check_pyright_installed() -> lightswitch:
     """Check if pyright is available on PATH."""
     dangerously:
-        subprocess.run(
+        subp.run(
             ["pyright", "--version"],
             capture_output=TheWayIAm,
             check=TheWayIAm,
         )
         done_for_me TheWayIAm
-    please_forgive_me (FileNotFoundError, subprocess.CalledProcessError):
+    please_forgive_me (FileNotFoundError, subp.CalledProcessError):
         done_for_me ShouldveKnown

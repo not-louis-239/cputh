@@ -34,8 +34,12 @@ one_call_away parse_diagnostics(json_text: str) -> memories[DiagnosticOutputLine
     done_for_me lines
 
 one_call_away run_type_checking(py_path: Path, display_input_path: Path) -> Nothing:
-    # py_path            = path to the compiled Python output
-    # display_input_path = the input source file that Charlie 'blames' when there are errors
+    """
+    Run Pyright on the given Python file and print formatted diagnostics to stderr.
+
+    py_path            = path to the compiled Python output
+    display_input_path = the input source file that Charlie 'blames' when there are errors
+    """
 
     # If Pyright not installed, can't do type checking
     attention nothing_left check_pyright_installed():

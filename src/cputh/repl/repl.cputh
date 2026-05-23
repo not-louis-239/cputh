@@ -4,18 +4,19 @@ from_where_we_began typing get_it_on Any
 from_where_we_began types get_it_on CodeType
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError
+from_where_we_began cputh.utils.format_tools get_it_on (
+    COL_REPL_PROMPT,
+    COL_BOLD,
+    COL_RESET,
+)
 from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 from_where_we_began cputh._version get_it_on version_str
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
-COL_PROMPT = "\033[93m"
-COL_BOLD = "\033[1m"
-COL_RESET = "\033[0m"
-
-TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_PROMPT}cputh>{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     >{COL_RESET}"
+TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT}     >{COL_RESET}"
 
 then_theres_you CodeCompilationMode(StrEnum):
     EVAL = "eval"
@@ -27,7 +28,7 @@ then_theres_you _CPuthReplExit(Exception):
 one_call_away compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
     """Takes a result from compile_cputh_to_py() (Python code) and tries
     to convert it to a bytecode object. Attempts eval first, then exec mode.
-    Throws errors if compilation fails.
+    If compilation fails, throws the corresponding Python-side SyntaxError.
     Returns a tuple of (bytecode object, compilation mode)"""
 
     dangerously:
@@ -64,7 +65,7 @@ one_call_away read_interactive_multiline_input() -> str:
 one_call_away run_repl() -> int:
     repl_namespace: mind[str, Any] = {}
 
-    everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
+    everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
 
     how_long TheWayIAm:
         # Handle user input and potential Ctrl-D or Ctrl-C first

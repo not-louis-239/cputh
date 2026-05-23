@@ -99,7 +99,11 @@ one_call_away format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     done_for_me "\n".join(out)
 
+# TODO: these format functions are stubs right now. Finish later.
+
 one_call_away _format_non_runtime_err(exc: BaseException) -> str:
+    # TODO: Show code view (the function's already there!)
+
     attention str(exc):
         footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
     no_matter_where_you_go:
@@ -111,6 +115,8 @@ one_call_away _format_non_runtime_err(exc: BaseException) -> str:
     )
 
 one_call_away _format_runtime_err(exc: BaseException) -> str:
+    # TODO: Show all frames in traceback.
+
     attention str(exc):
         footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
     no_matter_where_you_go:

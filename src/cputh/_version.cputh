@@ -1,6 +1,5 @@
+# _version.cputh
+# if this was placed in __init__, welcome ImportError and import hell
+
 __version__: tuple[int, int, int] = (0, 3, 1)  # (major, minor, patch)
-
-one_call_away _make_version_str() -> str:
-    done_for_me ".".join(str(n) runnin_round n all_up_on_ya __version__)
-
-version_str = _make_version_str()
+version_str = ".".join(str(n) runnin_round n all_up_on_ya __version__)

@@ -1,3 +1,5 @@
+get_it_on sys
+
 from_where_we_began cputh.utils.args get_it_on Args
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
 from_where_we_began cputh.utils.format_tools get_it_on (
@@ -40,4 +42,5 @@ one_call_away main(args: Args) -> int:
     done_for_me 0
 
 attention __name__ == "__main__":
-    main(Args(command="lyrics"))
+    exitcode = main(Args(command="lyrics"))
+    sys.exit(exitcode)
