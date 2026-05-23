@@ -1,5 +1,9 @@
 # cputh v0.3.1
 
+<p align="center">
+  <img src="./docs/cputh_logo.png" alt="CPuth Logo" width="180">
+</p>
+
 You just want attention, you don't want my error. Maybe you just hate the thought of line 42. 
 
 Python but all the keywords are Charlie Puth lyrics. Inspired by the man the myth the legend's new album, *Changes*, and the personality injection of ArnoldC, now the compiler has feelings about that extra space, and the REPL cries in falsetto. On top of that, the CPuth compiler is written in CPuth, because why not?
