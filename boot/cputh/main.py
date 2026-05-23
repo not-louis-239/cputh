@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Literal
 from dataclasses import dataclass
 
-if (distribution := Path(__file__).parents[2] / "dist").exists():
-    sys.path.insert(0, str(distribution))
-elif (bootstrap := Path(__file__).parents[2] / "boot").exists():
+if (bootstrap := Path(__file__).parents[2] / "boot").exists():
     sys.path.insert(0, str(bootstrap))
+elif (distribution := Path(__file__).parents[2] / "dist").exists():
+    sys.path.insert(0, str(distribution))
 else:
     raise RuntimeError("Could not find distribution or bootstrap directory. We don't talk anymore.")
 

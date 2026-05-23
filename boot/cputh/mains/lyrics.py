@@ -18,7 +18,7 @@ def main(args: Args) -> int:
     print(f"charlie puth native help (v{version_str}) - you just want attention, you don't want my error; maybe you just hate the thought of line 42")
     print(f"\nleft side  = {COL_KW_CPUTH}cputh{COL_RESET}")
     print(f"right side = {COL_KW_PY}python{COL_RESET}")
-    print(f"\nAs of CPuth v0.3.1, using Nothing as None is deprecated; use EmptyCups instead.\nThe 'Nothing' keyword will be removed in v0.5.0")
+    print(f"\nAs of CPuth v0.3.1+, using Nothing as None is deprecated; use EmptyCups instead.\nThe 'Nothing' keyword will be removed in v0.5.0")
 
     gram = load_grammar_file()
 

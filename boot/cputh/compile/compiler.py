@@ -62,16 +62,13 @@ def _rewrite_increment_decrement_lines(text: str) -> str:
 
     return "".join(out)
 
-# XXX: I don't like the name "Transpiler", just call it a god damn compiler!!
-# But that's for the next commit.
-
-class CPuthTranspiler:
-    def _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
+class CPuthCompiler:
+    def _compile_name_token(self, tok: tokenize.TokenInfo, cputh_map: dict[str, str]) -> tokenize.TokenInfo:
         if tok.type != token.NAME:
             return tok
         return tok._replace(string=cputh_map.get(tok.string, tok.string))
 
-    def _transpile_fstring(
+    def _compile_fstring(
             self,
             tokens: list[tokenize.TokenInfo],
             cputh_map: dict[str, str],
@@ -89,7 +86,7 @@ class CPuthTranspiler:
                 continue
 
             if tok.type == token.OP and tok.string == "{":
-                field_tokens, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                field_tokens, i = self._compile_replacement_field(tokens, cputh_map, i)
                 out.extend(field_tokens)
                 continue
 
@@ -97,12 +94,12 @@ class CPuthTranspiler:
                 out.append(tok)
                 return out, i + 1
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         raise CPuthSyntaxError("unterminated f-string")
 
-    def _transpile_replacement_field(
+    def _compile_replacement_field(
             self,
             tokens: list[tokenize.TokenInfo],
             cputh_map: dict[str, str],
@@ -116,7 +113,7 @@ class CPuthTranspiler:
             tok = tokens[i]
 
             if tok.type == _FSTRING_START:
-                nested_fstring, i = self._transpile_fstring(tokens, cputh_map, i)
+                nested_fstring, i = self._compile_fstring(tokens, cputh_map, i)
                 out.extend(nested_fstring)
                 continue
 
@@ -139,7 +136,7 @@ class CPuthTranspiler:
 
                 if nesting == 0 and tok.string == "=":
                     out.append(tok)
-                    return self._transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
+                    return self._compile_replacement_field_tail(tokens, cputh_map, out, i + 1)
 
                 if nesting == 0 and tok.string == "!":
                     out.append(tok)
@@ -147,18 +144,18 @@ class CPuthTranspiler:
                     if i < len(tokens):
                         out.append(tokens[i])
                         i += 1
-                    return self._transpile_format_spec(tokens, cputh_map, out, i)
+                    return self._compile_format_spec(tokens, cputh_map, out, i)
 
                 if nesting == 0 and tok.string == ":":
                     out.append(tok)
-                    return self._transpile_format_spec(tokens, cputh_map, out, i + 1)
+                    return self._compile_format_spec(tokens, cputh_map, out, i + 1)
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         raise CPuthSyntaxError("unterminated f-string replacement field")
 
-    def _transpile_replacement_field_tail(
+    def _compile_replacement_field_tail(
             self,
             tokens: list[tokenize.TokenInfo],
             cputh_map: dict[str, str],
@@ -176,7 +173,7 @@ class CPuthTranspiler:
 
         if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == ":":
             out.append(tokens[i])
-            return self._transpile_format_spec(tokens, cputh_map, out, i + 1)
+            return self._compile_format_spec(tokens, cputh_map, out, i + 1)
 
         if i < len(tokens) and tokens[i].type == token.OP and tokens[i].string == "}":
             out.append(tokens[i])
@@ -184,7 +181,7 @@ class CPuthTranspiler:
 
         raise CPuthSyntaxError("invalid f-string replacement field")
 
-    def _transpile_format_spec(
+    def _compile_format_spec(
             self,
             tokens: list[tokenize.TokenInfo],
             cputh_map: dict[str, str],
@@ -202,7 +199,7 @@ class CPuthTranspiler:
                 continue
 
             if tok.type == token.OP and tok.string == "{":
-                nested_field, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                nested_field, i = self._compile_replacement_field(tokens, cputh_map, i)
                 out.extend(nested_field)
                 continue
 
@@ -210,12 +207,12 @@ class CPuthTranspiler:
                 out.append(tok)
                 return out, i + 1
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         raise CPuthSyntaxError("unterminated f-string format specifier")
 
-    def transpile_tokens(
+    def compile_tokens(
             self,
             tokens: list[tokenize.TokenInfo],
             cputh_map: dict[str, str],
@@ -228,11 +225,11 @@ class CPuthTranspiler:
             tok = tokens[i]
 
             if tok.type == _FSTRING_START:
-                fstring_tokens, i = self._transpile_fstring(tokens, cputh_map, i)
+                fstring_tokens, i = self._compile_fstring(tokens, cputh_map, i)
                 out.extend(fstring_tokens)
                 continue
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         return out, i
@@ -243,7 +240,7 @@ def compile_cputh_to_py(text: str) -> str:
     try:
         text = _rewrite_increment_decrement_lines(text)
         tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
-        translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
+        translated, _ = CPuthCompiler().compile_tokens(tokens, CPUTH_MAP)
         return tokenize.untokenize(translated)
     except tokenize.TokenError as exc:
         raise CPuthTokenError(
