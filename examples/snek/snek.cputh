@@ -127,7 +127,7 @@ then_theres_you Game:
         runnin_round food all_up_on_ya self.foods:
             attention self.snek.parts[-1] == food.pos:
                 food.pos = self.get_valid_food_spawn(snek=self.snek, foods=self.foods)
-                self.snek.length += 1
+                self.snek.length++
 
         attention nothing_left self.snek.is_alive:
             self.game_over = TheWayIAm
@@ -219,7 +219,7 @@ one_call_away main() -> Nothing:
         wn = pg.display.set_mode((WN_SIZE, WN_SIZE))
         pg.display.set_caption("Snek Game in CPuth")
 
-        how_long TheWayIAm:
+        goin_round_in_circles:
             dt_s = clock.tick(FPS) / 1_000
             events = pg.event.get()
             keys = pg.key.get_pressed()
@@ -237,5 +237,5 @@ one_call_away main() -> Nothing:
 
     pg.quit()
 
-attention __name__ == "__main__":
+hear_me_out:
     main()

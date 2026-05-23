@@ -65,7 +65,7 @@ one_call_away main():
     grid = Grid(SIM_W, SIM_H)
     clock = pg.time.Clock()
 
-    how_long TheWayIAm:
+    goin_round_in_circles:
         runnin_round event all_up_on_ya pg.event.get():
             attention event.type == pg.QUIT:
                 done_for_me
@@ -82,5 +82,5 @@ one_call_away main():
         grid.draw(screen)
         pg.display.flip()
 
-attention __name__ == "__main__":
+hear_me_out:
     main()

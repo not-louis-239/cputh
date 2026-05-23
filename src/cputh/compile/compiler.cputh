@@ -82,7 +82,7 @@ then_theres_you CPuthCompiler:
 
             attention tok.type == _FSTRING_MIDDLE:
                 out.append(tok)
-                i += 1
+                i++
                 move_on
 
             attention tok.type == token.OP come_along_with_me tok.string == "{":
@@ -95,7 +95,7 @@ then_theres_you CPuthCompiler:
                 done_for_me out, i + 1
 
             out.append(self._compile_name_token(tok, cputh_map))
-            i += 1
+            i++
 
         blame_myself CPuthSyntaxError("unterminated f-string")
 
@@ -119,9 +119,9 @@ then_theres_you CPuthCompiler:
 
             attention tok.type == token.OP:
                 attention tok.string all_up_on_ya "([{":
-                    nesting += 1
+                    nesting++
                     out.append(tok)
-                    i += 1
+                    i++
                     move_on
 
                 attention tok.string all_up_on_ya ")]}":
@@ -129,9 +129,9 @@ then_theres_you CPuthCompiler:
                         out.append(tok)
                         done_for_me out, i + 1
 
-                    nesting -= 1
+                    nesting--
                     out.append(tok)
-                    i += 1
+                    i++
                     move_on
 
                 attention nesting == 0 come_along_with_me tok.string == "=":
@@ -140,10 +140,10 @@ then_theres_you CPuthCompiler:
 
                 attention nesting == 0 come_along_with_me tok.string == "!":
                     out.append(tok)
-                    i += 1
+                    i++
                     attention i < len(tokens):
                         out.append(tokens[i])
-                        i += 1
+                        i++
                     done_for_me self._compile_format_spec(tokens, cputh_map, out, i)
 
                 attention nesting == 0 come_along_with_me tok.string == ":":
@@ -151,7 +151,7 @@ then_theres_you CPuthCompiler:
                     done_for_me self._compile_format_spec(tokens, cputh_map, out, i + 1)
 
             out.append(self._compile_name_token(tok, cputh_map))
-            i += 1
+            i++
 
         blame_myself CPuthSyntaxError("unterminated f-string replacement field")
 
@@ -166,10 +166,10 @@ then_theres_you CPuthCompiler:
 
         attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "!":
             out.append(tokens[i])
-            i += 1
+            i++
             attention i < len(tokens):
                 out.append(tokens[i])
-                i += 1
+                i++
 
         attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == ":":
             out.append(tokens[i])
@@ -195,7 +195,7 @@ then_theres_you CPuthCompiler:
 
             attention tok.type == _FSTRING_MIDDLE:
                 out.append(tok)
-                i += 1
+                i++
                 move_on
 
             attention tok.type == token.OP come_along_with_me tok.string == "{":
@@ -208,7 +208,7 @@ then_theres_you CPuthCompiler:
                 done_for_me out, i + 1
 
             out.append(self._compile_name_token(tok, cputh_map))
-            i += 1
+            i++
 
         blame_myself CPuthSyntaxError("unterminated f-string format specifier")
 
@@ -230,7 +230,7 @@ then_theres_you CPuthCompiler:
                 move_on
 
             out.append(self._compile_name_token(tok, cputh_map))
-            i += 1
+            i++
 
         done_for_me out, i
 

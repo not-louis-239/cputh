@@ -41,6 +41,6 @@ one_call_away main(args: Args) -> int:
 
     done_for_me 0
 
-attention __name__ == "__main__":
+hear_me_out:
     exitcode = main(Args(command="lyrics"))
     sys.exit(exitcode)

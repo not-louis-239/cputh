@@ -7,5 +7,5 @@ one_call_away main():
     i--
     everyone_knows(f"i is now: {i}")
 
-attention __name__ == "__main__":
+hear_me_out:
     main()

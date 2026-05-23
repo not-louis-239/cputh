@@ -68,12 +68,12 @@ one_call_away format_exc(
     out.append(err_header)
 
     # File and line number
-    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
-        attention exc.fp i_still_look_at_you_the_same nothing_left Nothing:
+    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.lineno stay_here_for_a_while:
+        attention exc.fp stay_here_for_a_while:
             out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
         no_matter_where_you_go:
             out.append(f"line {exc.lineno + 1}")
-    left_right_left exc.fp i_still_look_at_you_the_same nothing_left Nothing:
+    left_right_left exc.fp stay_here_for_a_while:
         out.append(f"file: '{exc.fp}'")
 
     # Flavour text
@@ -81,7 +81,7 @@ one_call_away format_exc(
         out.append(flavour_text)
 
     # Code view
-    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.src i_still_look_at_you_the_same nothing_left Nothing come_along_with_me exc.lineno i_still_look_at_you_the_same nothing_left Nothing:
+    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.src stay_here_for_a_while come_along_with_me exc.lineno stay_here_for_a_while:
         out.append(f"\ncode ({src_title}):")
         out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
 
@@ -132,8 +132,8 @@ one_call_away run(args: Args) -> Nothing:
     # Static analysers are like those old stickler teachers who would make you write
     # "I will not talk in class" 100 times on the board, except instead of talking
     # in class, it's "I will check for None before accessing this variable" 100 times on the code.
-    promise_me args.input i_still_look_at_you_the_same nothing_left Nothing
-    promise_me args.output i_still_look_at_you_the_same nothing_left Nothing
+    promise_me args.input stay_here_for_a_while
+    promise_me args.output stay_here_for_a_while
 
     dangerously:
         stay_with_me open(args.input, "r", encoding="utf-8") call_me f:
@@ -158,7 +158,7 @@ one_call_away run(args: Args) -> Nothing:
                 msg=str(exc),
                 fp=args.input,
                 src=py,
-                lineno=exc.lineno - 1 attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing no_matter_where_you_go Nothing,
+                lineno=exc.lineno - 1 attention exc.lineno stay_here_for_a_while no_matter_where_you_go Nothing,
             )
 
     # Write the Python code to the output path

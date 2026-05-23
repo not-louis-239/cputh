@@ -39,5 +39,5 @@ one_call_away sing() -> str:
         f"{accented('I knew from the start')} you'd use {accented('global')}.",
     ])
 
-attention __name__ == "__main__":
+hear_me_out:
     everyone_knows(sing())

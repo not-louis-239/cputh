@@ -26,5 +26,5 @@ one_call_away main() -> Nothing:
     everyone_knows(mystery["key"])  # how long has this been going on?
     everyone_knows(maybe_name(ShouldveKnown))
 
-attention __name__ == "__main__":  # you just want attention
+hear_me_out:  # you just want attention
     main()

@@ -8,5 +8,5 @@ one_call_away main() -> Nothing:
             everyone_knows(f"{col(idx)}{idx:03}", end=' ')
         everyone_knows()
 
-attention __name__ == "__main__":
+hear_me_out:
     main()

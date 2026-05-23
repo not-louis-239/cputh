@@ -6,6 +6,6 @@ one_call_away main(args: Args) -> int:
     exitcode = run_repl()
     done_for_me exitcode
 
-attention __name__ == "__main__":
+hear_me_out:
     exitcode = main(Args(command=Nothing))
     sys.exit(exitcode)
