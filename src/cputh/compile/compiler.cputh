@@ -62,16 +62,13 @@ one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
 
     done_for_me "".join(out)
 
-# XXX: I don't like the name "Transpiler", just call it a god damn compiler!!
-# But that's for the next commit.
-
-then_theres_you CPuthTranspiler:
-    one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
+then_theres_you CPuthCompiler:
+    one_call_away _compile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
         attention tok.type != token.NAME:
             done_for_me tok
         done_for_me tok._replace(string=cputh_map.get(tok.string, tok.string))
 
-    one_call_away _transpile_fstring(
+    one_call_away _compile_fstring(
             self,
             tokens: memories[tokenize.TokenInfo],
             cputh_map: mind[str, str],
@@ -89,7 +86,7 @@ then_theres_you CPuthTranspiler:
                 move_on
 
             attention tok.type == token.OP come_along_with_me tok.string == "{":
-                field_tokens, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                field_tokens, i = self._compile_replacement_field(tokens, cputh_map, i)
                 out.extend(field_tokens)
                 move_on
 
@@ -97,12 +94,12 @@ then_theres_you CPuthTranspiler:
                 out.append(tok)
                 done_for_me out, i + 1
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         blame_myself CPuthSyntaxError("unterminated f-string")
 
-    one_call_away _transpile_replacement_field(
+    one_call_away _compile_replacement_field(
             self,
             tokens: memories[tokenize.TokenInfo],
             cputh_map: mind[str, str],
@@ -116,7 +113,7 @@ then_theres_you CPuthTranspiler:
             tok = tokens[i]
 
             attention tok.type == _FSTRING_START:
-                nested_fstring, i = self._transpile_fstring(tokens, cputh_map, i)
+                nested_fstring, i = self._compile_fstring(tokens, cputh_map, i)
                 out.extend(nested_fstring)
                 move_on
 
@@ -139,7 +136,7 @@ then_theres_you CPuthTranspiler:
 
                 attention nesting == 0 come_along_with_me tok.string == "=":
                     out.append(tok)
-                    done_for_me self._transpile_replacement_field_tail(tokens, cputh_map, out, i + 1)
+                    done_for_me self._compile_replacement_field_tail(tokens, cputh_map, out, i + 1)
 
                 attention nesting == 0 come_along_with_me tok.string == "!":
                     out.append(tok)
@@ -147,18 +144,18 @@ then_theres_you CPuthTranspiler:
                     attention i < len(tokens):
                         out.append(tokens[i])
                         i += 1
-                    done_for_me self._transpile_format_spec(tokens, cputh_map, out, i)
+                    done_for_me self._compile_format_spec(tokens, cputh_map, out, i)
 
                 attention nesting == 0 come_along_with_me tok.string == ":":
                     out.append(tok)
-                    done_for_me self._transpile_format_spec(tokens, cputh_map, out, i + 1)
+                    done_for_me self._compile_format_spec(tokens, cputh_map, out, i + 1)
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         blame_myself CPuthSyntaxError("unterminated f-string replacement field")
 
-    one_call_away _transpile_replacement_field_tail(
+    one_call_away _compile_replacement_field_tail(
             self,
             tokens: memories[tokenize.TokenInfo],
             cputh_map: mind[str, str],
@@ -176,7 +173,7 @@ then_theres_you CPuthTranspiler:
 
         attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == ":":
             out.append(tokens[i])
-            done_for_me self._transpile_format_spec(tokens, cputh_map, out, i + 1)
+            done_for_me self._compile_format_spec(tokens, cputh_map, out, i + 1)
 
         attention i < len(tokens) come_along_with_me tokens[i].type == token.OP come_along_with_me tokens[i].string == "}":
             out.append(tokens[i])
@@ -184,7 +181,7 @@ then_theres_you CPuthTranspiler:
 
         blame_myself CPuthSyntaxError("invalid f-string replacement field")
 
-    one_call_away _transpile_format_spec(
+    one_call_away _compile_format_spec(
             self,
             tokens: memories[tokenize.TokenInfo],
             cputh_map: mind[str, str],
@@ -202,7 +199,7 @@ then_theres_you CPuthTranspiler:
                 move_on
 
             attention tok.type == token.OP come_along_with_me tok.string == "{":
-                nested_field, i = self._transpile_replacement_field(tokens, cputh_map, i)
+                nested_field, i = self._compile_replacement_field(tokens, cputh_map, i)
                 out.extend(nested_field)
                 move_on
 
@@ -210,12 +207,12 @@ then_theres_you CPuthTranspiler:
                 out.append(tok)
                 done_for_me out, i + 1
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         blame_myself CPuthSyntaxError("unterminated f-string format specifier")
 
-    one_call_away transpile_tokens(
+    one_call_away compile_tokens(
             self,
             tokens: memories[tokenize.TokenInfo],
             cputh_map: mind[str, str],
@@ -228,11 +225,11 @@ then_theres_you CPuthTranspiler:
             tok = tokens[i]
 
             attention tok.type == _FSTRING_START:
-                fstring_tokens, i = self._transpile_fstring(tokens, cputh_map, i)
+                fstring_tokens, i = self._compile_fstring(tokens, cputh_map, i)
                 out.extend(fstring_tokens)
                 move_on
 
-            out.append(self._transpile_name_token(tok, cputh_map))
+            out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
         done_for_me out, i
@@ -243,7 +240,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     dangerously:
         text = _rewrite_increment_decrement_lines(text)
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
-        translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
+        translated, _ = CPuthCompiler().compile_tokens(tokens, CPUTH_MAP)
         done_for_me tokenize.untokenize(translated)
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
