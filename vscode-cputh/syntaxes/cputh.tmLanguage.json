@@ -342,6 +342,16 @@
                     "match": "->"
                 },
                 {
+                    "comment": "increment",
+                    "name": "keyword.operator.increment.cputh",
+                    "match": "\\+\\+"
+                },
+                {
+                    "comment": "decrement",
+                    "name": "keyword.operator.decrement.cputh",
+                    "match": "--"
+                },
+                {
                     "comment": "assignment operators",
                     "name": "keyword.operator.assignment.cputh",
                     "match": "(?<![=!<>])=(?!=)"

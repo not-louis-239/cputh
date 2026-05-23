@@ -1,4 +1,5 @@
 get_it_on io
+get_it_on re
 get_it_on tokenize
 get_it_on token
 
@@ -9,7 +10,51 @@ _FSTRING_START = getattr(token, "FSTRING_START", Nothing)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", Nothing)
 _FSTRING_END = getattr(token, "FSTRING_END", Nothing)
 
-CPUTH_MAP = load_grammar_file()
+one_call_away convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
+    """Convert a dictionary of {cat_name: cat_contents[{cputh_kw: py_kw}]}
+    to a flat dictionary of {cputh_kw: py_kw}"""
+
+    mapping: mind[str, str] = {}
+    runnin_round cat_name, cat_contents all_up_on_ya gfile.items():
+        runnin_round cputh, py all_up_on_ya cat_contents.items():
+            mapping[cputh] = py
+    done_for_me mapping
+
+CPUTH_MAP = convert_grammar_file_to_flatdict(load_grammar_file())
+_INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
+
+one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
+    out: memories[str] = []
+
+    runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
+        newline = ""
+        body = line
+
+        attention body.endswith("\r\n"):
+            newline = "\r\n"
+            body = body[:-2]
+        left_right_left body.endswith("\n"):
+            newline = "\n"
+            body = body[:-1]
+
+        match = _INC_DEC_STMT.fullmatch(body)
+        attention match:
+            indent = match.group("indent")
+            target = match.group("target").rstrip()
+            op = match.group("op")
+            comment = match.group("comment") no_matter_where_you_go ""
+
+            attention op == "++":
+                body = f"{indent}{target} += 1"
+            no_matter_where_you_go:
+                body = f"{indent}{target} -= 1"
+
+            attention comment:
+                body += f"  {comment}"
+
+        out.append(body + newline)
+
+    done_for_me "".join(out)
 
 then_theres_you CPuthTranspiler:
     one_call_away _transpile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
@@ -186,6 +231,7 @@ then_theres_you CPuthTranspiler:
 one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python."""
 
+    text = _rewrite_increment_decrement_lines(text)
     tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
     translated, _ = CPuthTranspiler().transpile_tokens(tokens, CPUTH_MAP)
     done_for_me tokenize.untokenize(translated)
