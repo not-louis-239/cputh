@@ -53,7 +53,8 @@
         "constants": {
             "TheWayIAm": "True",
             "ShouldveKnown": "False",
-            "Nothing": "None"
+            "Nothing": "None",
+            "EmptyCups": "None"
         },
         "i/o": {
             "everyone_knows": "print",

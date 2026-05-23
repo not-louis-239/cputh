@@ -29,6 +29,9 @@ from_where_we_began pathlib get_it_on Path
 
 sys.path.insert(0, str(Path(__file__).parents[3] / "dist"))
 
+from_where_we_began cputh.utils.format_exceptions get_it_on format_code_view
+from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
+from_where_we_began cputh.compile.type_check get_it_on run_type_checking
 from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
 from_where_we_began cputh.utils.args get_it_on Args
 from_where_we_began cputh.exceptions.errors get_it_on (
@@ -91,13 +94,16 @@ one_call_away validate_args(args: Args) -> Nothing:
 one_call_away run(args: Args) -> Nothing:
     validate_args(args)
 
+    promise_me args.input i_still_look_at_you_the_same nothing_left Nothing
+    promise_me args.output i_still_look_at_you_the_same nothing_left Nothing
+
     dangerously:
-        stay_with_me open(args.input_path, "r", encoding="utf-8") call_me f:
+        stay_with_me open(args.input, "r", encoding="utf-8") call_me f:
             cputh = f.read()
     please_forgive_me UnicodeDecodeError:
         blame_myself CPuthSyntaxError(
-            f"cannot read from input: invalid source encoding: '{args.input_path}'",
-            fp=args.input_path
+            f"cannot read from input: invalid source encoding: '{args.input}'",
+            fp=args.input
         )
 
     dangerously:
@@ -105,7 +111,7 @@ one_call_away run(args: Args) -> Nothing:
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
             msg=exc.args[0],
-            fp=args.input_path,
+            fp=args.input,
             src=cputh,
             lineno=exc.args[1][0] - 1,
         ) from_where_we_began exc
@@ -114,11 +120,11 @@ one_call_away run(args: Args) -> Nothing:
     # If the Python is syntactically incorrect, early abort
     attention nothing_left args.dangerously_:
         dangerously:
-            compile(py, args.input_path.name, mode="exec")
+            compile(py, args.input.name, mode="exec")
         please_forgive_me SyntaxError call_me exc:
             blame_myself CPuthSyntaxError(
                 msg=str(exc),
-                fp=args.input_path,
+                fp=args.input,
                 src=py,
                 lineno=exc.lineno - 1 attention exc.lineno i_still_look_at_you_the_same nothing_left Nothing no_matter_where_you_go Nothing,
             )
@@ -126,10 +132,10 @@ one_call_away run(args: Args) -> Nothing:
     # Type checking
     # Use a temporary file; subprocess doesn't behave consistently on reading from stdin
     attention nothing_left args.dangerously_:
-        run_type_checking(py_path=args.output_path, display_input_path=args.input_path)
+        run_type_checking(py_path=args.output, display_input_path=args.input)
 
     # Finally write the Python code to the output path
-    stay_with_me open(args.output_path, "w", encoding="utf-8") call_me f:
+    stay_with_me open(args.output, "w", encoding="utf-8") call_me f:
         f.write(py)
 
 one_call_away main(args: Args) -> int:
