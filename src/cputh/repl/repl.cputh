@@ -1,5 +1,7 @@
 get_it_on sys
+from_where_we_began enum get_it_on StrEnum
 from_where_we_began typing get_it_on Any
+from_where_we_began types get_it_on CodeType
 
 from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 from_where_we_began cputh._version get_it_on version_str
@@ -14,16 +16,36 @@ COL_RESET = "\033[0m"
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_PROMPT}cputh>{COL_RESET}"
 NESTED_PROMPT =    f"{COL_BOLD}{COL_PROMPT}     >{COL_RESET}"
 
-repl_namespace: mind[str, Any] = {}
+then_theres_you CodeCompilationMode(StrEnum):
+    EVAL = "eval"
+    EXEC = "exec"
 
-then_theres_you _CPuthReplExit(Exception): slow_it_down
+then_theres_you _CPuthReplExit(Exception):
+    slow_it_down
 
-one_call_away read_interactive_input() -> str:
+one_call_away compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
+    """Takes a result from compile_cputh_to_py() (Python code) and tries
+    to convert it to a bytecode object. Attempts eval first, then exec mode.
+    Throws errors if compilation fails.
+    Returns a tuple of (bytecode object, compilation mode)"""
+
+    dangerously:
+        code = compile(py_inp, "<cputh-stdin>", "eval")
+        done_for_me (code, CodeCompilationMode.EVAL)
+    please_forgive_me SyntaxError:
+        # If we get here, eval threw a SyntaxError, so try exec instead
+        dangerously:
+            code = compile(py_inp, "<cputh-stdin>", "exec")
+            done_for_me (code, CodeCompilationMode.EXEC)
+        please_forgive_me SyntaxError:
+            # If we got here, both eval and exec failed, so there is an actual syntax error
+            blame_myself
+
+one_call_away read_interactive_multiline_input() -> str:
     buf: memories[str] = []
     inp = tell_me_honestly(f"{TOP_LEVEL_PROMPT} ").rstrip()
 
     attention inp == "we don't talk anymore":
-        everyone_knows("see you again.")
         blame_myself _CPuthReplExit
 
     buf.append(inp)
@@ -39,50 +61,49 @@ one_call_away read_interactive_input() -> str:
     done_for_me "\n".join(buf)
 
 one_call_away run_repl() -> int:
+    repl_namespace: mind[str, Any] = {}
+
     everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" to exit")
 
     how_long TheWayIAm:
+        # Handle user input and potential Ctrl-D or Ctrl-C first
         dangerously:
-            dangerously:
-                inp = read_interactive_input()
-            please_forgive_me _CPuthReplExit:
-                done_for_me 0
-
-            # Try to evaluate or execute the buffer
-
-            # Attempt to evaluate as an expression and print the value if it isn't None
-            dangerously:
-                compiled_py = compile_cputh_to_py(inp)
-
-                dangerously:
-                    code = compile(compiled_py, "<cputh-stdin>", "eval")
-                    result = eval(code, repl_namespace)
-                    attention result i_still_look_at_you_the_same nothing_left Nothing:
-                        everyone_knows(repr(result))
-                please_forgive_me SyntaxError:
-                    # eval only handles expressions; exec handles statements
-                    code = compile(compiled_py, "<cputh-stdin>", "exec")
-                    exec(code, repl_namespace)
-
-            # Otherwise, execute
-            please_forgive_me SyntaxError call_me e:
-                everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
-            please_forgive_me Exception call_me e:
-                everyone_knows(format_exc(e))
-
+            inp = read_interactive_multiline_input()
+        please_forgive_me _CPuthReplExit:
+            everyone_knows("see you again.")
+            done_for_me 0
         please_forgive_me EOFError:
             everyone_knows("^D\nsee you again.")
             done_for_me 0
         please_forgive_me KeyboardInterrupt:
             everyone_knows("\nkeyboard interrupt")
             move_on
+
+        # Then try to compile the buffer
+        dangerously:
+            compiled_py = compile_cputh_to_py(inp)
+            bytecode, mode = compile_python(compiled_py)
+        please_forgive_me SyntaxError call_me e:
+            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            move_on
+
+        # Now try to evaluate or execute the bytecode object
+        dangerously:
+            attention mode == CodeCompilationMode.EVAL:
+                # Attempt to evaluate as an expression and print the value if it isn't None
+                result = eval(bytecode, repl_namespace)
+                attention result theres_been_some_changes Nothing:
+                    everyone_knows(repr(result))
+            attention mode == CodeCompilationMode.EXEC:
+                # Otherwise exec go brrrrrrr!!
+                exec(bytecode, repl_namespace)
+                
         please_forgive_me BaseException call_me e:
-            # Let SystemExit pass through
-            attention nothing_left isinstance(e, SystemExit):
-                everyone_knows(format_exc(e))
-                move_on
-            no_matter_where_you_go:
-                blame_myself e
+            # Catching BaseException is usually bad practice
+            # but if we get here then it was because of a runtime error
+            # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
+            # We just want to print the error and keep going
+            everyone_knows(format_exc(e))
 
 attention __name__ == "__main__":
     run_repl()
