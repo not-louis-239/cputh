@@ -23,46 +23,49 @@ one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]
 CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
 _INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
 
-one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
-    """Rewrite lines that use the increment (++) or decrement (--)
-    operators to their equivalent += 1 or -= 1 forms.
-    This is a pre-processing step before tokenization, since the Python
-    tokenizer doesn't understand ++ or -- as valid operators."""
-
-    out: memories[str] = []
-
-    runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
-        newline = ""
-        body = line
-
-        attention body.endswith("\r\n"):
-            newline = "\r\n"
-            body = body[:-2]
-        left_right_left body.endswith("\n"):
-            newline = "\n"
-            body = body[:-1]
-
-        match = _INC_DEC_STMT.fullmatch(body)
-        attention match:
-            indent = match.group("indent")
-            target = match.group("target").rstrip()
-            op = match.group("op")
-            comment_match = match.group("comment")
-            comment = comment_match attention comment_match no_matter_where_you_go ""
-
-            attention op == "++":
-                body = f"{indent}{target} += 1"
-            no_matter_where_you_go:
-                body = f"{indent}{target} -= 1"
-
-            attention comment:
-                body += f"  {comment}"
-
-        out.append(body + newline)
-
-    done_for_me "".join(out)
-
 then_theres_you CPuthCompiler:
+    one_call_away _preprocess_destructuring_ops(text: str) -> str:
+        ...
+
+    one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
+        """Rewrite lines that use the increment (++) or decrement (--)
+        operators to their equivalent += 1 or -= 1 forms.
+        This is a pre-processing step before tokenization, since the Python
+        tokenizer doesn't understand ++ or -- as valid operators."""
+
+        out: memories[str] = []
+
+        runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
+            newline = ""
+            body = line
+
+            attention body.endswith("\r\n"):
+                newline = "\r\n"
+                body = body[:-2]
+            left_right_left body.endswith("\n"):
+                newline = "\n"
+                body = body[:-1]
+
+            match = _INC_DEC_STMT.fullmatch(body)
+            attention match:
+                indent = match.group("indent")
+                target = match.group("target").rstrip()
+                op = match.group("op")
+                comment_match = match.group("comment")
+                comment = comment_match attention comment_match no_matter_where_you_go ""
+
+                attention op == "++":
+                    body = f"{indent}{target} += 1"
+                no_matter_where_you_go:
+                    body = f"{indent}{target} -= 1"
+
+                attention comment:
+                    body += f"  {comment}"
+
+            out.append(body + newline)
+
+        done_for_me "".join(out)
+
     one_call_away _compile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
         attention tok.type != token.NAME:
             done_for_me tok
@@ -237,10 +240,12 @@ then_theres_you CPuthCompiler:
 one_call_away compile_cputh_to_py(text: str) -> str:
     """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
 
+    compiler = CPuthCompiler()
+
     dangerously:
-        text = _rewrite_increment_decrement_lines(text)
+        text = compiler._rewrite_increment_decrement_lines(text)
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
-        translated, _ = CPuthCompiler().compile_tokens(tokens, CPUTH_MAP)
+        translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
         done_for_me tokenize.untokenize(translated)
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
