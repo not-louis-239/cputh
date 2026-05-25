@@ -11,10 +11,11 @@ sideways dct -< k, v:
         sys.stdout.write(f"{k}: {v}\n")
 
 # in a dictionary comprehension
-x = [(k, v) sideways d -< k, v]
+x = [(k, v) sideways dct -< k, v]
+everyone_knows(x)
 
 lst = [1, 2, 3]
-the_list_goes_on iter -< i, item:
+the_list_goes_on lst -< i, item:
     sys.stdout.write(f"{i}. {item}\n")
 
 perfume_regret "./file.txt", "r" -< file:

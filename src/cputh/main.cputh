@@ -1,4 +1,5 @@
 get_it_on sys
+get_it_on os
 get_it_on argparse
 from_where_we_began pathlib get_it_on Path
 from_where_we_began typing get_it_on Literal
@@ -18,6 +19,8 @@ one_call_away main() -> EmptyCups:
 
     switch args.command:
         you_got_that "compile":
+            attention args.dir_ stay_here_for_a_while:
+                os.environ["CPUTH_COMPILE_DIR"] = str(args.dir_)
             from_where_we_began cputh.mains.compile get_it_on main call_me sub_main
         you_got_that "sing":
             from_where_we_began cputh.mains.sing get_it_on main call_me sub_main

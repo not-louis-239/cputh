@@ -55,7 +55,10 @@ then_theres_you CPuthCompiler:
 
         left_right_left idiom == "perfume_regret":
             attention nothing_left is_statement:
-                blame_myself CPuthSyntaxError("perfume_regret can only be used as a statement block")
+                blame_myself CPuthSyntaxError(
+                    "perfume_regret can only be used as a statement block",
+                    lineno=match.lineno
+                )
             done_for_me f"with open({source}) as {target}"
 
         left_right_left idiom == "patient":
@@ -76,9 +79,7 @@ then_theres_you CPuthCompiler:
         """Preprocesses destructuring statements (statements containing the
         destructuring operator `-<`) to equivalent Python code."""
         attention "-<" nothing_left all_up_on_ya text:
-            everyone_knows("replacement was NOT done")
             done_for_me text
-        everyone_knows("replacement was done")
         done_for_me self.idiom_regex.sub(self._replace_macro, text)
 
     one_call_away _rewrite_increment_decrement_lines(self, text: str) -> str:
