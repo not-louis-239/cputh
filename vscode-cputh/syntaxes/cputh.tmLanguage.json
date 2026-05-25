@@ -16,9 +16,39 @@
         "keywords": {
             "patterns": [
                 {
-                    "comment": "control flow",
+                    "comment": "general control flow",
                     "name": "keyword.control.flow.cputh",
-                    "match": "\\b(promise_me|attention|left_right_left|no_matter_where_you_go|how_long|runnin_round|we_dont_talk_anymore|move_on|slow_it_down|done_for_me|cheating_on_you|switch|you_got_that|goin_round_in_circles|hear_me_out)\\b"
+                    "match": "\\b(promise_me|how_long|runnin_round|done_for_me|cheating_on_you)\\b"
+                },
+                {
+                    "comment": "destructuring idioms",
+                    "name": "keyword.shorthand.destructure.cputh",
+                    "match": "\\b(sideways|the_list_goes_on|perfume_regret|patient)\\b"
+                },
+                {
+                    "comment": "while True / if __name__ == \"__main__\" shorthand",
+                    "name": "keyword.control.flow.cputh",
+                    "match": "\\b(goin_round_in_circles|hear_me_out)\\b"
+                },
+                {
+                    "comment": "if, else-if, else",
+                    "name": "keyword.control.flow.if-statement.cputh",
+                    "match": "\\b(attention|left_right_left|no_matter_where_you_go)\\b"
+                },
+                {
+                    "comment": "break, continue, pass",
+                    "name": "keyword.control.flow.cputh",
+                    "match": "\\b(we_dont_talk_anymore|move_on|slow_it_down)\\b"
+                },
+                {
+                    "comment": "switch-case",
+                    "name": "keyword.control.flow.switch-case.cputh",
+                    "match": "\\b(switch|you_got_that)\\b"
+                },
+                {
+                    "comment": "do-until",
+                    "name": "keyword.control.flow.do-until.cputh",
+                    "match": "\\b(thats_when_you_said|until_it_happens_to_you)\\b"
                 },
                 {
                     "comment": "exceptions",
@@ -27,13 +57,13 @@
                 },
                 {
                     "comment": "raise NotImplementedError shorthand",
-                    "name": "keyword.control.exception.not_implemented.cputh",
+                    "name": "keyword.control.exception.not-implemented.cputh",
                     "match": "\\bi_wouldnt_know_what_to_do\\b"
                 },
                 {
                     "comment": "null coalescence - equivalent of is not None",
-                    "name": "keyword.control.null_coalescence.cputh",
-                    "match": "\\b(stay_here_for_a_while)\\b"
+                    "name": "keyword.control.null-coalescence.cputh",
+                    "match": "\\bstay_here_for_a_while\\b"
                 },
                 {
                     "comment": "future imports shorthand",
@@ -365,6 +395,11 @@
                     "comment": "decrement",
                     "name": "keyword.operator.decrement.cputh",
                     "match": "--"
+                },
+                {
+                    "comment": "branching/destructuring operator",
+                    "name": "keyword.operator.destructure.cputh",
+                    "match": "-<"
                 },
                 {
                     "comment": "assignment operators",

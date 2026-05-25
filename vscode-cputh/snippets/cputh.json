@@ -171,6 +171,11 @@
         "body": ["Nothing$0"],
         "description": "None constant"
     },
+    "EmptyCups": {
+        "prefix": "EmptyCups",
+        "body": ["EmptyCups$0"],
+        "description": "None constant"
+    },
 
     "everyone_knows": {
         "prefix": "everyone_knows",
@@ -219,5 +224,67 @@
         "prefix": "get_it_on",
         "body": ["get_it_on$0"],
         "description": "import statement"
+    },
+
+    "thats_when_you_said": {
+        "prefix": "thats_when_you_said",
+        "body": [
+            "thats_when_you_said:",
+            "    $0",
+            "until_it_happens_to_you"
+        ],
+        "description": "do-until loop"
+    },
+    "until_it_happens_to_you": {
+        "prefix": "until_it_happens_to_you",
+        "body": ["until_it_happens_to_you$0"],
+        "description": "do-until loop"
+    },
+
+    "theres_been_some_changes": {
+        "prefix": "theres_been_some_changes",
+        "body": ["theres_been_some_changes$0"],
+        "description": "is not shorthand"
+    },
+    "goin_round_in_circles": {
+        "prefix": "goin_round_in_circles",
+        "body": ["goin_round_in_circles$0"],
+        "description": "while True shorthand"
+    },
+    "i_wouldnt_know_what_to_do": {
+        "prefix": "i_wouldnt_know_what_to_do",
+        "body": ["i_wouldnt_know_what_to_do$0"],
+        "description": "raise NotImplementedError shorthand"
+    },
+    "stay_here_for_a_while": {
+        "prefix": "stay_here_for_a_while",
+        "body": ["stay_here_for_a_while$0"],
+        "description": "is not None shorthand"
+    },
+    "hear_me_out": {
+        "prefix": "hear_me_out",
+        "body": ["hear_me_out$0"],
+        "description": "if __name__ == \"__main__\" shorthand"
+    },
+
+    "sideways": {
+        "prefix": "sideways",
+        "body": ["sideways$0"],
+        "description": "for k, v in dict.items() destructuring shorthand"
+    },
+    "the_list_goes_on": {
+        "prefix": "the_list_goes_on",
+        "body": ["the_list_goes_on$0"],
+        "description": "enumerate() destructuring shorthand"
+    },
+    "perfume_regret": {
+        "prefix": "perfume_regret",
+        "body": ["perfume_regret$0"],
+        "description": "with open(...) as f destructuring shorthand"
+    },
+    "patient": {
+        "prefix": "patient",
+        "body": ["patient$0"],
+        "description": "next(elem for elem in iter if cond) destructuring shorthand"
     }
 }
