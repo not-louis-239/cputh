@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 from pathlib import Path
 from typing import Literal
@@ -18,6 +19,8 @@ def main() -> None:
 
     match args.command:
         case "compile":
+            if args.dir_ is not None:
+                os.environ["CPUTH_COMPILE_DIR"] = str(args.dir_)
             from cputh.mains.compile import main as sub_main
         case "sing":
             from cputh.mains.sing import main as sub_main

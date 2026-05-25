@@ -27,7 +27,8 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "dist"))
+_compile_dir = Path(os.environ["CPUTH_COMPILE_DIR"]) if "CPUTH_COMPILE_DIR" in os.environ else Path(__file__).parents[3] / "dist"
+sys.path.insert(0, str(_compile_dir))
 
 from cputh.utils.format_exceptions import format_code_view
 from cputh.compile.compiler import compile_cputh_to_py
@@ -97,6 +98,10 @@ def validate_args(args: Args) -> None:
         raise CPuthFileError("missing argument: input file")
     if args.output is None:
         raise CPuthFileError("missing argument: output file")
+    if args.dir_ is not None and not args.dir_.exists():
+        raise CPuthFileError(f"no such compiler directory: '{args.dir_}'")
+    if args.dir_ is not None and not args.dir_.is_dir():
+        raise CPuthFileError(f"compiler reference path is not a directory: '{args.dir_}'")
 
     # Input file and output file's parent directory must both exist.
     if not args.input.exists():

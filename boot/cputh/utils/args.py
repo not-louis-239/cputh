@@ -8,6 +8,7 @@ class Args:
     command: Literal["compile", "sing", "lyrics", None]
     input: Path | None = None             # compile + sing
     output: Path | None = None            # compile + sing
+    dir_: Path | None = None              # compile only
     force: bool = False         # compile only
     dangerously_: bool = False  # compile only
 
@@ -22,6 +23,12 @@ def parse_args() -> Args:
     compile_parser = subparsers.add_parser("compile")
     compile_parser.add_argument("input", type=Path, help="path to the input .cputh file")
     compile_parser.add_argument("-o", "--output", type=Path, required=True, help="path to the output .py file")
+    compile_parser.add_argument(
+        "--dir",
+        type=Path,
+        dest="dir_",
+        help="force the compiler to reference this directory instead of its default import location"
+    )
     compile_parser.add_argument(
         "-f", "--force",
         action="store_true",
@@ -48,7 +55,7 @@ def parse_args() -> Args:
         command=args_raw.command,
         input=getattr(args_raw, "input", None),
         output=getattr(args_raw, "output", None),
+        dir_=getattr(args_raw, "dir_", None),
         force=getattr(args_raw, "force", False),
         dangerously_=getattr(args_raw, "dangerously_", False),
     )
-

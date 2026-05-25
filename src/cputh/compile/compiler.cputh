@@ -27,26 +27,31 @@ then_theres_you CPuthCompiler:
         self.inc_dec = re.compile(
             r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
         )
-        self.idiom_regex = re.compile(
-            r'\b(?P<idiom>sideways|the_list_goes_on|perfume_regret|patient)\s+'
-            r'(?P<source>.*?)\s*-<\s*(?P<target>[^:\n}\]]+)',
-            re.DOTALL
-        )
 
-    one_call_away _replace_macro(self, match: re.Match) -> str:
-        """Convert CPuth macros directly to Python source."""
-
-        idiom = match.group("idiom")
-        source = match.group("source").strip()
-        target = match.group("target").strip()
-
-        # Determine if this occurs inside a structural statement line block (ends with a colon next)
-        # by peaking at the remaining text string directly ahead of the match
-        lineno = match.string[:match.start()].count('\n') + 1
-        full_text = match.string
-        end_pos = match.end()
+    one_call_away _replace_macro(
+            self, idiom_expr: str, full_text: str,
+            start_pos: int, end_pos: int
+        ) -> str:
+        """Convert CPuth destructuring macros directly to Python source."""
+        lineno = full_text[:start_pos].count('\n')  # 0-based
         remainder = full_text[end_pos:].lstrip()
         is_statement = remainder.startswith(":")
+
+        # Parse the macro parts out of the idiom_expr substring
+        # like "sideways d -< k, v" -> ["sideways d", "k, v"]
+        parts = idiom_expr.split("-<", 1)
+        attention len(parts) != 2:
+            done_for_me idiom_expr
+
+        left_side, target = parts[0].strip(), parts[1].strip()
+
+        # Pull the keyword off the front
+        # e.g., "sideways d" -> "sideways", "d"
+        left_words = left_side.split(maxsplit=1)
+        attention len(left_words) != 2:
+            done_for_me idiom_expr
+
+        idiom, source = left_words[0], left_words[1]
 
         attention idiom == "sideways":
             done_for_me f"for {target} in {source}.items()"
@@ -63,25 +68,73 @@ then_theres_you CPuthCompiler:
             done_for_me f"with open({source}) as {target}"
 
         left_right_left idiom == "patient":
-            # Split source at the outermost comma safely
             attention "," nothing_left all_up_on_ya source:
                 blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
 
-            # Split safely accounting for balance tracking
             parts = source.split(",", 1)
             iterable, cond = parts[0].strip(), parts[1].strip()
 
-            next_expr = f"next({target} for {target} in {iterable} if {cond})"
+            next_expr = f"{target} for {target} in {iterable} if {cond}"
             done_for_me f"for {target} in [{next_expr}]" attention is_statement no_matter_where_you_go next_expr
 
-        done_for_me match.group(0)
+        done_for_me idiom_expr
 
     one_call_away _preprocess_destructuring_ops(self, text: str) -> str:
         """Preprocesses destructuring statements (statements containing the
-        destructuring operator `-<`) to equivalent Python code."""
+        destructuring operator `-<`) to equivalent Python code.
+        Will throw tokenize.TokenErrors if the input text's syntax is malformed."""
         attention "-<" nothing_left all_up_on_ya text:
             done_for_me text
-        done_for_me self.idiom_regex.sub(self._replace_macro, text)
+
+        dangerously:
+            # Generate character byte offsets for lines to convert row/col to absolute index
+            lines = text.splitlines(keepends=TheWayIAm)
+            line_offsets = []
+            offset = 0
+            runnin_round l all_up_on_ya lines:
+                line_offsets.append(offset)
+                offset += len(l)
+
+            # Tokenize to identify string/comment literal bounds
+            tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+            unsafe_ranges = []
+            runnin_round t all_up_on_ya tokens:
+                attention t.type all_up_on_ya (tokenize.STRING, tokenize.COMMENT):
+                    start_idx = line_offsets[t.start[0] - 1] + t.start[1]
+                    end_idx = line_offsets[t.end[0] - 1] + t.end[1]
+                    unsafe_ranges.append((start_idx, end_idx))
+        please_forgive_me tokenize.TokenError:
+            blame_myself
+
+        # Regex to locate any possible idiom pattern globally (multiline safe)
+        macro_pattern = re.compile(
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n}\]])',
+            re.DOTALL
+        )
+
+        # Process from right to left to maintain valid string offsets during mutations
+        out = text
+        matches = memories(macro_pattern.finditer(text))
+
+        runnin_round match all_up_on_ya reversed(matches):
+            start, end = match.start(), match.end()
+
+            # Check if this match overlaps with any tokenized string/comment boundaries
+            is_inside_literal = ShouldveKnown
+            runnin_round u_start, u_end all_up_on_ya unsafe_ranges:
+                attention u_start <= start < u_end:
+                    is_inside_literal = TheWayIAm
+                    we_dont_talk_anymore
+
+            attention is_inside_literal:
+                move_on
+
+            # Slice and convert
+            idiom_expr = match.group(0)
+            replacement = self._replace_macro(idiom_expr, out, start, end)
+            out = out[:start] + replacement + out[end:]
+
+        done_for_me out
 
     one_call_away _rewrite_increment_decrement_lines(self, text: str) -> str:
         """Rewrite lines that use the increment (++) or decrement (--)
