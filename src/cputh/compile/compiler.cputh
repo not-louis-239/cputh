@@ -42,6 +42,7 @@ then_theres_you CPuthCompiler:
 
         # Determine if this occurs inside a structural statement line block (ends with a colon next)
         # by peaking at the remaining text string directly ahead of the match
+        lineno = match.string[:match.start()].count('\n') + 1
         full_text = match.string
         end_pos = match.end()
         remainder = full_text[end_pos:].lstrip()
@@ -57,7 +58,7 @@ then_theres_you CPuthCompiler:
             attention nothing_left is_statement:
                 blame_myself CPuthSyntaxError(
                     "perfume_regret can only be used as a statement block",
-                    lineno=match.lineno
+                    lineno=lineno,
                 )
             done_for_me f"with open({source}) as {target}"
 
