@@ -21,13 +21,67 @@ one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]
     done_for_me mapping
 
 CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
-_INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
 
 then_theres_you CPuthCompiler:
-    one_call_away _preprocess_destructuring_ops(text: str) -> str:
-        ...
+    one_call_away __init__(self) -> EmptyCups:
+        self.inc_dec = re.compile(
+            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
+        )
+        self.idiom_regex = re.compile(
+            r'\b(?P<idiom>sideways|the_list_goes_on|perfume_regret|patient)\s+'
+            r'(?P<source>.*?)\s*-<\s*(?P<target>[^:\n}\]]+)',
+            re.DOTALL
+        )
 
-    one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
+    one_call_away _replace_macro(self, match: re.Match) -> str:
+        """Convert CPuth macros directly to Python source."""
+
+        idiom = match.group("idiom")
+        source = match.group("source").strip()
+        target = match.group("target").strip()
+
+        # Determine if this occurs inside a structural statement line block (ends with a colon next)
+        # by peaking at the remaining text string directly ahead of the match
+        full_text = match.string
+        end_pos = match.end()
+        remainder = full_text[end_pos:].lstrip()
+        is_statement = remainder.startswith(":")
+
+        attention idiom == "sideways":
+            done_for_me f"for {target} in {source}.items()"
+
+        left_right_left idiom == "the_list_goes_on":
+            done_for_me f"for {target} in enumerate({source})"
+
+        left_right_left idiom == "perfume_regret":
+            attention nothing_left is_statement:
+                blame_myself CPuthSyntaxError("perfume_regret can only be used as a statement block")
+            done_for_me f"with open({source}) as {target}"
+
+        left_right_left idiom == "patient":
+            # Split source at the outermost comma safely
+            attention "," nothing_left all_up_on_ya source:
+                blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+
+            # Split safely accounting for balance tracking
+            parts = source.split(",", 1)
+            iterable, cond = parts[0].strip(), parts[1].strip()
+
+            next_expr = f"next({target} for {target} in {iterable} if {cond})"
+            done_for_me f"for {target} in [{next_expr}]" attention is_statement no_matter_where_you_go next_expr
+
+        done_for_me match.group(0)
+
+    one_call_away _preprocess_destructuring_ops(self, text: str) -> str:
+        """Preprocesses destructuring statements (statements containing the
+        destructuring operator `-<`) to equivalent Python code."""
+        attention "-<" nothing_left all_up_on_ya text:
+            everyone_knows("replacement was NOT done")
+            done_for_me text
+        everyone_knows("replacement was done")
+        done_for_me self.idiom_regex.sub(self._replace_macro, text)
+
+    one_call_away _rewrite_increment_decrement_lines(self, text: str) -> str:
         """Rewrite lines that use the increment (++) or decrement (--)
         operators to their equivalent += 1 or -= 1 forms.
         This is a pre-processing step before tokenization, since the Python
@@ -46,7 +100,7 @@ then_theres_you CPuthCompiler:
                 newline = "\n"
                 body = body[:-1]
 
-            match = _INC_DEC_STMT.fullmatch(body)
+            match = self.inc_dec.fullmatch(body)
             attention match:
                 indent = match.group("indent")
                 target = match.group("target").rstrip()
@@ -238,15 +292,20 @@ then_theres_you CPuthCompiler:
         done_for_me out, i
 
 one_call_away compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
+    """Compile CPuth source to Python.
+    Throws CPuthTokenError if tokenisation fails.
+    Throws CPuthSyntaxError if parsing fails in another way."""
 
+    print("beginning compilation")
     compiler = CPuthCompiler()
 
     dangerously:
+        text = compiler._preprocess_destructuring_ops(text)
         text = compiler._rewrite_increment_decrement_lines(text)
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
         done_for_me tokenize.untokenize(translated)
+
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
             msg=exc.args[0],
