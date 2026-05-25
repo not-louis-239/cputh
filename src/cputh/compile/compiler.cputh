@@ -96,7 +96,7 @@ then_theres_you CPuthCompiler:
                 offset += len(l)
 
             # Tokenize to identify string/comment literal bounds
-            tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+            tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
             unsafe_ranges = []
             runnin_round t all_up_on_ya tokens:
                 attention t.type all_up_on_ya (tokenize.STRING, tokenize.COMMENT):
@@ -351,7 +351,6 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    print("beginning compilation")
     compiler = CPuthCompiler()
 
     dangerously:

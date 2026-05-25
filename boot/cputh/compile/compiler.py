@@ -351,7 +351,6 @@ def compile_cputh_to_py(text: str) -> str:
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    print("beginning compilation")
     compiler = CPuthCompiler()
 
     try:
