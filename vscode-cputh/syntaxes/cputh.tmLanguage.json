@@ -147,9 +147,9 @@
         "strings": {
             "patterns": [
                 {
-                    "comment": "f-string double quoted",
+                    "comment": "f or r-string double quoted",
                     "name": "string.quoted.double.cputh",
-                    "begin": "(f)(\")",
+                    "begin": "(f|r)(\")",
                     "end": "(?<!\\\\)\\\"",
                     "beginCaptures": {
                         "1": { "name": "storage.type.string.cputh" },
@@ -167,9 +167,9 @@
                     ]
                 },
                 {
-                    "comment": "f-string single quoted",
+                    "comment": "f or r-string single quoted",
                     "name": "string.quoted.single.cputh",
-                    "begin": "(f)(')",
+                    "begin": "(f|r)(')",
                     "end": "(?<!\\\\)'",
                     "beginCaptures": {
                         "1": { "name": "storage.type.string.cputh" },
