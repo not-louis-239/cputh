@@ -239,13 +239,17 @@ class Marker:
             )
             return 0
 
+def _format_time(t_i: float, t_f: float) -> str:
+    dt_ms = 1_000 * (t_f - t_i)
+    return f"{COL_FAINT}({dt_ms:.3f} ms){COL_END}"
+
 def print_pass(s: str, *, t_i: float, t_f: float) -> None:
     dt = t_f - t_i
-    print(f"  {COL_OK}Pass {COL_END}{COL_FAINT}({dt:.5f}s){COL_END}: {s}")
+    print(f"  {COL_OK}Pass {COL_END}{_format_time(t_i, t_f)}: {s}")
 
 def print_fail(s: str, *, t_i: float, t_f: float) -> None:
     dt = t_f - t_i
-    print(f"  {COL_ERR}Fail {COL_END}{COL_FAINT}({dt:.5f}s){COL_END}: {s}")
+    print(f"  {COL_ERR}Fail {COL_END}{_format_time(t_i, t_f)}: {s}")
 
 class Exam:
     def __init__(self) -> None:
@@ -255,7 +259,7 @@ class Exam:
     def run(self) -> int:
         """Return an exit code: 0 if tests passed, 1 otherwise."""
         print(f"Starting exam...")
-        print(f"  {COL_INFO}{WORKING_TIME_PER_QUESTION:.3f}{COL_END} seconds per question")
+        print(f"  {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000:.3f} ms{COL_END} per question")
         print()
 
         score = 0
