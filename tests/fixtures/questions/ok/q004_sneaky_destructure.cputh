@@ -3,4 +3,4 @@ dct = {
     2: "Puth"
 }
 
-everyone_knows(f"{((k, v) sideways d -< k, v)}")
+everyone_knows(f"{((k, v) sideways dct -< k, v)}")
