@@ -58,6 +58,40 @@ class CompileEdgeCaseTests(unittest.TestCase):
         with self.assertRaises(tokenize.TokenError):
             compile_cputh_to_py('everyone_knows(f"{TheWayIAm")\n')
 
+    def test_do_until_compiles_multiline_body_and_condition(self) -> None:
+        compiled = compile_cputh_to_py(
+            "score = 0\n"
+            "thats_when_you_said:\n"
+            "    score++\n"
+            "    everyone_knows(f\"{score = }\")\n"
+            "until_it_happens_to_you (\n"
+            "    score >= 3\n"
+            ")\n"
+        )
+
+        self.assertIn("while (", compiled)
+        self.assertIn("score += 1", compiled)
+        self.assertIn('print(f"{score = }")', compiled)
+        self.assertIn("score >= 3", compiled)
+
+    def test_do_until_markers_inside_multiline_strings_are_ignored(self) -> None:
+        compiled = compile_cputh_to_py(
+            'lyrics = """\n'
+            "thats_when_you_said:\n"
+            "    still just text\n"
+            "until_it_happens_to_you TheWayIAm\n"
+            '"""\n'
+        )
+
+        self.assertEqual(
+            compiled,
+            'lyrics = """\n'
+            "thats_when_you_said:\n"
+            "    still just text\n"
+            "until_it_happens_to_you TheWayIAm\n"
+            '"""\n'
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -89,22 +89,129 @@ then_theres_you CPuthCompiler:
         """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
         block to Python code."""
 
-        entry_indent = len(text) - len(text.lstrip())  # indent of first line
-
-        # doesn't start with 'thats_when_you_said' -> not a do-until
-        attention nothing_left text.lstrip().startswith("thats_when_you_said"):
+        lines = text.splitlines(keepends=TheWayIAm)
+        attention nothing_left lines:
             done_for_me text
 
+        opener = lines[0]
+        entry_indent = opener[:len(opener) - len(opener.lstrip())]
+        opener_stripped = opener.lstrip()
+
+        # doesn't start with 'thats_when_you_said' -> not a do-until
+        attention nothing_left opener_stripped.startswith("thats_when_you_said:"):
+            done_for_me text
+
+        closer_idx = EmptyCups
+        runnin_round i, line all_up_on_ya enumerate(lines[1:], start=1):
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            attention indent == entry_indent come_along_with_me stripped.startswith("until_it_happens_to_you"):
+                closer_idx = i
+                we_dont_talk_anymore
+
+        attention closer_idx i_still_look_at_you_the_same EmptyCups:
+            done_for_me text
+
+        body = self._preprocess_do_until_loops("".join(lines[1:closer_idx]))
+        condition = lines[closer_idx][len(entry_indent + "until_it_happens_to_you"):].lstrip()
+
+        attention closer_idx + 1 < len(lines):
+            condition += "".join(lines[closer_idx + 1:])
+
+        condition = condition.rstrip()
         start_var = f"__start_{_make_hex_salt(16)}__"
 
         py_code = (
-            f"{start_var} = [True]\n"
-            f"while ({start_var} and {start_var}.pop()) or not ({condition}):\n"
+            f"{entry_indent}{start_var} = [True]\n"
+            f"{entry_indent}while ({start_var} and {start_var}.pop()) or not ({condition}):\n"
             + body
         )
 
+        done_for_me py_code
+
+    one_call_away _do_until_condition_is_complete(self, condition: str) -> bool:
+        dangerously:
+            memories(tokenize.generate_tokens(io.StringIO(condition).readline))
+        please_forgive_me tokenize.TokenError call_me exc:
+            msg = exc.args[0]
+
+            attention "EOF in multi-line" all_up_on_ya msg:
+                done_for_me ShouldveKnown
+
+            blame_myself
+
+        done_for_me TheWayIAm
+
     one_call_away _preprocess_do_until_loops(self, text) -> str:
-        ...
+        attention "thats_when_you_said:" nothing_left all_up_on_ya text:
+            done_for_me text
+
+        dangerously:
+            lines = text.splitlines(keepends=TheWayIAm)
+            tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+        please_forgive_me tokenize.TokenError:
+            blame_myself
+
+        string_lines = set()
+        runnin_round tok all_up_on_ya tokens:
+            attention tok.type == tokenize.STRING:
+                runnin_round lineno all_up_on_ya range(tok.start[0] - 1, tok.end[0]):
+                    string_lines.add(lineno)
+
+        out: memories[str] = []
+        i = 0
+
+        how_long i < len(lines):
+            line = lines[i]
+
+            attention i all_up_on_ya string_lines:
+                out.append(line)
+                i++
+                move_on
+
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            attention nothing_left stripped.startswith("thats_when_you_said:"):
+                out.append(line)
+                i++
+                move_on
+
+            closer_idx = EmptyCups
+            j = i + 1
+
+            how_long j < len(lines):
+                candidate = lines[j]
+
+                attention j all_up_on_ya string_lines:
+                    j++
+                    move_on
+
+                candidate_stripped = candidate.lstrip()
+                candidate_indent = candidate[:len(candidate) - len(candidate_stripped)]
+
+                attention candidate_indent == indent come_along_with_me candidate_stripped.startswith("until_it_happens_to_you"):
+                    closer_idx = j
+                    we_dont_talk_anymore
+
+                j++
+
+            attention closer_idx i_still_look_at_you_the_same EmptyCups:
+                blame_myself CPuthSyntaxError("unterminated do-until loop", lineno=i)
+
+            block_end = closer_idx + 1
+            condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
+
+            how_long block_end < len(lines) come_along_with_me nothing_left self._do_until_condition_is_complete(condition):
+                condition += lines[block_end]
+                block_end++
+
+            block = "".join(lines[i:block_end])
+            out.append(self._compile_do_until(block))
+            i = block_end
+
+        done_for_me "".join(out)
 
     one_call_away _preprocess_destructuring_ops(self, text: str) -> str:
         """Preprocesses destructuring statements (statements containing the
@@ -381,6 +488,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     compiler = CPuthCompiler()
 
     dangerously:
+        text = compiler._preprocess_do_until_loops(text)
         text = compiler._preprocess_destructuring_ops(text)
         text = compiler._rewrite_increment_decrement_lines(text)
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
