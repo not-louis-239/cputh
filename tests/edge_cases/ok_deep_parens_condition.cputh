@@ -1,0 +1,11 @@
+n = 0
+
+thats_when_you_said:
+    n++
+until_it_happens_to_you (
+    (
+        (
+            n >= 3
+        )
+    )
+)

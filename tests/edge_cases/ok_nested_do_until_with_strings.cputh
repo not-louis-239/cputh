@@ -1,0 +1,10 @@
+outer = 0
+
+thats_when_you_said:
+    message = "until_it_happens_to_you is just text here"
+
+    thats_when_you_said:
+        outer++
+        everyone_knows(message)
+    until_it_happens_to_you outer >= 1
+until_it_happens_to_you outer >= 1

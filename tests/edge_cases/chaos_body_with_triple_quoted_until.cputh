@@ -1,0 +1,10 @@
+seen = 0
+
+thats_when_you_said:
+    block = """
+until_it_happens_to_you not really
+thats_when_you_said: not really
+"""
+    seen++
+    everyone_knows(block)
+until_it_happens_to_you seen >= 1

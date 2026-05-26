@@ -1,0 +1,6 @@
+count = 0
+thats_when_you_said:
+    # until_it_happens_to_you count >= 999999
+    count++
+    everyone_knows(f"{count = }")
+until_it_happens_to_you count >= 2

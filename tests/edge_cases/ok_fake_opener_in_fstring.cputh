@@ -1,0 +1,13 @@
+name = "Charlie"
+everyone_knows(
+    f"""
+thats_when_you_said:
+    hello {name}
+until_it_happens_to_you TheWayIAm
+"""
+)
+
+turns = 0
+thats_when_you_said:
+    turns++
+until_it_happens_to_you turns == 1

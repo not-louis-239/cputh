@@ -1,0 +1,5 @@
+score = 0
+thats_when_you_said:
+    everyone_knows("starting")
+  until_it_happens_to_you score >= 1
+score++
