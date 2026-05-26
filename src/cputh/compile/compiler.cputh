@@ -153,9 +153,16 @@ then_theres_you CPuthCompiler:
         please_forgive_me tokenize.TokenError:
             blame_myself
 
+        stringish_token_types = {
+            tokenize.STRING,
+            _FSTRING_START,
+            _FSTRING_MIDDLE,
+            _FSTRING_END,
+        }
+
         string_lines = set()
         runnin_round tok all_up_on_ya tokens:
-            attention tok.type == tokenize.STRING:
+            attention tok.type all_up_on_ya stringish_token_types:
                 runnin_round lineno all_up_on_ya range(tok.start[0] - 1, tok.end[0]):
                     string_lines.add(lineno)
 

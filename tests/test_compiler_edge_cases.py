@@ -92,6 +92,26 @@ class CompileEdgeCaseTests(unittest.TestCase):
             '"""\n'
         )
 
+    def test_do_until_markers_inside_multiline_fstrings_are_ignored(self) -> None:
+        compiled = compile_cputh_to_py(
+            'name = "Charlie"\n'
+            "everyone_knows(\n"
+            '    f"""\n'
+            "thats_when_you_said:\n"
+            "    hello {name}\n"
+            "until_it_happens_to_you TheWayIAm\n"
+            '"""\n'
+            ")\n"
+            "\n"
+            "turns = 0\n"
+            "thats_when_you_said:\n"
+            "    turns++\n"
+            "until_it_happens_to_you turns == 1\n"
+        )
+
+        self.assertIn('f"""\nthats_when_you_said:\n    hello {name}\nuntil_it_happens_to_you TheWayIAm\n"""', compiled)
+        self.assertIn("turns += 1", compiled)
+
 
 if __name__ == "__main__":
     unittest.main()
