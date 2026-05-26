@@ -1,0 +1,3 @@
+nums = [-2, -1, 0, 4, 7]
+positives = [patient nums, x > 0 -< x]
+everyone_knows(positives)

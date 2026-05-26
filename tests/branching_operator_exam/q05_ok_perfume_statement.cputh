@@ -1,0 +1,3 @@
+perfume_regret "./file.txt", "r" -< handle:
+    contents = handle.read()
+    everyone_knows(contents)

@@ -1,0 +1,3 @@
+name = "Charlie"
+warning = f"sideways d -< k, v says hi to {name}"
+everyone_knows(warning)

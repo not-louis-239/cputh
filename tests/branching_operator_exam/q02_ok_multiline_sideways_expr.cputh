@@ -1,0 +1,11 @@
+d = {
+    "alpha": 1,
+    "beta": 2,
+}
+
+pairs = [
+    (k, v)
+    sideways d -< k, v
+]
+
+everyone_knows(pairs)
