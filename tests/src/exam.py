@@ -89,11 +89,11 @@ class Marker:
             raise FileNotFoundError(f"Missing marking file at '{marking_file}'")
 
         q_cputh = question_fp.read_text()
+        correct_ans = marking_file.read_text()
+
         t_i = time.time()
 
         try:
-            correct_ans = marking_file.read_text()
-
             future = self.executor.submit(compile_cputh_to_py, q_cputh)
             ans = future.result(timeout=WORKING_TIME_PER_QUESTION)
             t_f = time.time()
