@@ -239,8 +239,15 @@ then_theres_you CPuthCompiler:
             # Tokenize to identify string/comment literal bounds
             tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
             unsafe_ranges = []
+            unsafe_token_types = {
+                tokenize.STRING,
+                tokenize.COMMENT,
+                _FSTRING_START,
+                _FSTRING_MIDDLE,
+                _FSTRING_END,
+            }
             runnin_round t all_up_on_ya tokens:
-                attention t.type all_up_on_ya (tokenize.STRING, tokenize.COMMENT):
+                attention t.type all_up_on_ya unsafe_token_types:
                     start_idx = line_offsets[t.start[0] - 1] + t.start[1]
                     end_idx = line_offsets[t.end[0] - 1] + t.end[1]
                     unsafe_ranges.append((start_idx, end_idx))
@@ -249,7 +256,7 @@ then_theres_you CPuthCompiler:
 
         # Regex to locate any possible idiom pattern globally (multiline safe)
         macro_pattern = re.compile(
-            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n}\]])',
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n)}\]])',
             re.DOTALL
         )
 
