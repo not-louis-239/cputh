@@ -27,8 +27,11 @@ COL_END = "\033[0m"
 
 START_VAR_RE: re.Pattern = re.compile(r"__start_[0-9a-fA-F]{16}__")
 
-TEST_DIST_DIR = ROOT_DIR / "dist"
-sys.path.insert(0, str(TEST_DIST_DIR))
+COMPILER_BUILD_DIR = ROOT_DIR / "dist"
+if not COMPILER_BUILD_DIR.exists():
+    COMPILER_BUILD_DIR = ROOT_DIR / "boot"
+
+sys.path.insert(0, str(COMPILER_BUILD_DIR))
 from cputh.compile.compiler import compile_cputh_to_py
 import cputh.exceptions.errors as cputh_errors
 
