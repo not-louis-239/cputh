@@ -14,13 +14,13 @@ else:
 
 from cputh.utils.args import parse_args, Args
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
+    if args.dir_ is not None:
+        os.environ["CPUTH_REF_DIR"] = str(args.dir_)
 
     match args.command:
         case "compile":
-            if args.dir_ is not None:
-                os.environ["CPUTH_COMPILE_DIR"] = str(args.dir_)
             from cputh.mains.compile import main as sub_main
         case "sing":
             from cputh.mains.sing import main as sub_main
@@ -33,7 +33,8 @@ def main() -> None:
             return 1
 
     exitcode = sub_main(args)
-    sys.exit(exitcode)
+    return exitcode
 
 if __name__ == "__main__":
-    main()
+    exitcode = main()
+    sys.exit(exitcode)

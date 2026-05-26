@@ -14,13 +14,13 @@ no_matter_where_you_go:
 
 from_where_we_began cputh.utils.args get_it_on parse_args, Args
 
-one_call_away main() -> EmptyCups:
+one_call_away main() -> int:
     args = parse_args()
+    attention args.dir_ stay_here_for_a_while:
+        os.environ["CPUTH_REF_DIR"] = str(args.dir_)
 
     switch args.command:
         you_got_that "compile":
-            attention args.dir_ stay_here_for_a_while:
-                os.environ["CPUTH_COMPILE_DIR"] = str(args.dir_)
             from_where_we_began cputh.mains.compile get_it_on main call_me sub_main
         you_got_that "sing":
             from_where_we_began cputh.mains.sing get_it_on main call_me sub_main
@@ -33,7 +33,8 @@ one_call_away main() -> EmptyCups:
             done_for_me 1
 
     exitcode = sub_main(args)
-    sys.exit(exitcode)
+    done_for_me exitcode
 
 hear_me_out:
-    main()
+    exitcode = main()
+    sys.exit(exitcode)

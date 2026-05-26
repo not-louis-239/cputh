@@ -2,13 +2,19 @@ import io
 import re
 import tokenize
 import token
+import random
 
 from cputh.exceptions.errors import CPuthSyntaxError, CPuthTokenError
 from cputh.compile.load_gram import load_grammar_file
 
+HEX_CHARS = "0123456789abcdef"
+
 _FSTRING_START = getattr(token, "FSTRING_START", None)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", None)
 _FSTRING_END = getattr(token, "FSTRING_END", None)
+
+def _make_hex_salt(length: int) -> str:
+    return ''.join(random.choices(HEX_CHARS, k=length))
 
 def _convert_grammar_file_to_flatdict(gfile: dict[str, dict[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -75,9 +81,145 @@ class CPuthCompiler:
             iterable, cond = parts[0].strip(), parts[1].strip()
 
             next_expr = f"{target} for {target} in {iterable} if {cond}"
-            return f"for {target} in [{next_expr}]" if is_statement else next_expr
+            return f"for {target} in ({next_expr})" if is_statement else next_expr
 
         return idiom_expr
+
+    def _compile_do_until(self, text) -> str:
+        """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
+        block to Python code."""
+
+        lines = text.splitlines(keepends=True)
+        if not lines:
+            return text
+
+        opener = lines[0]
+        entry_indent = opener[:len(opener) - len(opener.lstrip())]
+        opener_stripped = opener.lstrip()
+
+        # doesn't start with 'thats_when_you_said' -> not a do-until
+        if not opener_stripped.startswith("thats_when_you_said:"):
+            return text
+
+        closer_idx = None
+        for i, line in enumerate(lines[1:], start=1):
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            if indent == entry_indent and stripped.startswith("until_it_happens_to_you"):
+                closer_idx = i
+                break
+
+        if closer_idx is None:
+            return text
+
+        body = self._preprocess_do_until_loops("".join(lines[1:closer_idx]))
+        condition = lines[closer_idx][len(entry_indent + "until_it_happens_to_you"):].lstrip()
+
+        if closer_idx + 1 < len(lines):
+            condition += "".join(lines[closer_idx + 1:])
+
+        condition = condition.rstrip()
+        start_var = f"__start_{_make_hex_salt(16)}__"
+        condition_expr = condition if condition.startswith("(") and condition.endswith(")") else f"({condition})"
+
+        py_code = (
+            f"{entry_indent}{start_var} = [True]\n"
+            f"{entry_indent}while ({start_var} and {start_var}.pop()) or not {condition_expr}:\n"
+            + body
+        )
+
+        return py_code
+
+    def _do_until_condition_is_complete(self, condition: str) -> bool:
+        try:
+            list(tokenize.generate_tokens(io.StringIO(condition).readline))
+        except tokenize.TokenError as exc:
+            msg = exc.args[0]
+
+            if "EOF in multi-line" in msg:
+                return False
+
+            raise
+
+        return True
+
+    def _preprocess_do_until_loops(self, text) -> str:
+        if "thats_when_you_said:" not in text:
+            return text
+
+        try:
+            lines = text.splitlines(keepends=True)
+            tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        except tokenize.TokenError:
+            raise
+
+        stringish_token_types = {
+            tokenize.STRING,
+            _FSTRING_START,
+            _FSTRING_MIDDLE,
+            _FSTRING_END,
+        }
+
+        string_lines = set()
+        for tok in tokens:
+            if tok.type in stringish_token_types:
+                for lineno in range(tok.start[0] - 1, tok.end[0]):
+                    string_lines.add(lineno)
+
+        out: list[str] = []
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+
+            if i in string_lines:
+                out.append(line)
+                i += 1
+                continue
+
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            if not stripped.startswith("thats_when_you_said:"):
+                out.append(line)
+                i += 1
+                continue
+
+            closer_idx = None
+            j = i + 1
+
+            while j < len(lines):
+                candidate = lines[j]
+
+                if j in string_lines:
+                    j += 1
+                    continue
+
+                candidate_stripped = candidate.lstrip()
+                candidate_indent = candidate[:len(candidate) - len(candidate_stripped)]
+
+                if candidate_indent == indent and candidate_stripped.startswith("until_it_happens_to_you"):
+                    closer_idx = j
+                    break
+
+                j += 1
+
+            if closer_idx is None:
+                raise CPuthSyntaxError("unterminated do-until loop", lineno=i)
+
+            block_end = closer_idx + 1
+            condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
+
+            while block_end < len(lines) and not self._do_until_condition_is_complete(condition):
+                condition += lines[block_end]
+                block_end += 1
+
+            block = "".join(lines[i:block_end])
+            out.append(self._compile_do_until(block))
+            i = block_end
+
+        return "".join(out)
 
     def _preprocess_destructuring_ops(self, text: str) -> str:
         """Preprocesses destructuring statements (statements containing the
@@ -98,8 +240,15 @@ class CPuthCompiler:
             # Tokenize to identify string/comment literal bounds
             tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
             unsafe_ranges = []
+            unsafe_token_types = {
+                tokenize.STRING,
+                tokenize.COMMENT,
+                _FSTRING_START,
+                _FSTRING_MIDDLE,
+                _FSTRING_END,
+            }
             for t in tokens:
-                if t.type in (tokenize.STRING, tokenize.COMMENT):
+                if t.type in unsafe_token_types:
                     start_idx = line_offsets[t.start[0] - 1] + t.start[1]
                     end_idx = line_offsets[t.end[0] - 1] + t.end[1]
                     unsafe_ranges.append((start_idx, end_idx))
@@ -108,7 +257,7 @@ class CPuthCompiler:
 
         # Regex to locate any possible idiom pattern globally (multiline safe)
         macro_pattern = re.compile(
-            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n}\]])',
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n)}\]])',
             re.DOTALL
         )
 
@@ -142,9 +291,37 @@ class CPuthCompiler:
         This is a pre-processing step before tokenization, since the Python
         tokenizer doesn't understand ++ or -- as valid operators."""
 
-        out: list[str] = []
+        try:
+            tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        except tokenize.TokenError:
+            raise
 
-        for line in text.splitlines(keepends=True):
+        lines = text.splitlines(keepends=True)
+        line_offsets = []
+        offset = 0
+        for line in lines:
+            line_offsets.append(offset)
+            offset += len(line)
+
+        unsafe_ranges = []
+        unsafe_token_types = {
+            tokenize.STRING,
+            tokenize.COMMENT,
+            _FSTRING_START,
+            _FSTRING_MIDDLE,
+            _FSTRING_END,
+        }
+        for tok in tokens:
+            if tok.type in unsafe_token_types:
+                start_idx = line_offsets[tok.start[0] - 1] + tok.start[1]
+                end_idx = line_offsets[tok.end[0] - 1] + tok.end[1]
+                unsafe_ranges.append((start_idx, end_idx))
+
+        op_pattern = re.compile(r"(?P<target>[^;\n]+?)(?P<op>\+\+|--)(?P<suffix>\s*)$")
+        out: list[str] = []
+        cursor = 0
+
+        for line in lines:
             newline = ""
             body = line
 
@@ -155,23 +332,45 @@ class CPuthCompiler:
                 newline = "\n"
                 body = body[:-1]
 
-            match = self.inc_dec.fullmatch(body)
-            if match:
-                indent = match.group("indent")
-                target = match.group("target").rstrip()
-                op = match.group("op")
-                comment_match = match.group("comment")
-                comment = comment_match if comment_match else ""
+            comment_idx = body.find("#")
+            code_part = body[:comment_idx] if comment_idx != -1 else body
+            comment = body[comment_idx:] if comment_idx != -1 else ""
 
-                if op == "++":
-                    body = f"{indent}{target} += 1"
-                else:
-                    body = f"{indent}{target} -= 1"
+            segments = code_part.split(";")
+            new_segments: list[str] = []
 
-                if comment:
-                    body += f"  {comment}"
+            for idx, segment in enumerate(segments):
+                segment_text = segment
+                segment_abs_end = cursor + len(segment_text)
+
+                is_unsafe = False
+                for unsafe_start, unsafe_end in unsafe_ranges:
+                    if unsafe_start < segment_abs_end and cursor < unsafe_end:
+                        is_unsafe = True
+                        break
+
+                if not is_unsafe:
+                    match = op_pattern.search(segment_text)
+
+                    if match:
+                        target = match.group("target").rstrip()
+                        op = match.group("op")
+                        suffix = match.group("suffix")
+                        assign_op = "+=" if op == "++" else "-="
+                        segment_text = f"{target} {assign_op} 1{suffix}"
+
+                new_segments.append(segment_text)
+                cursor += len(segment)
+
+                if idx == len(segments) - 1:
+                    continue
+
+                cursor += 1
+
+            body = ";".join(new_segments) + comment
 
             out.append(body + newline)
+            cursor += len(newline)
 
         return "".join(out)
 
@@ -354,6 +553,7 @@ def compile_cputh_to_py(text: str) -> str:
     compiler = CPuthCompiler()
 
     try:
+        text = compiler._preprocess_do_until_loops(text)
         text = compiler._preprocess_destructuring_ops(text)
         text = compiler._rewrite_increment_decrement_lines(text)
         tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))

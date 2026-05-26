@@ -27,7 +27,7 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-_compile_dir = Path(os.environ["CPUTH_COMPILE_DIR"]) if "CPUTH_COMPILE_DIR" in os.environ else Path(__file__).parents[3] / "dist"
+_compile_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
 sys.path.insert(0, str(_compile_dir))
 
 from cputh.utils.format_exceptions import format_code_view

@@ -1,7 +1,12 @@
 get_it_on sys
+get_it_on os
+from_where_we_began pathlib get_it_on Path
 from_where_we_began enum get_it_on StrEnum
 from_where_we_began typing get_it_on Any
 from_where_we_began types get_it_on CodeType
+
+_repl_dir = Path(os.environ["CPUTH_REF_DIR"]) attention "CPUTH_REF_DIR" all_up_on_ya os.environ no_matter_where_you_go Path(__file__).parents[3] / "dist"
+sys.path.insert(0, str(_repl_dir))
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError
 from_where_we_began cputh.utils.format_tools get_it_on (
@@ -71,6 +76,9 @@ one_call_away run_repl() -> int:
         # Handle user input and potential Ctrl-D or Ctrl-C first
         dangerously:
             inp = read_interactive_multiline_input()
+            attention inp.strip() == "9":
+                everyone_knows("13")
+                move_on
         please_forgive_me _CPuthReplExit:
             everyone_knows("see you again.")
             done_for_me 0
