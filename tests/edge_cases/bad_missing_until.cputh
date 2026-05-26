@@ -1,4 +1,0 @@
-value = 0
-thats_when_you_said:
-    value++
-    everyone_knows(value)

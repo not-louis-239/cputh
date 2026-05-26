@@ -1,1 +1,0 @@
-reader = perfume_regret "./file.txt", "r" -< handle

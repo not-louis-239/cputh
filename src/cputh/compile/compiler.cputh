@@ -81,7 +81,7 @@ then_theres_you CPuthCompiler:
             iterable, cond = parts[0].strip(), parts[1].strip()
 
             next_expr = f"{target} for {target} in {iterable} if {cond}"
-            done_for_me f"for {target} in [{next_expr}]" attention is_statement no_matter_where_you_go next_expr
+            done_for_me f"for {target} in ({next_expr})" attention is_statement no_matter_where_you_go next_expr
 
         done_for_me idiom_expr
 

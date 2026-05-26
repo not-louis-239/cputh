@@ -1,9 +1,0 @@
-value = 0
-
-thats_when_you_said:
-    value++
-until_it_happens_to_you (
-    everyone_knows("bump") is EmptyCups
-    share_our_fears
-    value >= 2
-)

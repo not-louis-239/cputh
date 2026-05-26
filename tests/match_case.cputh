@@ -1,8 +1,0 @@
-runnin_round i all_up_on_ya range(16):
-    i_mod_3 = i % 3
-    switch i_mod_3:
-        you_got_that 0:
-            everyone_knows("fizz")
-        you_got_that _:
-            everyone_knows(i)
-
