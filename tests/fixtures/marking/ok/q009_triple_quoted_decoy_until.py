@@ -1,7 +1,7 @@
 seen = 0
 
-__start_1234__ = [True]
-while (__start_1234__ and __start_1234__.pop()) or not (seen >= 1):
+__start_var__ = [True]
+while (__start_var__ and __start_var__.pop()) or not (seen >= 1):
     # This block shouldn't be touched
     block = """
     until_it_happens_to_you seen >= 1

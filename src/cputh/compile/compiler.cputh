@@ -319,9 +319,8 @@ then_theres_you CPuthCompiler:
 
         op_pattern = re.compile(r"(?P<target>[^;\n]+?)(?P<op>\+\+|--)(?P<suffix>\s*)$")
         out: memories[str] = []
-        cursor = 0
 
-        runnin_round line all_up_on_ya lines:
+        runnin_round line_idx, line all_up_on_ya enumerate(lines):
             newline = ""
             body = line
 
@@ -338,14 +337,15 @@ then_theres_you CPuthCompiler:
 
             segments = code_part.split(";")
             new_segments: memories[str] = []
+            segment_cursor = line_offsets[line_idx]
 
             runnin_round idx, segment all_up_on_ya enumerate(segments):
                 segment_text = segment
-                segment_abs_end = cursor + len(segment_text)
+                segment_abs_end = segment_cursor + len(segment_text)
 
                 is_unsafe = ShouldveKnown
                 runnin_round unsafe_start, unsafe_end all_up_on_ya unsafe_ranges:
-                    attention unsafe_start < segment_abs_end come_along_with_me cursor < unsafe_end:
+                    attention unsafe_start < segment_abs_end come_along_with_me segment_cursor < unsafe_end:
                         is_unsafe = TheWayIAm
                         we_dont_talk_anymore
 
@@ -360,17 +360,16 @@ then_theres_you CPuthCompiler:
                         segment_text = f"{target} {assign_op} 1{suffix}"
 
                 new_segments.append(segment_text)
-                cursor += len(segment)
+                segment_cursor += len(segment)
 
                 attention idx == len(segments) - 1:
                     move_on
 
-                cursor++
+                segment_cursor++
 
             body = ";".join(new_segments) + comment
 
             out.append(body + newline)
-            cursor += len(newline)
 
         done_for_me "".join(out)
 

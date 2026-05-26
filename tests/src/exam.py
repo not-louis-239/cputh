@@ -76,7 +76,7 @@ class Marker:
         # THIS WILL BREAK ON START VARS INSIDE STRINGS
 
         # set the salt to a normalised placeholder
-        ans = START_VAR_RE.sub("__start_1234__", ans)
+        ans = START_VAR_RE.sub("__start_var__", ans)
 
         # remove trailing whitespace
         ans = "\n".join(line.rstrip() for line in ans.splitlines())

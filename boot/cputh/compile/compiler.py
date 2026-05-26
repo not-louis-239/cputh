@@ -319,9 +319,8 @@ class CPuthCompiler:
 
         op_pattern = re.compile(r"(?P<target>[^;\n]+?)(?P<op>\+\+|--)(?P<suffix>\s*)$")
         out: list[str] = []
-        cursor = 0
 
-        for line in lines:
+        for line_idx, line in enumerate(lines):
             newline = ""
             body = line
 
@@ -338,14 +337,15 @@ class CPuthCompiler:
 
             segments = code_part.split(";")
             new_segments: list[str] = []
+            segment_cursor = line_offsets[line_idx]
 
             for idx, segment in enumerate(segments):
                 segment_text = segment
-                segment_abs_end = cursor + len(segment_text)
+                segment_abs_end = segment_cursor + len(segment_text)
 
                 is_unsafe = False
                 for unsafe_start, unsafe_end in unsafe_ranges:
-                    if unsafe_start < segment_abs_end and cursor < unsafe_end:
+                    if unsafe_start < segment_abs_end and segment_cursor < unsafe_end:
                         is_unsafe = True
                         break
 
@@ -360,17 +360,16 @@ class CPuthCompiler:
                         segment_text = f"{target} {assign_op} 1{suffix}"
 
                 new_segments.append(segment_text)
-                cursor += len(segment)
+                segment_cursor += len(segment)
 
                 if idx == len(segments) - 1:
                     continue
 
-                cursor += 1
+                segment_cursor += 1
 
             body = ";".join(new_segments) + comment
 
             out.append(body + newline)
-            cursor += len(newline)
 
         return "".join(out)
 
