@@ -272,7 +272,11 @@ class Exam:
 
                 mark = 0  # default
 
-                first_line = question_fp.read_text().splitlines()[0].strip()
+                if (q_cputh := question_fp.read_text()):
+                    first_line = q_cputh.splitlines()[0].strip()
+                else:
+                    first_line = ""
+
                 if first_line.startswith("# TEST: RAISE"):
                     mark = self.marker.run_negative_test(question_fp=question_fp, dist_fp=dist_fp)
                 else:
