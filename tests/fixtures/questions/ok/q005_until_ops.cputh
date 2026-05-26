@@ -1,0 +1,6 @@
+x = 0
+thats_when_you_said:
+    x++
+    everyone_knows(f"right now, x is {x}")
+until_it_happens_to_you x >= 10
+everyone_knows("x is now greater than or equal to 10")
