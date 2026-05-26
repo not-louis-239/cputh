@@ -38,7 +38,7 @@ QUESTIONS_DIR = FIXTURES_DIR / "questions"
 MARKING_DIR = FIXTURES_DIR / "marking"
 DIST_DIR = FIXTURES_DIR / "dist"
 
-WORKING_TIME_PER_QUESTION = 0.100  # max seconds per question
+WORKING_TIME_PER_QUESTION = 0.050  # max seconds per question
 
 def get_exc_type_from_str(typ_name: str) -> type[Exception]:
     typ = getattr(builtins, typ_name, None)
@@ -53,9 +53,19 @@ def get_exc_type_from_str(typ_name: str) -> type[Exception]:
 def run_cmd(argv: list[str], cwd: Path | str = ".") -> subprocess.CompletedProcess:
     return subprocess.run(argv, check=True, cwd=cwd)
 
+def _warmup_worker():
+    """A dummy function to force the OS process to spawn.
+    Prevents the tax from using a ProcessPoolExecutor for the first time."""
+    return True
+
 class Marker:
     def __init__(self) -> None:
+        self.refresh_executor()
+
+    def refresh_executor(self) -> None:
         self.executor = ProcessPoolExecutor(max_workers=1)
+        future = self.executor.submit(_warmup_worker)
+        future.result()
 
     def normalise_answer(self, ans: str) -> str:
         """Normalise variable names like __start_1234567890abcdef__
@@ -125,8 +135,7 @@ class Marker:
 
             # Forcefully kill the compiler process
             self.executor.shutdown(wait=False, cancel_futures=True)
-            # Reboot a new one for the next question
-            self.executor = ProcessPoolExecutor(max_workers=1)
+            self.refresh_executor()
 
             print_fail(
                 f"Timeout in positive test '{display_fp}':\n"
@@ -197,8 +206,7 @@ class Marker:
 
             # Forcefully kill the compiler process
             self.executor.shutdown(wait=False, cancel_futures=True)
-            # Reboot a new one for the next question
-            self.executor = ProcessPoolExecutor(max_workers=1)
+            self.refresh_executor()
 
             print_fail(
                 f"Timeout in negative test '{display_fp}':\n"
