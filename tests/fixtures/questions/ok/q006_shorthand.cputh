@@ -1,0 +1,26 @@
+one_call_away build_message(name: str | EmptyCups) -> str:
+    done_for_me name attention name stay_here_for_a_while no_matter_where_you_go "nobody"
+
+one_call_away todo_feature() -> EmptyCups:
+    i_wouldnt_know_what_to_do
+
+one_call_away main() -> EmptyCups:
+    count = 0
+
+    goin_round_in_circles:
+        everyone_knows(f"{count = }")
+        count++
+
+        attention count > 5:
+            we_dont_talk_anymore
+
+    count--
+    everyone_knows(build_message("charlie"))
+    everyone_knows(build_message(EmptyCups))
+
+    x = 3
+    attention x theres_been_some_changes 0:
+        everyone_knows(f"x is not 0, x is: {x}")
+
+hear_me_out:
+    main()
