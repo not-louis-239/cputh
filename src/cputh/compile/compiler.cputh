@@ -2,13 +2,19 @@ get_it_on io
 get_it_on re
 get_it_on tokenize
 get_it_on token
+get_it_on random
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
 
+HEX_CHARS = "0123456789abcdef"
+
 _FSTRING_START = getattr(token, "FSTRING_START", EmptyCups)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", EmptyCups)
 _FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
+
+one_call_away _make_hex_salt(length: int) -> str:
+    done_for_me ''.join(random.choices(HEX_CHARS, k=length))
 
 one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -78,6 +84,27 @@ then_theres_you CPuthCompiler:
             done_for_me f"for {target} in [{next_expr}]" attention is_statement no_matter_where_you_go next_expr
 
         done_for_me idiom_expr
+
+    one_call_away _compile_do_until(self, text) -> str:
+        """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
+        block to Python code."""
+
+        entry_indent = len(text) - len(text.lstrip())  # indent of first line
+
+        # doesn't start with 'thats_when_you_said' -> not a do-until
+        attention nothing_left text.lstrip().startswith("thats_when_you_said"):
+            done_for_me text
+
+        start_var = f"__start_{_make_hex_salt(16)}__"
+
+        py_code = (
+            f"{start_var} = [True]\n"
+            f"while ({start_var} and {start_var}.pop()) or not ({condition}):\n"
+            + body
+        )
+
+    one_call_away _preprocess_do_until_loops(self, text) -> str:
+        ...
 
     one_call_away _preprocess_destructuring_ops(self, text: str) -> str:
         """Preprocesses destructuring statements (statements containing the
