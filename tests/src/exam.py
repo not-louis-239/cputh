@@ -13,6 +13,9 @@ from concurrent.futures import ProcessPoolExecutor, TimeoutError
 # for error lookup:
 import builtins
 
+class EmptyMarkingFileError(Exception):
+    pass
+
 try:
     ROOT_DIR = next(p for p in Path(__file__).parents if (p / ".git").exists())
 except StopIteration:
@@ -103,6 +106,9 @@ class Marker:
 
         q_cputh = question_fp.read_text()
         correct_ans = marking_file.read_text()
+
+        if not correct_ans:
+            raise EmptyMarkingFileError(f"Empty marking file: '{marking_file}'")
 
         t_i = time.time()
 
@@ -260,7 +266,9 @@ class Exam:
         self.marker = Marker()
 
     def run(self) -> int:
-        """Return an exit code: 0 if tests passed, 1 otherwise."""
+        """Return an exit code: 0 if tests passed, 1 otherwise.
+        Questions with missing marking keys are skipped and a file is created
+        for them, to prepare for the next test."""
         print(f"Starting exam...")
         print(f"  {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000:.3f} ms{COL_END} per question")
         print(f"  Found {COL_INFO}{len(self.question_paths)}{COL_END} question papers")
@@ -268,6 +276,7 @@ class Exam:
 
         score = 0
         total_marks = 0
+        missing_marking_paths: list[Path] = []
 
         for question_fp in self.question_paths:
             try:
@@ -294,9 +303,19 @@ class Exam:
                 score += mark
             except FileNotFoundError:
                 # missing marking key
-                print(f"  {COL_WARN}Warning{COL_END}: No marking file found for {COL_WARN}'{question_fp.relative_to(ROOT_DIR)}'{COL_END}, skipping.", file=sys.stderr)
+                rel_fp = question_fp.relative_to(QUESTIONS_DIR)
+                marking_fp = MARKING_DIR / rel_fp.with_suffix(".py")
+                display_marking_fp = marking_fp.relative_to(ROOT_DIR)
+                missing_marking_paths.append(marking_fp)
+                print(f"  {COL_WARN}Warning{COL_END}: No marking file found at {COL_WARN}'{display_marking_fp}'{COL_END}, skipping.", file=sys.stderr)
 
-                # Then we skip incrementing total_marks so as not to penalise the compiler.
+            except EmptyMarkingFileError:
+                # empty marking key
+                rel_fp = question_fp.relative_to(QUESTIONS_DIR)
+                marking_fp = MARKING_DIR / rel_fp.with_suffix(".py")
+                display_marking_fp = marking_fp.relative_to(ROOT_DIR)
+                missing_marking_paths.append(marking_fp)
+                print(f"  {COL_WARN}Warning{COL_END}: Empty marking file found at {COL_WARN}'{display_marking_fp}'{COL_END}, skipping.", file=sys.stderr)
 
         # show results
         print("\nTests completed.")
@@ -310,6 +329,16 @@ class Exam:
         frac = score / total_marks
 
         print(f"  Result: {result_str} ({score} / {total_marks} - {frac:.2%})")
+
+        # Make missing marking key files
+        if missing_marking_paths:
+            print("\nMissing or empty marking files:", file=sys.stderr)
+            for fp in missing_marking_paths:
+                if not fp.exists():
+                    fp.touch(exist_ok=True)
+                    print(f"  Created missing marking file at {COL_INFO}'{fp.relative_to(ROOT_DIR)}'{COL_END}.", file=sys.stderr)
+                else:
+                    print(f"  Empty existing marking file at {COL_INFO}'{fp.relative_to(ROOT_DIR)}'{COL_END}.", file=sys.stderr)
 
         return 0 if passed else 1
 

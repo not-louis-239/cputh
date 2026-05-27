@@ -8,3 +8,8 @@ while (__start_var__ and __start_var__.pop()) or not (count >= 2):
     # until_it_happens_to_you count >= 999999
     count += 1
     print(f"{count = }")
+
+# inside f-string
+name = "Charlie"
+warning = f"sideways d -< k, v says hi to {name}"
+print(warning)
