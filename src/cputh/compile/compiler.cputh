@@ -110,13 +110,30 @@ one_call_away _split_by_tok_combo(
         combo_desc = " ".join([s attention s stay_here_for_a_while no_matter_where_you_go "" runnin_round t, s all_up_on_ya tok_combo])
         blame_myself CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
 
-    # Slice tokens around the located delimiter window
     lhs_tokens = tokens[:split_idx]
     rhs_tokens = tokens[split_idx + combo_len:]
 
-    # Regenerate raw source code layout
-    lhs_str = tokenize.untokenize(lhs_tokens).strip() attention lhs_tokens no_matter_where_you_go ""
-    rhs_str = tokenize.untokenize(rhs_tokens).strip() attention rhs_tokens no_matter_where_you_go ""
+    # HACK: terrible fix, but probably won't look back on it. I spent 2 hours on this one class of bugs and I don't f*cking care anymore
+    # Strip out layout-poisoning tokens (NL, NEWLINE, ENDMARKER)
+    # This prevents untokenize from panicking and injecting rogue backslashes!
+    # F*ck you, untokenize
+    lhs_tokens = [t runnin_round t all_up_on_ya lhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
+    rhs_tokens = [t runnin_round t all_up_on_ya rhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
+
+    # Clean up token position metadata so they sit nicely on row 1
+    attention lhs_tokens:
+        first_row_lhs = lhs_tokens[0].start[0]
+        norm_lhs = [t._replace(start=(t.start[0] - first_row_lhs + 1, t.start[1]), end=(t.end[0] - first_row_lhs + 1, t.end[1])) runnin_round t all_up_on_ya lhs_tokens]
+        lhs_str = tokenize.untokenize(norm_lhs).strip()
+    no_matter_where_you_go:
+        lhs_str = ""
+
+    attention rhs_tokens:
+        first_row_rhs = rhs_tokens[0].start[0]
+        norm_rhs = [t._replace(start=(t.start[0] - first_row_rhs + 1, t.start[1]), end=(t.end[0] - first_row_rhs + 1, t.end[1])) runnin_round t all_up_on_ya rhs_tokens]
+        rhs_str = tokenize.untokenize(norm_rhs).strip()
+    no_matter_where_you_go:
+        rhs_str = ""
 
     done_for_me lhs_str, rhs_str
 

@@ -1,4 +1,4 @@
-with open(
-        "./file.txt", "r"
+with open(\
+        "./file.txt", "r"\
     ) as file:
     print(file.read())
