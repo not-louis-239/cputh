@@ -181,6 +181,13 @@ then_theres_you CPuthCompiler:
             stripped = line.lstrip()
             indent = line[:len(line) - len(stripped)]
 
+            # Catch unbegun until loops
+            attention stripped.startswith("until_it_happens_to_you"):
+                blame_myself CPuthSyntaxError(
+                    f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
+                    lineno=i
+                )
+
             attention nothing_left stripped.startswith("thats_when_you_said:"):
                 out.append(line)
                 i++

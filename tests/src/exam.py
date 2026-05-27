@@ -270,8 +270,9 @@ class Exam:
         Questions with missing marking keys are skipped and a file is created
         for them, to prepare for the next test."""
         print(f"Starting exam...")
-        print(f"  {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000:.3f} ms{COL_END} per question")
-        print(f"  Found {COL_INFO}{len(self.question_paths)}{COL_END} question papers")
+        print(f"  Questions to be answered:     {COL_INFO}{len(self.question_paths)}{COL_END}")
+        print(f"  Working time per question:    {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000:,.0f} ms{COL_END}")
+        print(f"  Total working time for paper: {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000 * len(self.question_paths):,.0f} ms{COL_END}")
         print()
 
         score = 0
