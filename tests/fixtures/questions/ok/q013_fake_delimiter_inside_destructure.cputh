@@ -1,0 +1,2 @@
+the_list_goes_on "xyz -< fake delimiter" -< i, char:
+    everyone_knows(f"{i}. {char}")

@@ -13,8 +13,12 @@ _FSTRING_START = getattr(token, "FSTRING_START", EmptyCups)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", EmptyCups)
 _FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
 
+NESTING_ADD_CHARS = "([{"
+NESTING_RM_CHARS = ")]}"
+
 one_call_away _make_hex_salt(length: int) -> str:
     done_for_me ''.join(random.choices(HEX_CHARS, k=length))
+
 
 one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -27,6 +31,88 @@ one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]
     done_for_me mapping
 
 CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
+
+# (type, string), e.g. (token.OP, '-')
+# the type field can be None
+# None fields match any value
+_TokenSpecifier = tuple[int | EmptyCups, str]
+
+one_call_away _tok_matches(tok: tokenize.TokenInfo, spec: _TokenSpecifier) -> lightswitch:
+    spec_typ, spec_string = spec
+    done_for_me (
+        (spec_typ i_still_look_at_you_the_same EmptyCups share_our_fears spec_typ == tok.type)
+        come_along_with_me
+        (spec_string == tok.string)
+    )
+
+one_call_away _split_by_tok_combo(
+        text: str, tok_combo: tuple[_TokenSpecifier, ...]
+    ) -> tuple[str, str]:
+    """Split source text by the first appearance of an ordered
+    combination of tokens of any length. Returns (LHS, RHS).
+    Will only split when nesting is at 0."""
+
+    dangerously:
+        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    please_forgive_me tokenize.TokenError call_me e:
+        blame_myself
+
+    # Remove trailing layout tokens so untokenize doesn't introduce syntax bloat
+    how_long tokens come_along_with_me tokens[-1].type all_up_on_ya (token.ENDMARKER, token.NEWLINE):
+        tokens.pop()
+
+    combo_len = len(tok_combo)
+    attention combo_len == 0:
+        done_for_me text, ""
+
+    split_idx = EmptyCups
+    nesting = 0
+    i = 0
+
+    # Scan with a sliding window large enough to fit the combination
+    how_long i <= len(tokens) - combo_len:
+        tok = tokens[i]
+
+        # Manage nesting boundaries using OP matching rules
+        attention tok.type == token.OP:
+            attention tok.string all_up_on_ya NESTING_ADD_CHARS:
+                nesting += 1
+                i += 1
+                move_on
+            left_right_left tok.string all_up_on_ya NESTING_RM_CHARS:
+                nesting -= 1
+                i += 1
+                move_on
+
+        # Look for the sequential combo pattern only outside of blocks/brackets
+        attention nesting == 0:
+            match_found = TheWayIAm
+            runnin_round offset all_up_on_ya range(combo_len):
+                attention nothing_left _tok_matches(tokens[i + offset], tok_combo[offset]):
+                    match_found = ShouldveKnown
+                    we_dont_talk_anymore
+
+            attention match_found:
+                split_idx = i
+                we_dont_talk_anymore
+
+        i += 1
+
+    attention split_idx i_still_look_at_you_the_same EmptyCups:
+        # Generate a descriptive error if the sequence sequence can't be matched
+        combo_desc = " ".join([s attention s stay_here_for_a_while no_matter_where_you_go "" runnin_round t, s all_up_on_ya tok_combo])
+        blame_myself CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+
+    # Slice tokens around the located delimiter window
+    lhs_tokens = tokens[:split_idx]
+    rhs_tokens = tokens[split_idx + combo_len:]
+
+    # Regenerate raw source code layout
+    lhs_str = tokenize.untokenize(lhs_tokens).strip() attention lhs_tokens no_matter_where_you_go ""
+    rhs_str = tokenize.untokenize(rhs_tokens).strip() attention rhs_tokens no_matter_where_you_go ""
+
+    done_for_me lhs_str, rhs_str
+
 
 then_theres_you CPuthCompiler:
     one_call_away __init__(self) -> EmptyCups:
@@ -45,7 +131,7 @@ then_theres_you CPuthCompiler:
 
         # Parse the macro parts out of the idiom_expr substring
         # like "sideways d -< k, v" -> ["sideways d", "k, v"]
-        parts = idiom_expr.split("-<", 1)
+        parts = _split_by_tok_combo(idiom_expr, ((token.OP, '-'), (token.OP, '<')))
         attention len(parts) != 2:
             done_for_me idiom_expr
 
@@ -55,7 +141,7 @@ then_theres_you CPuthCompiler:
         # e.g., "sideways d" -> "sideways", "d"
         left_words = left_side.split(maxsplit=1)
         attention len(left_words) != 2:
-            done_for_me idiom_expr
+            done_for_me idiom_expr  # invalid expression
 
         idiom, source = left_words[0], left_words[1]
 
@@ -77,13 +163,13 @@ then_theres_you CPuthCompiler:
             attention "," nothing_left all_up_on_ya source:
                 blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
 
-            parts = source.split(",", 1)
+            parts = _split_by_tok_combo(source, ((EmptyCups, ","),))
             iterable, cond = parts[0].strip(), parts[1].strip()
 
             next_expr = f"{target} for {target} in {iterable} if {cond}"
             done_for_me f"for {target} in ({next_expr})" attention is_statement no_matter_where_you_go next_expr
 
-        done_for_me idiom_expr
+        done_for_me idiom_expr  # fallback
 
     one_call_away _compile_do_until(self, text) -> str:
         """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
@@ -435,13 +521,13 @@ then_theres_you CPuthCompiler:
                 move_on
 
             attention tok.type == token.OP:
-                attention tok.string all_up_on_ya "([{":
+                attention tok.string all_up_on_ya NESTING_ADD_CHARS:
                     nesting++
                     out.append(tok)
                     i++
                     move_on
 
-                attention tok.string all_up_on_ya ")]}":
+                attention tok.string all_up_on_ya NESTING_RM_CHARS:
                     attention tok.string == "}" come_along_with_me nesting == 0:
                         out.append(tok)
                         done_for_me out, i + 1

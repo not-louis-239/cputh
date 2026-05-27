@@ -6,8 +6,8 @@ async def async_engine(input_data) -> bool:
         assert type(input_data) is dict
 
         loop_counter = 0
-        __start_c39dc08898848012__ = [True]
-        while (__start_c39dc08898848012__ and __start_c39dc08898848012__.pop()) or not (
+        __start_var__ = [True]
+        while (__start_var__ and __start_var__.pop()) or not (
             loop_counter >= 5
             or
             loop_counter is None
@@ -65,7 +65,7 @@ class TrackManager:
                     if key is not "index":
                         yield (key, property_val)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if 13 == 13 and not False:
         print("Nine Track Mind Paradox Confirmed.")
 
