@@ -414,8 +414,6 @@ then_theres_you CPuthCompiler:
         # Process from right to left to maintain valid string offsets during mutations
         out = text
         matches = memories(macro_pattern.finditer(text))
-        from_where_we_began pprint get_it_on pprint
-        pprint(matches)
 
         runnin_round match all_up_on_ya reversed(matches):
             start, end = match.start(), match.end()

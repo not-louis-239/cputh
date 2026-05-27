@@ -13,8 +13,16 @@ _FSTRING_START = getattr(token, "FSTRING_START", None)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", None)
 _FSTRING_END = getattr(token, "FSTRING_END", None)
 
+NESTING_ADD_CHARS = "([{"
+NESTING_RM_CHARS = ")]}"
+
+CPUTH_MACRO_KEYWORDS = {
+    "sideways", "the_list_goes_on", "perfume_regret", "patient"
+}
+
 def _make_hex_salt(length: int) -> str:
     return ''.join(random.choices(HEX_CHARS, k=length))
+
 
 def _convert_grammar_file_to_flatdict(gfile: dict[str, dict[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -27,6 +35,108 @@ def _convert_grammar_file_to_flatdict(gfile: dict[str, dict[str, str]]):
     return mapping
 
 CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
+
+# (type, string), e.g. (token.OP, '-')
+# the type field can be None
+# None fields match any value
+_TokenSpecifier = tuple[int | None, str]
+
+def _tok_matches(tok: tokenize.TokenInfo, spec: _TokenSpecifier) -> bool:
+    spec_typ, spec_string = spec
+    return (
+        (spec_typ is None or spec_typ == tok.type)
+        and
+        (spec_string == tok.string)
+    )
+
+def _split_by_tok_combo(
+        text: str, tok_combo: tuple[_TokenSpecifier, ...]
+    ) -> tuple[str, str]:
+    """Split source text by the first appearance of an ordered
+    combination of tokens of any length. Returns (LHS, RHS).
+    Will only split when nesting is at 0.
+
+    If cannot split, e.g. empty combo tuple or no tokens in LHS
+    or RHS, that side will be an empty string."""
+
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    except tokenize.TokenError as e:
+        raise
+
+    # Remove trailing layout tokens so untokenize doesn't introduce syntax bloat
+    while tokens and tokens[-1].type in (token.ENDMARKER, token.NEWLINE):
+        tokens.pop()
+
+    combo_len = len(tok_combo)
+    if combo_len == 0:
+        return text, ""
+
+    split_idx = None
+    nesting = 0
+    i = 0
+
+    # Scan with a sliding window large enough to fit the combination
+    while i <= len(tokens) - combo_len:
+        tok = tokens[i]
+
+        # Manage nesting boundaries using OP matching rules
+        if tok.type == token.OP:
+            if tok.string in NESTING_ADD_CHARS:
+                nesting += 1
+                i += 1
+                continue
+            elif tok.string in NESTING_RM_CHARS:
+                nesting -= 1
+                i += 1
+                continue
+
+        # Look for the sequential combo pattern only outside of blocks/brackets
+        if nesting == 0:
+            match_found = True
+            for offset in range(combo_len):
+                if not _tok_matches(tokens[i + offset], tok_combo[offset]):
+                    match_found = False
+                    break
+
+            if match_found:
+                split_idx = i
+                break
+
+        i += 1
+
+    if split_idx is None:
+        # Generate a descriptive error if the sequence sequence can't be matched
+        combo_desc = " ".join([s if s is not None else "" for t, s in tok_combo])
+        raise CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+
+    lhs_tokens = tokens[:split_idx]
+    rhs_tokens = tokens[split_idx + combo_len:]
+
+    # HACK: terrible fix, but probably won't look back on it. I spent 2 hours on this one class of bugs and I don't f*cking care anymore
+    # Strip out layout-poisoning tokens (NL, NEWLINE, ENDMARKER)
+    # This prevents untokenize from panicking and injecting rogue backslashes!
+    # F*ck you, untokenize
+    lhs_tokens = [t for t in lhs_tokens if t.type not in (token.NL, token.NEWLINE, token.ENDMARKER)]
+    rhs_tokens = [t for t in rhs_tokens if t.type not in (token.NL, token.NEWLINE, token.ENDMARKER)]
+
+    # Clean up token position metadata so they sit nicely on row 1
+    if lhs_tokens:
+        first_row_lhs = lhs_tokens[0].start[0]
+        norm_lhs = [t._replace(start=(t.start[0] - first_row_lhs + 1, t.start[1]), end=(t.end[0] - first_row_lhs + 1, t.end[1])) for t in lhs_tokens]
+        lhs_str = tokenize.untokenize(norm_lhs).strip()
+    else:
+        lhs_str = ""
+
+    if rhs_tokens:
+        first_row_rhs = rhs_tokens[0].start[0]
+        norm_rhs = [t._replace(start=(t.start[0] - first_row_rhs + 1, t.start[1]), end=(t.end[0] - first_row_rhs + 1, t.end[1])) for t in rhs_tokens]
+        rhs_str = tokenize.untokenize(norm_rhs).strip()
+    else:
+        rhs_str = ""
+
+    return lhs_str, rhs_str
+
 
 class CPuthCompiler:
     def __init__(self) -> None:
@@ -45,45 +155,77 @@ class CPuthCompiler:
 
         # Parse the macro parts out of the idiom_expr substring
         # like "sideways d -< k, v" -> ["sideways d", "k, v"]
-        parts = idiom_expr.split("-<", 1)
-        if len(parts) != 2:
-            return idiom_expr
-
+        parts = _split_by_tok_combo(idiom_expr, ((token.OP, '-'), (token.OP, '<')))
         left_side, target = parts[0].strip(), parts[1].strip()
 
-        # Pull the keyword off the front
-        # e.g., "sideways d" -> "sideways", "d"
-        left_words = left_side.split(maxsplit=1)
-        if len(left_words) != 2:
+        if not target:
+            raise CPuthSyntaxError(
+                "Expected target variable(s) after destructuring operator", lineno=lineno
+            )
+
+        # Token-scan left_side to pinpoint the actual macro keyword
+        try:
+            tokens = list(tokenize.generate_tokens(io.StringIO(left_side).readline))
+            # Strip trailing markers
+            while tokens and tokens[-1].type in (token.ENDMARKER, token.NEWLINE):
+                tokens.pop()
+        except Exception:
             return idiom_expr
 
-        idiom, source = left_words[0], left_words[1]
+        # Find the keyword token (scan backward to respect assignments like 'reader = ')
+        keyword_idx = None
+        for i in reversed(range(len(tokens))):
+            if tokens[i].type == token.NAME and tokens[i].string in CPUTH_MACRO_KEYWORDS:
+                keyword_idx = i
+                break
 
-        if idiom == "sideways":
-            return f"for {target} in {source}.items()"
+        # If no valid CPuth macro keyword is detected at all, drop through to safety
+        if keyword_idx is None:
+            return idiom_expr
 
-        elif idiom == "the_list_goes_on":
-            return f"for {target} in enumerate({source})"
+        idiom = tokens[keyword_idx].string
 
-        elif idiom == "perfume_regret":
-            if not is_statement:
-                raise CPuthSyntaxError(
-                    "perfume_regret can only be used as a statement block",
-                    lineno=lineno,
-                )
-            return f"with open({source}) as {target}"
+        # Use untokenize to extract the prefix and source expressions completely intact
+        prefix = tokenize.untokenize(tokens[:keyword_idx]).strip()
+        source = tokenize.untokenize(tokens[keyword_idx + 1:]).strip()
 
-        elif idiom == "patient":
-            if "," not in source:
-                raise CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+        # Process the idiomatic translation
+        translated_expr = ""
 
-            parts = source.split(",", 1)
-            iterable, cond = parts[0].strip(), parts[1].strip()
+        match idiom:
+            case "sideways":
+                translated_expr = f"for {target} in {source}.items()"
 
-            next_expr = f"{target} for {target} in {iterable} if {cond}"
-            return f"for {target} in ({next_expr})" if is_statement else next_expr
+            case "the_list_goes_on":
+                translated_expr = f"for {target} in enumerate({source})"
 
-        return idiom_expr
+            case "perfume_regret":
+                if not is_statement:
+                    raise CPuthSyntaxError(
+                        "perfume_regret can only be used as a statement block", lineno=lineno
+                    )
+
+                if source.startswith('(') and source.endswith(')'):
+                    translated_expr = f"with open{source} as {target}"
+                else:
+                    translated_expr = f"with open({source}) as {target}"
+
+            case "patient":
+                sub_parts = _split_by_tok_combo(source, ((None, ","),))
+
+                # Check both parts are non-empty
+                if not (sub_parts[0] and sub_parts[1]):
+                    raise CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+
+                iterable, cond = sub_parts[0].strip(), sub_parts[1].strip()
+                next_expr = f"{target} for {target} in {iterable} if {cond}"
+                translated_expr = f"for {target} in ({next_expr})" if is_statement else next_expr
+
+            case bad_kw:
+                raise CPuthSyntaxError(f"invalid macro keyword: {bad_kw}")
+
+        # Prepend the original prefix (e.g., "reader = ") to the result
+        return f"{prefix} {translated_expr}".strip()
 
     def _compile_do_until(self, text) -> str:
         """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
@@ -181,6 +323,13 @@ class CPuthCompiler:
             stripped = line.lstrip()
             indent = line[:len(line) - len(stripped)]
 
+            # Catch unbegun until loops
+            if stripped.startswith("until_it_happens_to_you"):
+                raise CPuthSyntaxError(
+                    f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
+                    lineno=i
+                )
+
             if not stripped.startswith("thats_when_you_said:"):
                 out.append(line)
                 i += 1
@@ -256,8 +405,9 @@ class CPuthCompiler:
             raise
 
         # Regex to locate any possible idiom pattern globally (multiline safe)
+        # Can match across lines, but stops instantly if it hits an empty line (\n\n) or comment start (#)
         macro_pattern = re.compile(
-            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n)}\]])',
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+(?:(?!\n\n)[^#])*?-<.*?(?=[:\n)}\]])',
             re.DOTALL
         )
 
@@ -428,13 +578,13 @@ class CPuthCompiler:
                 continue
 
             if tok.type == token.OP:
-                if tok.string in "([{":
+                if tok.string in NESTING_ADD_CHARS:
                     nesting += 1
                     out.append(tok)
                     i += 1
                     continue
 
-                if tok.string in ")]}":
+                if tok.string in NESTING_RM_CHARS:
                     if tok.string == "}" and nesting == 0:
                         out.append(tok)
                         return out, i + 1
