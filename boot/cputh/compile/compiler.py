@@ -135,6 +135,12 @@ def _split_by_tok_combo(
     else:
         rhs_str = ""
 
+    # HACK: Another terrible hack fix. It just violently rips out all trailing backslashes...
+    # This will break if a maniac user decides to put trailing backslashes inside the LHS... too bad!
+    # If you do that, you deserve whatever traceback Python decides to throw at you.
+    # For now, let's just say that if Charlie Puth finds a trailing backslash in the LHS, it's UB
+    lhs_str = re.sub(r'\\\s*\n', '\n', lhs_str)
+
     return lhs_str, rhs_str
 
 
