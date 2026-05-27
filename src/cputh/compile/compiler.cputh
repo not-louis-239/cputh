@@ -384,15 +384,17 @@ then_theres_you CPuthCompiler:
             blame_myself
 
         # Regex to locate any possible idiom pattern globally (multiline safe)
-        # XXX: bad perfume statement not being detected and thus doesn't raise an exception! FIX THIS!!
+        # Can match across lines, but stops instantly if it hits an empty line (\n\n) or comment start (#)
         macro_pattern = re.compile(
-            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n)}\]])',
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+(?:(?!\n\n)[^#])*?-<.*?(?=[:\n)}\]])',
             re.DOTALL
         )
 
         # Process from right to left to maintain valid string offsets during mutations
         out = text
         matches = memories(macro_pattern.finditer(text))
+        from_where_we_began pprint get_it_on pprint
+        pprint(matches)
 
         runnin_round match all_up_on_ya reversed(matches):
             start, end = match.start(), match.end()

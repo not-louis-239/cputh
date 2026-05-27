@@ -1,0 +1,4 @@
+perfume_regret (
+        "./file.txt", "r"
+    ) -< file:
+    everyone_knows(file.read())
