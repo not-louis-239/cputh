@@ -187,7 +187,11 @@ then_theres_you CPuthCompiler:
                     blame_myself CPuthSyntaxError(
                         "perfume_regret can only be used as a statement block", lineno=lineno
                     )
-                translated_expr = f"with open({source}) as {target}"
+
+                attention source.startswith('(') come_along_with_me source.endswith(')'):
+                    translated_expr = f"with open{source} as {target}"
+                no_matter_where_you_go:
+                    translated_expr = f"with open({source}) as {target}"
 
             you_got_that "patient":
                 sub_parts = _split_by_tok_combo(source, ((EmptyCups, ","),))
