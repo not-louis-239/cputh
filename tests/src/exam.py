@@ -263,6 +263,7 @@ class Exam:
         """Return an exit code: 0 if tests passed, 1 otherwise."""
         print(f"Starting exam...")
         print(f"  {COL_INFO}{WORKING_TIME_PER_QUESTION * 1_000:.3f} ms{COL_END} per question")
+        print(f"  Found {COL_INFO}{len(self.question_paths)}{COL_END} question papers")
         print()
 
         score = 0

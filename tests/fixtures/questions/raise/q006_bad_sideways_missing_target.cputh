@@ -1,0 +1,4 @@
+# TEST: RAISE: Exception
+d = {"a": 1}
+sideways d -< :
+    everyone_knows("oops")

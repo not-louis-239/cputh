@@ -1,0 +1,4 @@
+# TEST: RAISE: Exception
+nums = [1, 2, 3]
+patient nums x > 0 -< x:
+    everyone_knows(x)

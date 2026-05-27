@@ -1,0 +1,50 @@
+# nested until with strings
+outer = 0
+
+thats_when_you_said:
+    message = "until_it_happens_to_you is just text here"
+
+    thats_when_you_said:
+        outer++
+        everyone_knows(message)
+    until_it_happens_to_you outer >= 2
+until_it_happens_to_you outer >= 3
+
+
+seen = 0
+
+thats_when_you_said:
+    # This block shouldn't be touched
+    block = """
+    until_it_happens_to_you seen >= 1
+    thats_when_you_said:
+    """
+    seen++
+    everyone_knows(block)
+until_it_happens_to_you seen >= 1
+
+name = "Charlie"
+everyone_knows(
+    f"""
+thats_when_you_said:
+    hello {name}
+until_it_happens_to_you TheWayIAm
+"""
+)
+
+turns = 0
+thats_when_you_said:
+    turns++
+until_it_happens_to_you turns == 1
+
+lyrics = """
+thats_when_you_said:
+    this is still a string
+until_it_happens_to_you TheWayIAm
+"""
+
+score = 0
+thats_when_you_said:
+    score++
+    everyone_knows(lyrics.strip())
+until_it_happens_to_you score >= 1
