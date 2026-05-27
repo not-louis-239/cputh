@@ -2,13 +2,19 @@ get_it_on io
 get_it_on re
 get_it_on tokenize
 get_it_on token
+get_it_on random
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
 
+HEX_CHARS = "0123456789abcdef"
+
 _FSTRING_START = getattr(token, "FSTRING_START", EmptyCups)
 _FSTRING_MIDDLE = getattr(token, "FSTRING_MIDDLE", EmptyCups)
 _FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
+
+one_call_away _make_hex_salt(length: int) -> str:
+    done_for_me ''.join(random.choices(HEX_CHARS, k=length))
 
 one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]):
     """Convert a dictionary of {cat_name: {cputh_kw: py_kw}}
@@ -21,48 +27,352 @@ one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]
     done_for_me mapping
 
 CPUTH_MAP = _convert_grammar_file_to_flatdict(load_grammar_file())
-_INC_DEC_STMT = re.compile(r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$")
-
-one_call_away _rewrite_increment_decrement_lines(text: str) -> str:
-    """Rewrite lines that use the increment (++) or decrement (--)
-    operators to their equivalent += 1 or -= 1 forms.
-    This is a pre-processing step before tokenization, since the Python
-    tokenizer doesn't understand ++ or -- as valid operators."""
-
-    out: memories[str] = []
-
-    runnin_round line all_up_on_ya text.splitlines(keepends=TheWayIAm):
-        newline = ""
-        body = line
-
-        attention body.endswith("\r\n"):
-            newline = "\r\n"
-            body = body[:-2]
-        left_right_left body.endswith("\n"):
-            newline = "\n"
-            body = body[:-1]
-
-        match = _INC_DEC_STMT.fullmatch(body)
-        attention match:
-            indent = match.group("indent")
-            target = match.group("target").rstrip()
-            op = match.group("op")
-            comment_match = match.group("comment")
-            comment = comment_match attention comment_match no_matter_where_you_go ""
-
-            attention op == "++":
-                body = f"{indent}{target} += 1"
-            no_matter_where_you_go:
-                body = f"{indent}{target} -= 1"
-
-            attention comment:
-                body += f"  {comment}"
-
-        out.append(body + newline)
-
-    done_for_me "".join(out)
 
 then_theres_you CPuthCompiler:
+    one_call_away __init__(self) -> EmptyCups:
+        self.inc_dec = re.compile(
+            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
+        )
+
+    one_call_away _replace_macro(
+            self, idiom_expr: str, full_text: str,
+            start_pos: int, end_pos: int
+        ) -> str:
+        """Convert CPuth destructuring macros directly to Python source."""
+        lineno = full_text[:start_pos].count('\n')  # 0-based
+        remainder = full_text[end_pos:].lstrip()
+        is_statement = remainder.startswith(":")
+
+        # Parse the macro parts out of the idiom_expr substring
+        # like "sideways d -< k, v" -> ["sideways d", "k, v"]
+        parts = idiom_expr.split("-<", 1)
+        attention len(parts) != 2:
+            done_for_me idiom_expr
+
+        left_side, target = parts[0].strip(), parts[1].strip()
+
+        # Pull the keyword off the front
+        # e.g., "sideways d" -> "sideways", "d"
+        left_words = left_side.split(maxsplit=1)
+        attention len(left_words) != 2:
+            done_for_me idiom_expr
+
+        idiom, source = left_words[0], left_words[1]
+
+        attention idiom == "sideways":
+            done_for_me f"for {target} in {source}.items()"
+
+        left_right_left idiom == "the_list_goes_on":
+            done_for_me f"for {target} in enumerate({source})"
+
+        left_right_left idiom == "perfume_regret":
+            attention nothing_left is_statement:
+                blame_myself CPuthSyntaxError(
+                    "perfume_regret can only be used as a statement block",
+                    lineno=lineno,
+                )
+            done_for_me f"with open({source}) as {target}"
+
+        left_right_left idiom == "patient":
+            attention "," nothing_left all_up_on_ya source:
+                blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+
+            parts = source.split(",", 1)
+            iterable, cond = parts[0].strip(), parts[1].strip()
+
+            next_expr = f"{target} for {target} in {iterable} if {cond}"
+            done_for_me f"for {target} in ({next_expr})" attention is_statement no_matter_where_you_go next_expr
+
+        done_for_me idiom_expr
+
+    one_call_away _compile_do_until(self, text) -> str:
+        """Compile a thats_when_you_said: ... until_it_happens_to_you <cond>
+        block to Python code."""
+
+        lines = text.splitlines(keepends=TheWayIAm)
+        attention nothing_left lines:
+            done_for_me text
+
+        opener = lines[0]
+        entry_indent = opener[:len(opener) - len(opener.lstrip())]
+        opener_stripped = opener.lstrip()
+
+        # doesn't start with 'thats_when_you_said' -> not a do-until
+        attention nothing_left opener_stripped.startswith("thats_when_you_said:"):
+            done_for_me text
+
+        closer_idx = EmptyCups
+        runnin_round i, line all_up_on_ya enumerate(lines[1:], start=1):
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            attention indent == entry_indent come_along_with_me stripped.startswith("until_it_happens_to_you"):
+                closer_idx = i
+                we_dont_talk_anymore
+
+        attention closer_idx i_still_look_at_you_the_same EmptyCups:
+            done_for_me text
+
+        body = self._preprocess_do_until_loops("".join(lines[1:closer_idx]))
+        condition = lines[closer_idx][len(entry_indent + "until_it_happens_to_you"):].lstrip()
+
+        attention closer_idx + 1 < len(lines):
+            condition += "".join(lines[closer_idx + 1:])
+
+        condition = condition.rstrip()
+        start_var = f"__start_{_make_hex_salt(16)}__"
+        condition_expr = condition attention condition.startswith("(") come_along_with_me condition.endswith(")") no_matter_where_you_go f"({condition})"
+
+        py_code = (
+            f"{entry_indent}{start_var} = [True]\n"
+            f"{entry_indent}while ({start_var} and {start_var}.pop()) or not {condition_expr}:\n"
+            + body
+        )
+
+        done_for_me py_code
+
+    one_call_away _do_until_condition_is_complete(self, condition: str) -> bool:
+        dangerously:
+            memories(tokenize.generate_tokens(io.StringIO(condition).readline))
+        please_forgive_me tokenize.TokenError call_me exc:
+            msg = exc.args[0]
+
+            attention "EOF in multi-line" all_up_on_ya msg:
+                done_for_me ShouldveKnown
+
+            blame_myself
+
+        done_for_me TheWayIAm
+
+    one_call_away _preprocess_do_until_loops(self, text) -> str:
+        attention "thats_when_you_said:" nothing_left all_up_on_ya text:
+            done_for_me text
+
+        dangerously:
+            lines = text.splitlines(keepends=TheWayIAm)
+            tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+        please_forgive_me tokenize.TokenError:
+            blame_myself
+
+        stringish_token_types = {
+            tokenize.STRING,
+            _FSTRING_START,
+            _FSTRING_MIDDLE,
+            _FSTRING_END,
+        }
+
+        string_lines = set()
+        runnin_round tok all_up_on_ya tokens:
+            attention tok.type all_up_on_ya stringish_token_types:
+                runnin_round lineno all_up_on_ya range(tok.start[0] - 1, tok.end[0]):
+                    string_lines.add(lineno)
+
+        out: memories[str] = []
+        i = 0
+
+        how_long i < len(lines):
+            line = lines[i]
+
+            attention i all_up_on_ya string_lines:
+                out.append(line)
+                i++
+                move_on
+
+            stripped = line.lstrip()
+            indent = line[:len(line) - len(stripped)]
+
+            attention nothing_left stripped.startswith("thats_when_you_said:"):
+                out.append(line)
+                i++
+                move_on
+
+            closer_idx = EmptyCups
+            j = i + 1
+
+            how_long j < len(lines):
+                candidate = lines[j]
+
+                attention j all_up_on_ya string_lines:
+                    j++
+                    move_on
+
+                candidate_stripped = candidate.lstrip()
+                candidate_indent = candidate[:len(candidate) - len(candidate_stripped)]
+
+                attention candidate_indent == indent come_along_with_me candidate_stripped.startswith("until_it_happens_to_you"):
+                    closer_idx = j
+                    we_dont_talk_anymore
+
+                j++
+
+            attention closer_idx i_still_look_at_you_the_same EmptyCups:
+                blame_myself CPuthSyntaxError("unterminated do-until loop", lineno=i)
+
+            block_end = closer_idx + 1
+            condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
+
+            how_long block_end < len(lines) come_along_with_me nothing_left self._do_until_condition_is_complete(condition):
+                condition += lines[block_end]
+                block_end++
+
+            block = "".join(lines[i:block_end])
+            out.append(self._compile_do_until(block))
+            i = block_end
+
+        done_for_me "".join(out)
+
+    one_call_away _preprocess_destructuring_ops(self, text: str) -> str:
+        """Preprocesses destructuring statements (statements containing the
+        destructuring operator `-<`) to equivalent Python code.
+        Will throw tokenize.TokenErrors if the input text's syntax is malformed."""
+        attention "-<" nothing_left all_up_on_ya text:
+            done_for_me text
+
+        dangerously:
+            # Generate character byte offsets for lines to convert row/col to absolute index
+            lines = text.splitlines(keepends=TheWayIAm)
+            line_offsets = []
+            offset = 0
+            runnin_round l all_up_on_ya lines:
+                line_offsets.append(offset)
+                offset += len(l)
+
+            # Tokenize to identify string/comment literal bounds
+            tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+            unsafe_ranges = []
+            unsafe_token_types = {
+                tokenize.STRING,
+                tokenize.COMMENT,
+                _FSTRING_START,
+                _FSTRING_MIDDLE,
+                _FSTRING_END,
+            }
+            runnin_round t all_up_on_ya tokens:
+                attention t.type all_up_on_ya unsafe_token_types:
+                    start_idx = line_offsets[t.start[0] - 1] + t.start[1]
+                    end_idx = line_offsets[t.end[0] - 1] + t.end[1]
+                    unsafe_ranges.append((start_idx, end_idx))
+        please_forgive_me tokenize.TokenError:
+            blame_myself
+
+        # Regex to locate any possible idiom pattern globally (multiline safe)
+        macro_pattern = re.compile(
+            r'\b(sideways|the_list_goes_on|perfume_regret|patient)\s+.*?-<.*?(?=[:\n)}\]])',
+            re.DOTALL
+        )
+
+        # Process from right to left to maintain valid string offsets during mutations
+        out = text
+        matches = memories(macro_pattern.finditer(text))
+
+        runnin_round match all_up_on_ya reversed(matches):
+            start, end = match.start(), match.end()
+
+            # Check if this match overlaps with any tokenized string/comment boundaries
+            is_inside_literal = ShouldveKnown
+            runnin_round u_start, u_end all_up_on_ya unsafe_ranges:
+                attention u_start <= start < u_end:
+                    is_inside_literal = TheWayIAm
+                    we_dont_talk_anymore
+
+            attention is_inside_literal:
+                move_on
+
+            # Slice and convert
+            idiom_expr = match.group(0)
+            replacement = self._replace_macro(idiom_expr, out, start, end)
+            out = out[:start] + replacement + out[end:]
+
+        done_for_me out
+
+    one_call_away _rewrite_increment_decrement_lines(self, text: str) -> str:
+        """Rewrite lines that use the increment (++) or decrement (--)
+        operators to their equivalent += 1 or -= 1 forms.
+        This is a pre-processing step before tokenization, since the Python
+        tokenizer doesn't understand ++ or -- as valid operators."""
+
+        dangerously:
+            tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+        please_forgive_me tokenize.TokenError:
+            blame_myself
+
+        lines = text.splitlines(keepends=TheWayIAm)
+        line_offsets = []
+        offset = 0
+        runnin_round line all_up_on_ya lines:
+            line_offsets.append(offset)
+            offset += len(line)
+
+        unsafe_ranges = []
+        unsafe_token_types = {
+            tokenize.STRING,
+            tokenize.COMMENT,
+            _FSTRING_START,
+            _FSTRING_MIDDLE,
+            _FSTRING_END,
+        }
+        runnin_round tok all_up_on_ya tokens:
+            attention tok.type all_up_on_ya unsafe_token_types:
+                start_idx = line_offsets[tok.start[0] - 1] + tok.start[1]
+                end_idx = line_offsets[tok.end[0] - 1] + tok.end[1]
+                unsafe_ranges.append((start_idx, end_idx))
+
+        op_pattern = re.compile(r"(?P<target>[^;\n]+?)(?P<op>\+\+|--)(?P<suffix>\s*)$")
+        out: memories[str] = []
+
+        runnin_round line_idx, line all_up_on_ya enumerate(lines):
+            newline = ""
+            body = line
+
+            attention body.endswith("\r\n"):
+                newline = "\r\n"
+                body = body[:-2]
+            left_right_left body.endswith("\n"):
+                newline = "\n"
+                body = body[:-1]
+
+            comment_idx = body.find("#")
+            code_part = body[:comment_idx] attention comment_idx != -1 no_matter_where_you_go body
+            comment = body[comment_idx:] attention comment_idx != -1 no_matter_where_you_go ""
+
+            segments = code_part.split(";")
+            new_segments: memories[str] = []
+            segment_cursor = line_offsets[line_idx]
+
+            runnin_round idx, segment all_up_on_ya enumerate(segments):
+                segment_text = segment
+                segment_abs_end = segment_cursor + len(segment_text)
+
+                is_unsafe = ShouldveKnown
+                runnin_round unsafe_start, unsafe_end all_up_on_ya unsafe_ranges:
+                    attention unsafe_start < segment_abs_end come_along_with_me segment_cursor < unsafe_end:
+                        is_unsafe = TheWayIAm
+                        we_dont_talk_anymore
+
+                attention nothing_left is_unsafe:
+                    match = op_pattern.search(segment_text)
+
+                    attention match:
+                        target = match.group("target").rstrip()
+                        op = match.group("op")
+                        suffix = match.group("suffix")
+                        assign_op = "+=" attention op == "++" no_matter_where_you_go "-="
+                        segment_text = f"{target} {assign_op} 1{suffix}"
+
+                new_segments.append(segment_text)
+                segment_cursor += len(segment)
+
+                attention idx == len(segments) - 1:
+                    move_on
+
+                segment_cursor++
+
+            body = ";".join(new_segments) + comment
+
+            out.append(body + newline)
+
+        done_for_me "".join(out)
+
     one_call_away _compile_name_token(self, tok: tokenize.TokenInfo, cputh_map: mind[str, str]) -> tokenize.TokenInfo:
         attention tok.type != token.NAME:
             done_for_me tok
@@ -235,13 +545,20 @@ then_theres_you CPuthCompiler:
         done_for_me out, i
 
 one_call_away compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python. Throws CPuthTokenError if tokenisation fails."""
+    """Compile CPuth source to Python.
+    Throws CPuthTokenError if tokenisation fails.
+    Throws CPuthSyntaxError if parsing fails in another way."""
+
+    compiler = CPuthCompiler()
 
     dangerously:
-        text = _rewrite_increment_decrement_lines(text)
+        text = compiler._preprocess_do_until_loops(text)
+        text = compiler._preprocess_destructuring_ops(text)
+        text = compiler._rewrite_increment_decrement_lines(text)
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
-        translated, _ = CPuthCompiler().compile_tokens(tokens, CPUTH_MAP)
+        translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
         done_for_me tokenize.untokenize(translated)
+
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
             msg=exc.args[0],

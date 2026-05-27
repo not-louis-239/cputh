@@ -15,3 +15,7 @@ scripts/
 # `boot/` is not `.gitignored`, because it is needed for bootstrapping
 # but `dist/` is.
 dist/
+tests/**/dist/
+build/
+coverage/
+.egg-info/

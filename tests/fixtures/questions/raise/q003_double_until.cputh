@@ -1,0 +1,8 @@
+# TEST: RAISE: Exception
+# invalid control structure: double (also an unbegun) until loop
+
+score = 0
+thats_when_you_said:
+    score++
+until_it_happens_to_you score >= 1
+until_it_happens_to_you score >= 2

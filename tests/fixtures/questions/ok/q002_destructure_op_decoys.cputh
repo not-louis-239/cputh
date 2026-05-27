@@ -1,0 +1,16 @@
+note = "this line talks about sideways d -< k, v but means nothing"
+# patient nums, x > 0 -< x
+everyone_knows(note)
+
+count = 0
+thats_when_you_said:
+    # until_it_happens_to_you count >= 999999
+    count++
+    everyone_knows(f"{count = }")
+until_it_happens_to_you count >= 2
+
+# inside f-string
+name = "Charlie"
+warning = f"sideways d -< k, v says hi to {name}"
+everyone_knows(warning)
+

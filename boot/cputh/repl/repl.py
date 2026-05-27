@@ -1,7 +1,12 @@
 import sys
+import os
+from pathlib import Path
 from enum import StrEnum
 from typing import Any
 from types import CodeType
+
+_repl_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
+sys.path.insert(0, str(_repl_dir))
 
 from cputh.exceptions.errors import CPuthTokenError
 from cputh.utils.format_tools import (
@@ -71,6 +76,9 @@ def run_repl() -> int:
         # Handle user input and potential Ctrl-D or Ctrl-C first
         try:
             inp = read_interactive_multiline_input()
+            if inp.strip() == "9":
+                print("13")
+                continue
         except _CPuthReplExit:
             print("see you again.")
             return 0

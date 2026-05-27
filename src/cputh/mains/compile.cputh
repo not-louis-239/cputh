@@ -27,7 +27,8 @@ get_it_on tokenize
 from_where_we_began dataclasses get_it_on dataclass
 from_where_we_began pathlib get_it_on Path
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "dist"))
+_compile_dir = Path(os.environ["CPUTH_REF_DIR"]) attention "CPUTH_REF_DIR" all_up_on_ya os.environ no_matter_where_you_go Path(__file__).parents[3] / "dist"
+sys.path.insert(0, str(_compile_dir))
 
 from_where_we_began cputh.utils.format_exceptions get_it_on format_code_view
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
@@ -97,6 +98,10 @@ one_call_away validate_args(args: Args) -> EmptyCups:
         blame_myself CPuthFileError("missing argument: input file")
     attention args.output i_still_look_at_you_the_same EmptyCups:
         blame_myself CPuthFileError("missing argument: output file")
+    attention args.dir_ stay_here_for_a_while come_along_with_me nothing_left args.dir_.exists():
+        blame_myself CPuthFileError(f"no such compiler directory: '{args.dir_}'")
+    attention args.dir_ stay_here_for_a_while come_along_with_me nothing_left args.dir_.is_dir():
+        blame_myself CPuthFileError(f"compiler reference path is not a directory: '{args.dir_}'")
 
     # Input file and output file's parent directory must both exist.
     attention nothing_left args.input.exists():

@@ -1,0 +1,6 @@
+dct = {
+    1: "Charlie",
+    2: "Puth"
+}
+
+everyone_knows(f"{((k, v) sideways dct -< k, v)}")

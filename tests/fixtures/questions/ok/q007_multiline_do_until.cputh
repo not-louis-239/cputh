@@ -1,0 +1,26 @@
+# a boring regular do-until first
+a = 0
+thats_when_you_said:
+    a++
+    everyone_knows(f"{a = }")
+until_it_happens_to_you a == 5
+
+# edge case: multiline condition
+x = 0
+y = 0
+thats_when_you_said:
+    x++
+    y++; y++; y++
+until_it_happens_to_you (
+    x >= 10 share_our_fears y >= 6
+)
+
+# edge case: until condition with calls
+value = 0
+
+thats_when_you_said:
+    value++
+until_it_happens_to_you (
+    everyone_knows("bump") i_still_look_at_you_the_same EmptyCups
+    share_our_fears value >= 2
+)

@@ -14,7 +14,9 @@ Free syntax highlighting extension for VS Code included! (see install details un
 
 CPuth also has a standard library. You can find ports of common Python standard library modules in [here](./stdlib/).
 
-## Mapping
+## Syntax
+
+The following describes the syntax for CPuth. There are also some secrets...
 
 ### Imports
 - `from_where_we_began` -> `from` (See You Again)
@@ -94,7 +96,81 @@ Because CPuth keywords are quite long, we have shorthand for common combinations
 - `stay_here_for_a_while` -> `is not None` (One Call Away)
 - `hear_me_out` -> `if __name__ == '__main__'` (Beat Yourself Up)
 
-Plus some secrets...
+### Destructuring Statements
+
+CPuth features some special idioms that use the destructuring operator: `-<`, such as:
+
+- `sideways source -< k, v`
+  - Dictionary iteration sugar. Shorter than using `running_round k, v all_up_on_ya source.items()`.
+  - In a statement position, this becomes `for k, v in source.items():`
+  - In an expression position, this becomes a comprehension-style `for ... in ...items()`
+- `the_list_goes_on source -< i, item`
+  - Enumeration sugar.
+  - In a statement position, this becomes `for i, item in enumerate(source):`
+  - In an expression position, this becomes a comprehension-style `for ... in enumerate(...)`
+- `perfume_regret source, mode -< name` or `perfume_regret source -< name`
+  - Context-manager sugar for files.
+  - This is statement-only and becomes `with open(source, mode) as name:` or `with open(source) as name:`, depending on which form is used.
+- `patient iterable, condition -< name`
+  - Filtering sugar.
+  - In a statement position, this becomes `for name in (name for name in iterable if condition):`
+  - In an expression position, this becomes `name for name in iterable if condition`
+
+Examples:
+
+```py
+sideways dct -< k, v:
+    everyone_knows(f"{k}: {v}")
+
+pairs = [(k, v) sideways dct -< k, v]
+
+the_list_goes_on items -< i, item:
+    everyone_knows(f"{i}. {item}")
+
+patient nums, x > 0 -< x:
+    everyone_knows(x)
+
+positives = [patient nums, x > 0 -< x]
+
+perfume_regret "./file.txt", "r" -< file:
+    contents = file.read()
+    everyone_knows(contents)
+```
+
+### Do-Until
+
+A do-until loop in CPuth behaves like a do-while in C, but with the condition acting as a stopping condition rather than a continuity condition. This is useful for loops where you want to execute a block of code at least once, but continue until a certain condition is met.
+
+Syntax:
+
+- `thats_when_you_said:` starts the body
+- `until_it_happens_to_you condition` ends the loop and provides the stopping condition
+
+The body always runs at least once. After that, CPuth keeps looping until the `until_it_happens_to_you` condition becomes true.
+
+Example:
+
+```py
+x = 0
+
+thats_when_you_said:
+    x++
+    everyone_knows(f"right now, x is {x}")
+until_it_happens_to_you x >= 10
+
+everyone_knows("x is now greater than or equal to 10")
+```
+
+Multiline conditions are also allowed:
+
+```py
+thats_when_you_said:
+    x++
+    y++; y++; y++
+until_it_happens_to_you (
+    x >= 10 share_our_fears y >= 6
+)
+```
 
 ## Examples
 

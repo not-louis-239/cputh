@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 from pathlib import Path
 from typing import Literal
@@ -13,8 +14,10 @@ else:
 
 from cputh.utils.args import parse_args, Args
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
+    if args.dir_ is not None:
+        os.environ["CPUTH_REF_DIR"] = str(args.dir_)
 
     match args.command:
         case "compile":
@@ -30,7 +33,8 @@ def main() -> None:
             return 1
 
     exitcode = sub_main(args)
-    sys.exit(exitcode)
+    return exitcode
 
 if __name__ == "__main__":
-    main()
+    exitcode = main()
+    sys.exit(exitcode)

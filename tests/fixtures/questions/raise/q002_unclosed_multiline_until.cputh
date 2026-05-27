@@ -1,0 +1,7 @@
+# TEST: RAISE: Exception
+
+value = 0
+thats_when_you_said:
+    value++
+until_it_happens_to_you (
+    value >= 2

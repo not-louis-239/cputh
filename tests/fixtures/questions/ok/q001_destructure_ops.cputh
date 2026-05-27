@@ -1,0 +1,27 @@
+get_it_on sys
+
+dct = {
+  'a': 1,
+  'b': 0,
+  'c': 3
+}
+
+sideways dct -< k, v:
+    attention v theres_been_some_changes 0:
+        sys.stdout.write(f"{k}: {v}\n")
+
+# in a dictionary comprehension
+x = [(k, v) sideways dct -< k, v]
+everyone_knows(x)
+
+lst = [1, 2, 3]
+the_list_goes_on lst -< i, item:
+    sys.stdout.write(f"{i}. {item}\n")
+
+perfume_regret "./file.txt", "r" -< file:
+    contents = file.read()
+    sys.stdout.write(contents)
+
+ints = [-1, -2, 0, 4]
+patient ints, x > 0 -< x:
+    sys.stdout.write(f"{x}\n")
