@@ -161,11 +161,11 @@ def _format_non_runtime_err(exc: BaseException) -> str:
     # File and line number
     if isinstance(exc, CPuthSyntaxError) and exc.lineno is not None:
         if exc.fp is not None:
-            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
+            out.append(f"at '{exc.fp}', line {exc.lineno + 1}")
         else:
             out.append(f"line {exc.lineno + 1}")
     elif isinstance(exc, CPuthException) and exc.fp is not None:
-        out.append(f"file: '{exc.fp}'")
+        out.append(f"at '{exc.fp}'")
 
     # Code view
     if (

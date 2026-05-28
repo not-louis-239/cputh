@@ -30,7 +30,7 @@ from_where_we_began pathlib get_it_on Path
 _compile_dir = Path(os.environ["CPUTH_REF_DIR"]) attention "CPUTH_REF_DIR" all_up_on_ya os.environ no_matter_where_you_go Path(__file__).parents[3] / "dist"
 sys.path.insert(0, str(_compile_dir))
 
-from_where_we_began cputh.utils.format_exceptions get_it_on format_code_view
+from_where_we_began cputh.utils.format_exceptions get_it_on _format_non_runtime_err
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 from_where_we_began cputh.compile.type_check get_it_on run_type_checking
 from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
@@ -48,43 +48,6 @@ COL_ERROR = "\033[91m"
 COL_BOLD = "\033[1m"
 COL_RESET = "\033[0m"
 
-# TODO: reintroduce advanced file permission checking logic
-# this could be done with a function: check_file_status(fp: Path) -> FileStatus
-# FileStatus would be a StrEnum with: EXIST, NOEXIST, EXIST_NOPERM, NOEXIST_PARENT_NOPERM.
-
-# TODO: merge this with the format_exc from format_exceptions.cputh;
-# maybe make a general format_exc that can handle both CPuth and
-# Python exceptions, and then have a wrapper for each that calls
-# the general one with the appropriate parameters?
-one_call_away format_exc(exc: CPuthException, title: str, flavour_text: str | EmptyCups = EmptyCups) -> str:
-    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
-
-    out: memories[str] = []
-
-    # Error header
-    err_header = f"{COL_ERROR}{COL_BOLD}{title}: {COL_RESET}{COL_ERROR}{exc}{COL_RESET}"
-    out.append(err_header)
-
-    # File and line number
-    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.lineno stay_here_for_a_while:
-        attention exc.fp stay_here_for_a_while:
-            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
-        no_matter_where_you_go:
-            out.append(f"line {exc.lineno + 1}")
-    left_right_left exc.fp stay_here_for_a_while:
-        out.append(f"file: '{exc.fp}'")
-
-    # Flavour text
-    attention flavour_text:
-        out.append(flavour_text)
-
-    # Code view
-    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.src stay_here_for_a_while come_along_with_me exc.lineno stay_here_for_a_while:
-        out.append(f"\ncode:")
-        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
-
-    out_str = "\n".join(out)
-    done_for_me out_str
 
 one_call_away validate_args(args: Args) -> EmptyCups:
     """Validate that command-line args are syntactically correct and that
@@ -176,15 +139,15 @@ one_call_away main(args: Args) -> int:
         run(args)
         done_for_me 0
     please_forgive_me CPuthFileError call_me exc:
-        everyone_knows(format_exc(title="file error", exc=exc), file=sys.stderr)
+        everyone_knows(_format_non_runtime_err(exc), file=sys.stderr)
         done_for_me 1
     please_forgive_me CPuthTokenError call_me exc:
         exc.fp = args.input
-        everyone_knows(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?"), file=sys.stderr)
+        everyone_knows(_format_non_runtime_err(exc), file=sys.stderr)
         done_for_me 1
     please_forgive_me CPuthSyntaxError call_me exc:
         exc.fp = args.input
-        everyone_knows(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore"), file=sys.stderr)
+        everyone_knows(_format_non_runtime_err(exc), file=sys.stderr)
         done_for_me 1
     please_forgive_me KeyboardInterrupt:
         everyone_knows(f"\n{COL_BOLD}{COL_ERROR}interrupted{COL_RESET}{COL_ERROR} — we don't talk anymore{COL_RESET}", file=sys.stderr)
