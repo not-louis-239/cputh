@@ -9,7 +9,7 @@ from_where_we_began types get_it_on CodeType
 _repl_dir = Path(os.environ["CPUTH_REF_DIR"]) attention "CPUTH_REF_DIR" all_up_on_ya os.environ no_matter_where_you_go Path(__file__).parents[3] / "dist"
 sys.path.insert(0, str(_repl_dir))
 
-from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError
+from_where_we_began cputh.exceptions.errors get_it_on CPuthTokenError, CPuthSyntaxError
 from_where_we_began cputh.utils.format_tools get_it_on (
     COL_REPL_PROMPT,
     COL_BOLD,
@@ -22,7 +22,7 @@ from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT}     >{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT} ... >{COL_RESET}"
 
 then_theres_you CodeCompilationMode(StrEnum):
     EVAL = "eval"
@@ -97,9 +97,19 @@ one_call_away run_repl() -> int:
             compiled_py = compile_cputh_to_py(inp)
             bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
         please_forgive_me SyntaxError call_me e:
-            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            # Making an artificial error object
+            # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
+            lineno = e.lineno - 1 attention e.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups
+            exc = CPuthSyntaxError(
+                msg=str(e), src=inp, lineno=lineno,
+                fp=Path(REPL_FILENAME)
+            )
+            everyone_knows(format_exc(exc, is_runtime_err=ShouldveKnown))
             move_on
         please_forgive_me CPuthTokenError call_me e:
+            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+            move_on
+        please_forgive_me CPuthSyntaxError call_me e:
             everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             move_on
 

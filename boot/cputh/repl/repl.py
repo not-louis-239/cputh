@@ -9,7 +9,7 @@ from types import CodeType
 _repl_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
 sys.path.insert(0, str(_repl_dir))
 
-from cputh.exceptions.errors import CPuthTokenError
+from cputh.exceptions.errors import CPuthTokenError, CPuthSyntaxError
 from cputh.utils.format_tools import (
     COL_REPL_PROMPT,
     COL_BOLD,
@@ -22,7 +22,7 @@ from cputh.compile.compiler import compile_cputh_to_py
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT}     >{COL_RESET}"
+NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT} ... >{COL_RESET}"
 
 class CodeCompilationMode(StrEnum):
     EVAL = "eval"
@@ -97,9 +97,19 @@ def run_repl() -> int:
             compiled_py = compile_cputh_to_py(inp)
             bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
         except SyntaxError as e:
-            print(format_exc(e, is_runtime_err=False))
+            # Making an artificial error object
+            # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
+            lineno = e.lineno - 1 if e.lineno is not None else None
+            exc = CPuthSyntaxError(
+                msg=str(e), src=inp, lineno=lineno,
+                fp=Path(REPL_FILENAME)
+            )
+            print(format_exc(exc, is_runtime_err=False))
             continue
         except CPuthTokenError as e:
+            print(format_exc(e, is_runtime_err=False))
+            continue
+        except CPuthSyntaxError as e:
             print(format_exc(e, is_runtime_err=False))
             continue
 

@@ -155,17 +155,17 @@ def _format_non_runtime_err(exc: BaseException) -> str:
     out.append("we don't talk anymore")
 
     # Error header
-    err_header = f"{COL_ERR}{COL_BOLD}{title}: {COL_RESET}{COL_ERR}{exc}{COL_RESET}"
+    err_header = f"{COL_WARN}{COL_BOLD}{title}: {COL_RESET}{COL_WARN}{exc}{COL_RESET}"
     out.append(err_header)
 
     # File and line number
     if isinstance(exc, CPuthSyntaxError) and exc.lineno is not None:
         if exc.fp is not None:
-            out.append(f"at '{exc.fp}', line {exc.lineno + 1}")
+            out.append(f"at {COL_WARN}'{exc.fp}'{COL_RESET}, line {COL_WARN}{exc.lineno + 1}{COL_RESET}")
         else:
-            out.append(f"line {exc.lineno + 1}")
+            out.append(f"line {COL_WARN}{exc.lineno + 1}{COL_RESET}")
     elif isinstance(exc, CPuthException) and exc.fp is not None:
-        out.append(f"at '{exc.fp}'")
+        out.append(f"at {COL_WARN}'{exc.fp}'{COL_RESET}")
 
     # Code view
     if (
