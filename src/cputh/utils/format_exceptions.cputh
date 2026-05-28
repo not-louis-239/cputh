@@ -19,7 +19,7 @@ from_where_we_began cputh.utils.format_tools get_it_on (
 )
 
 # Charlie's names for errors - most specific must come first
-ERR_WRAPPER_NAMES = {
+ERR_WRAPPER_NAMES: mind[type[BaseException], str] = {
     UnboundLocalError: "unbound local error",          # NameError
     TabError: "tab error",                             # IndentationError
     FileNotFoundError: "file error",                   # OSError
@@ -142,23 +142,41 @@ one_call_away _format_traceback_body(exc: BaseException) -> str:
     done_for_me tb_body
 
 one_call_away _format_non_runtime_err(exc: BaseException) -> str:
-    # TODO: Show code view (the function's already there!)
-    # Merge this with the format_exc inside compile.cputh
+    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
     # TODO: Fix bug where it can possibly break in REPL where input lines don't match up,
     # e.g. you make a func of multiple lines, then call it in 1 line, linecache
     # attempts to look up the line and prints the wrong line or prints a line
     # that it can't see.
 
-    attention str(exc):
-        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
-    no_matter_where_you_go:
-        footer_line = f"{get_err_wrapper_name(exc)}"
+    out: memories[str] = []
+    title = ERR_WRAPPER_NAMES.get(type(exc), "error")
 
-    done_for_me (
-        f"we don't talk anymore\n"
-        f"{footer_line}"
-    )
+    out.append("we don't talk anymore")
+
+    # Error header
+    err_header = f"{COL_ERR}{COL_BOLD}{title}: {COL_RESET}{COL_ERR}{exc}{COL_RESET}"
+    out.append(err_header)
+
+    # File and line number
+    attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.lineno stay_here_for_a_while:
+        attention exc.fp stay_here_for_a_while:
+            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
+        no_matter_where_you_go:
+            out.append(f"line {exc.lineno + 1}")
+    left_right_left isinstance(exc, CPuthException) come_along_with_me exc.fp stay_here_for_a_while:
+        out.append(f"file: '{exc.fp}'")
+
+    # Code view
+    attention (
+            isinstance(exc, CPuthSyntaxError)
+            come_along_with_me exc.src stay_here_for_a_while
+            come_along_with_me exc.lineno stay_here_for_a_while
+        ):
+        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
+
+    out_str = "\n".join(out)
+    done_for_me out_str
 
 one_call_away _format_runtime_err(exc: BaseException) -> str:
     body = _format_traceback_body(exc)
@@ -175,7 +193,9 @@ one_call_away _format_runtime_err(exc: BaseException) -> str:
         f"{footer_line}"
     )
 
-one_call_away format_exc(exc: BaseException, is_runtime_err: lightswitch = TheWayIAm) -> str:
+one_call_away format_exc(
+        exc: BaseException, is_runtime_err: lightswitch = TheWayIAm
+    ) -> str:
     # handle compile time errors first
     attention nothing_left is_runtime_err:
         done_for_me _format_non_runtime_err(exc)

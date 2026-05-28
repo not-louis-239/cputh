@@ -19,7 +19,7 @@ from cputh.utils.format_tools import (
 )
 
 # Charlie's names for errors - most specific must come first
-ERR_WRAPPER_NAMES = {
+ERR_WRAPPER_NAMES: dict[type[BaseException], str] = {
     UnboundLocalError: "unbound local error",          # NameError
     TabError: "tab error",                             # IndentationError
     FileNotFoundError: "file error",                   # OSError
@@ -142,23 +142,41 @@ def _format_traceback_body(exc: BaseException) -> str:
     return tb_body
 
 def _format_non_runtime_err(exc: BaseException) -> str:
-    # TODO: Show code view (the function's already there!)
-    # Merge this with the format_exc inside compile.cputh
+    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
     # TODO: Fix bug where it can possibly break in REPL where input lines don't match up,
     # e.g. you make a func of multiple lines, then call it in 1 line, linecache
     # attempts to look up the line and prints the wrong line or prints a line
     # that it can't see.
 
-    if str(exc):
-        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
-    else:
-        footer_line = f"{get_err_wrapper_name(exc)}"
+    out: list[str] = []
+    title = ERR_WRAPPER_NAMES.get(type(exc), "error")
 
-    return (
-        f"we don't talk anymore\n"
-        f"{footer_line}"
-    )
+    out.append("we don't talk anymore")
+
+    # Error header
+    err_header = f"{COL_ERR}{COL_BOLD}{title}: {COL_RESET}{COL_ERR}{exc}{COL_RESET}"
+    out.append(err_header)
+
+    # File and line number
+    if isinstance(exc, CPuthSyntaxError) and exc.lineno is not None:
+        if exc.fp is not None:
+            out.append(f"file: '{exc.fp}', line {exc.lineno + 1}")
+        else:
+            out.append(f"line {exc.lineno + 1}")
+    elif isinstance(exc, CPuthException) and exc.fp is not None:
+        out.append(f"file: '{exc.fp}'")
+
+    # Code view
+    if (
+            isinstance(exc, CPuthSyntaxError)
+            and exc.src is not None
+            and exc.lineno is not None
+        ):
+        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
+
+    out_str = "\n".join(out)
+    return out_str
 
 def _format_runtime_err(exc: BaseException) -> str:
     body = _format_traceback_body(exc)
@@ -175,7 +193,9 @@ def _format_runtime_err(exc: BaseException) -> str:
         f"{footer_line}"
     )
 
-def format_exc(exc: BaseException, is_runtime_err: bool = True) -> str:
+def format_exc(
+        exc: BaseException, is_runtime_err: bool = True
+    ) -> str:
     # handle compile time errors first
     if not is_runtime_err:
         return _format_non_runtime_err(exc)
