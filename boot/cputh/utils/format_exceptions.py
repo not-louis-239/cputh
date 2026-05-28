@@ -40,7 +40,6 @@ ERR_WRAPPER_NAMES = {
     ArithmeticError: "math error",
     LookupError: "lookup error",
     OSError: "os error",
-    RuntimeError: "runtime error",
 
     AssertionError: "assertion error",
     AttributeError: "attribute error",
@@ -53,6 +52,7 @@ ERR_WRAPPER_NAMES = {
     ValueError: "value error",
     KeyboardInterrupt: "keyboard interrupt",
 
+    RuntimeError: "runtime error",
     tokenize.TokenError: "token error",
     CPuthTokenError: "token error",
     CPuthFileError: "file error",
@@ -103,7 +103,7 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
 def _format_traceback_body(exc: BaseException) -> str:
     tb = exc.__traceback__
-    frames_lines = []
+    frames_lines: list[str] = []
 
     if tb is not None:
         all_frames = traceback.extract_tb(tb)
@@ -121,13 +121,16 @@ def _format_traceback_body(exc: BaseException) -> str:
             # If not, violently rip it directly out of the memory linecache
             line_code = frame.line
             if not line_code:
-                line_code = linecache.getline(filename, lineno)
+                if lineno is not None:  # must check if isn't None, otherwise default to fallback
+                    line_code = linecache.getline(filename, lineno)
+                else:
+                    line_code = ""
 
             # Clean up spacing or provide a fallback if it's truly empty
             line_code = line_code.strip() if line_code.strip() else "..."
 
             frames_lines.append(
-                f"  at '{filename}', line {lineno}, in '{name}'\n"
+                f"  at {COL_WARN}'{filename}'{COL_RESET}, line {COL_WARN}{lineno}{COL_RESET}, in {COL_WARN}{name}{COL_RESET}\n"
                 f"    {line_code}"
             )
 
@@ -140,6 +143,12 @@ def _format_traceback_body(exc: BaseException) -> str:
 
 def _format_non_runtime_err(exc: BaseException) -> str:
     # TODO: Show code view (the function's already there!)
+    # Merge this with the format_exc inside compile.cputh
+
+    # TODO: Fix bug where it can possibly break in REPL where input lines don't match up,
+    # e.g. you make a func of multiple lines, then call it in 1 line, linecache
+    # attempts to look up the line and prints the wrong line or prints a line
+    # that it can't see.
 
     if str(exc):
         footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
@@ -154,10 +163,11 @@ def _format_non_runtime_err(exc: BaseException) -> str:
 def _format_runtime_err(exc: BaseException) -> str:
     body = _format_traceback_body(exc)
 
-    if str(exc):
-        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    footer_line_prefix = f"{COL_BOLD}{COL_WARN}{get_err_wrapper_name(exc)}{COL_RESET}"
+    if (str_exc := str(exc)):
+        footer_line = f"{footer_line_prefix}: {COL_WARN}{str_exc}{COL_RESET}"
     else:
-        footer_line = f"{get_err_wrapper_name(exc)}"
+        footer_line = f"{footer_line_prefix}"
 
     return (
         f"we don't talk anymore (most recent call last)\n"
