@@ -13,7 +13,7 @@ def parse_grammar_file(contents: str) -> dict[str, dict[str, str]]:
     return gram
 
 def load_grammar_file() -> dict[str, dict[str, str]]:
-    with open(GRAMMAR_FILE_PATH) as f:
+    with open(GRAMMAR_FILE_PATH, "r", encoding="utf-8") as f:
         contents: str = f.read()
         return parse_grammar_file(contents)
 

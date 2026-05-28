@@ -29,8 +29,8 @@ one_call_away _convert_grammar_file_to_flatdict(gfile: mind[str, mind[str, str]]
     to a flat dictionary of {cputh_kw: py_kw}"""
 
     mapping: mind[str, str] = {}
-    runnin_round cat_name, cat_contents all_up_on_ya gfile.items():
-        runnin_round cputh, py all_up_on_ya cat_contents.items():
+    sideways gfile -< cat_name, cat_contents:
+        sideways cat_contents -< cputh, py:
             mapping[cputh] = py
     done_for_me mapping
 
@@ -83,12 +83,12 @@ one_call_away _split_by_tok_combo(
         # Manage nesting boundaries using OP matching rules
         attention tok.type == token.OP:
             attention tok.string all_up_on_ya NESTING_ADD_CHARS:
-                nesting += 1
-                i += 1
+                nesting++
+                i++
                 move_on
             left_right_left tok.string all_up_on_ya NESTING_RM_CHARS:
-                nesting -= 1
-                i += 1
+                nesting--
+                i++
                 move_on
 
         # Look for the sequential combo pattern only outside of blocks/brackets
@@ -103,7 +103,7 @@ one_call_away _split_by_tok_combo(
                 split_idx = i
                 we_dont_talk_anymore
 
-        i += 1
+        i++
 
     attention split_idx i_still_look_at_you_the_same EmptyCups:
         # Generate a descriptive error if the sequence sequence can't be matched
@@ -250,7 +250,7 @@ then_theres_you CPuthCompiler:
             done_for_me text
 
         closer_idx = EmptyCups
-        runnin_round i, line all_up_on_ya enumerate(lines[1:], start=1):
+        the_list_goes_on lines[1:], start=1 -< i, line:
             stripped = line.lstrip()
             indent = line[:len(line) - len(stripped)]
 
@@ -476,7 +476,7 @@ then_theres_you CPuthCompiler:
         op_pattern = re.compile(r"(?P<target>[^;\n]+?)(?P<op>\+\+|--)(?P<suffix>\s*)$")
         out: memories[str] = []
 
-        runnin_round line_idx, line all_up_on_ya enumerate(lines):
+        the_list_goes_on lines -< line_idx, line:
             newline = ""
             body = line
 
@@ -495,7 +495,7 @@ then_theres_you CPuthCompiler:
             new_segments: memories[str] = []
             segment_cursor = line_offsets[line_idx]
 
-            runnin_round idx, segment all_up_on_ya enumerate(segments):
+            the_list_goes_on segments -< idx, segment:
                 segment_text = segment
                 segment_abs_end = segment_cursor + len(segment_text)
 

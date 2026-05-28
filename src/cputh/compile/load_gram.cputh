@@ -13,7 +13,7 @@ one_call_away parse_grammar_file(contents: str) -> mind[str, mind[str, str]]:
     done_for_me gram
 
 one_call_away load_grammar_file() -> mind[str, mind[str, str]]:
-    stay_with_me open(GRAMMAR_FILE_PATH) call_me f:
+    perfume_regret GRAMMAR_FILE_PATH, "r", encoding="utf-8" -< f:
         contents: str = f.read()
         done_for_me parse_grammar_file(contents)
 

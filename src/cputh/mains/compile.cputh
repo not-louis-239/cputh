@@ -141,7 +141,7 @@ one_call_away run(args: Args) -> EmptyCups:
     promise_me args.output stay_here_for_a_while
 
     dangerously:
-        stay_with_me open(args.input, "r", encoding="utf-8") call_me f:
+        perfume_regret args.input, "r", encoding="utf-8" -< f:
             cputh = f.read()
     please_forgive_me UnicodeDecodeError:
         blame_myself CPuthSyntaxError(
@@ -167,7 +167,7 @@ one_call_away run(args: Args) -> EmptyCups:
             )
 
     # Write the Python code to the output path
-    stay_with_me open(args.output, "w", encoding="utf-8") call_me f:
+    perfume_regret args.output, "w", encoding="utf-8" -< f:
         f.write(py)
 
     # Finally, run type checking on the output
