@@ -17,18 +17,18 @@ def parse_args() -> Args:
         prog="cputh",
         description="Compile Charlie Puth code to Python. Why use boring keywords when your source can have feelings?"
     )
+    parser.add_argument(
+        "--dir",
+        type=Path,
+        dest="dir_",
+        help="force the compiler to reference this directory when loading itself instead of its default import location"
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     # compile
     compile_parser = subparsers.add_parser("compile")
     compile_parser.add_argument("input", type=Path, help="path to the input .cputh file")
     compile_parser.add_argument("-o", "--output", type=Path, required=True, help="path to the output .py file")
-    compile_parser.add_argument(
-        "--dir",
-        type=Path,
-        dest="dir_",
-        help="force the compiler to reference this directory instead of its default import location"
-    )
     compile_parser.add_argument(
         "-f", "--force",
         action="store_true",
