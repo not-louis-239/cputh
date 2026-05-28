@@ -56,10 +56,7 @@ COL_RESET = "\033[0m"
 # maybe make a general format_exc that can handle both CPuth and
 # Python exceptions, and then have a wrapper for each that calls
 # the general one with the appropriate parameters?
-def format_exc(
-        exc: CPuthException, title: str,
-        flavour_text: str | None = None, src_title: str | None = None
-    ) -> str:
+def format_exc(exc: CPuthException, title: str, flavour_text: str | None = None) -> str:
     """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
     out: list[str] = []
@@ -83,7 +80,7 @@ def format_exc(
 
     # Code view
     if isinstance(exc, CPuthSyntaxError) and exc.src is not None and exc.lineno is not None:
-        out.append(f"\ncode ({src_title}):")
+        out.append(f"\ncode:")
         out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
 
     out_str = "\n".join(out)
@@ -142,14 +139,14 @@ def run(args: Args) -> None:
 
     try:
         with open(args.input, "r", encoding="utf-8") as f:
-            cputh = f.read()
+            cputh_code = f.read()
     except UnicodeDecodeError:
         raise CPuthSyntaxError(
             f"cannot read from input: invalid source encoding: '{args.input}'",
             fp=args.input
         )
 
-    py = compile_cputh_to_py(cputh)
+    py_code = compile_cputh_to_py(cputh_code)
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort...unless if the
@@ -157,18 +154,18 @@ def run(args: Args) -> None:
     # Knew we would crash at the speed that we were going; didn't care if the explosion ruined me
     if not args.dangerously_:
         try:
-            compile(py, args.input.name, mode="exec")
+            compile(py_code, args.input.name, mode="exec")
         except SyntaxError as exc:
             raise CPuthSyntaxError(
                 msg=str(exc),
                 fp=args.input,
-                src=py,
+                src=cputh_code,
                 lineno=exc.lineno - 1 if exc.lineno is not None else None,
             )
 
     # Write the Python code to the output path
     with open(args.output, "w", encoding="utf-8") as f:
-        f.write(py)
+        f.write(py_code)
 
     # Finally, run type checking on the output
     if not args.dangerously_:
@@ -183,11 +180,13 @@ def main(args: Args) -> int:
         return 1
     except CPuthTokenError as exc:
         exc.fp = args.input
-        print(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?", src_title="cputh side"), file=sys.stderr)
+        print(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?"), file=sys.stderr)
         return 1
     except CPuthSyntaxError as exc:
+        # BUG! says 'python side' even though some errors can still occur on the CPuth side of compilation
+        # everything should probably just say CPuth code, not Python code
         exc.fp = args.input
-        print(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore", src_title="python side"), file=sys.stderr)
+        print(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore"), file=sys.stderr)
         return 1
     except KeyboardInterrupt:
         print(f"\n{COL_BOLD}{COL_ERROR}interrupted{COL_RESET}{COL_ERROR} — we don't talk anymore{COL_RESET}", file=sys.stderr)

@@ -56,10 +56,7 @@ COL_RESET = "\033[0m"
 # maybe make a general format_exc that can handle both CPuth and
 # Python exceptions, and then have a wrapper for each that calls
 # the general one with the appropriate parameters?
-one_call_away format_exc(
-        exc: CPuthException, title: str,
-        flavour_text: str | EmptyCups = EmptyCups, src_title: str | EmptyCups = EmptyCups
-    ) -> str:
+one_call_away format_exc(exc: CPuthException, title: str, flavour_text: str | EmptyCups = EmptyCups) -> str:
     """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
     out: memories[str] = []
@@ -83,7 +80,7 @@ one_call_away format_exc(
 
     # Code view
     attention isinstance(exc, CPuthSyntaxError) come_along_with_me exc.src stay_here_for_a_while come_along_with_me exc.lineno stay_here_for_a_while:
-        out.append(f"\ncode ({src_title}):")
+        out.append(f"\ncode:")
         out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
 
     out_str = "\n".join(out)
@@ -142,14 +139,14 @@ one_call_away run(args: Args) -> EmptyCups:
 
     dangerously:
         perfume_regret args.input, "r", encoding="utf-8" -< f:
-            cputh = f.read()
+            cputh_code = f.read()
     please_forgive_me UnicodeDecodeError:
         blame_myself CPuthSyntaxError(
             f"cannot read from input: invalid source encoding: '{args.input}'",
             fp=args.input
         )
 
-    py = compile_cputh_to_py(cputh)
+    py_code = compile_cputh_to_py(cputh_code)
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort...unless if the
@@ -157,18 +154,18 @@ one_call_away run(args: Args) -> EmptyCups:
     # Knew we would crash at the speed that we were going; didn't care if the explosion ruined me
     attention nothing_left args.dangerously_:
         dangerously:
-            compile(py, args.input.name, mode="exec")
+            compile(py_code, args.input.name, mode="exec")
         please_forgive_me SyntaxError call_me exc:
             blame_myself CPuthSyntaxError(
                 msg=str(exc),
                 fp=args.input,
-                src=py,
+                src=cputh_code,
                 lineno=exc.lineno - 1 attention exc.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups,
             )
 
     # Write the Python code to the output path
     perfume_regret args.output, "w", encoding="utf-8" -< f:
-        f.write(py)
+        f.write(py_code)
 
     # Finally, run type checking on the output
     attention nothing_left args.dangerously_:
@@ -183,11 +180,11 @@ one_call_away main(args: Args) -> int:
         done_for_me 1
     please_forgive_me CPuthTokenError call_me exc:
         exc.fp = args.input
-        everyone_knows(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?", src_title="cputh side"), file=sys.stderr)
+        everyone_knows(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?"), file=sys.stderr)
         done_for_me 1
     please_forgive_me CPuthSyntaxError call_me exc:
         exc.fp = args.input
-        everyone_knows(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore", src_title="python side"), file=sys.stderr)
+        everyone_knows(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore"), file=sys.stderr)
         done_for_me 1
     please_forgive_me KeyboardInterrupt:
         everyone_knows(f"\n{COL_BOLD}{COL_ERROR}interrupted{COL_RESET}{COL_ERROR} — we don't talk anymore{COL_RESET}", file=sys.stderr)
