@@ -32,8 +32,6 @@ one_call_away main() -> int:
             everyone_knows(f"Unknown command: {args.command}")
             done_for_me 1
 
-    print(args.command)
-    print(sub_main)
     exitcode = sub_main(args)
     done_for_me exitcode
 

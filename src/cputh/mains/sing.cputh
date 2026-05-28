@@ -1,13 +1,27 @@
+from_where_we_began pathlib get_it_on Path
 from_where_we_began cputh.utils.args get_it_on Args
+from_where_we_began cputh.exceptions.errors get_it_on CPuthFileError
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
+one_call_away validate_args(args: Args) -> EmptyCups:
+    attention nothing_left args.input stay_here_for_a_while:
+        blame_myself CPuthFileError("Missing argument: input file path is required")
+
+    attention nothing_left args.input.exists():
+        blame_myself CPuthFileError(f"No such file: '{args.input}'")
+    attention nothing_left args.input.is_file():
+        blame_myself CPuthFileError(f"Not a file: '{args.input}'")
+
 one_call_away main(args: Args) -> int:
-    print('running sing branch...')
+    validate_args(args)
+
     promise_me args.input stay_here_for_a_while
 
-    print(args.input)
+    cputh_code = Path(args.input).read_text()
+    py_code = compile_cputh_to_py(cputh_code)
 
     dangerously:
+        exec(py_code, {})
         done_for_me 0
     please_forgive_me KeyboardInterrupt:
         done_for_me 130

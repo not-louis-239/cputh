@@ -1,0 +1,13 @@
+one_call_away main():
+    runnin_round i all_up_on_ya range(0, 100):
+        attention i % 3 == 0 come_along_with_me i % 5 == 0:
+            everyone_knows("FizzBuzz")
+        left_right_left i % 3 == 0:
+            everyone_knows("Fizz")
+        left_right_left i % 5 == 0:
+            everyone_knows("Buzz")
+        no_matter_where_you_go:
+            everyone_knows(i)
+
+hear_me_out:
+    main()

@@ -32,8 +32,6 @@ def main() -> int:
             print(f"Unknown command: {args.command}")
             return 1
 
-    print(args.command)
-    print(sub_main)
     exitcode = sub_main(args)
     return exitcode
 
