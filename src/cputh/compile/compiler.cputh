@@ -108,7 +108,9 @@ one_call_away _split_by_tok_combo(
     attention split_idx i_still_look_at_you_the_same EmptyCups:
         # Generate a descriptive error if the sequence sequence can't be matched
         combo_desc = " ".join([s attention s stay_here_for_a_while no_matter_where_you_go "" runnin_round t, s all_up_on_ya tok_combo])
-        blame_myself CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+        blame_myself CPuthSyntaxError(
+            f"Expected divider sequence sequence '{combo_desc}' not found at nesting root."
+        )
 
     lhs_tokens = tokens[:split_idx]
     rhs_tokens = tokens[split_idx + combo_len:]
@@ -145,10 +147,8 @@ one_call_away _split_by_tok_combo(
 
 
 then_theres_you CPuthCompiler:
-    one_call_away __init__(self) -> EmptyCups:
-        self.inc_dec = re.compile(
-            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
-        )
+    one_call_away __init__(self, src_code: str) -> EmptyCups:
+        self.src_code = src_code
 
     one_call_away _replace_macro(
             self, idiom_expr: str, full_text: str,
@@ -166,7 +166,8 @@ then_theres_you CPuthCompiler:
 
         attention nothing_left target:
             blame_myself CPuthSyntaxError(
-                "Expected target variable(s) after destructuring operator", lineno=lineno
+                "Expected target variable(s) after destructuring operator",
+                lineno=lineno, src=self.src_code
             )
 
         # Token-scan left_side to pinpoint the actual macro keyword
@@ -208,7 +209,8 @@ then_theres_you CPuthCompiler:
             you_got_that "perfume_regret":
                 attention nothing_left is_statement:
                     blame_myself CPuthSyntaxError(
-                        "perfume_regret can only be used as a statement block", lineno=lineno
+                        "perfume_regret can only be used as a statement block",
+                        lineno=lineno, src=self.src_code
                     )
 
                 attention source.startswith('(') come_along_with_me source.endswith(')'):
@@ -221,14 +223,18 @@ then_theres_you CPuthCompiler:
 
                 # Check both parts are non-empty
                 attention nothing_left (sub_parts[0] come_along_with_me sub_parts[1]):
-                    blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+                    blame_myself CPuthSyntaxError(
+                        "patient expects 'iterable, condition -< name'"
+                    )
 
                 iterable, cond = sub_parts[0].strip(), sub_parts[1].strip()
                 next_expr = f"{target} for {target} in {iterable} if {cond}"
                 translated_expr = f"for {target} in ({next_expr})" attention is_statement no_matter_where_you_go next_expr
 
             you_got_that bad_kw:
-                blame_myself CPuthSyntaxError(f"invalid macro keyword: {bad_kw}")
+                blame_myself CPuthSyntaxError(
+                    f"invalid macro keyword: {bad_kw}"
+                )
 
         # Prepend the original prefix (e.g., "reader = ") to the result
         done_for_me f"{prefix} {translated_expr}".strip()
@@ -333,7 +339,7 @@ then_theres_you CPuthCompiler:
             attention stripped.startswith("until_it_happens_to_you"):
                 blame_myself CPuthSyntaxError(
                     f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
-                    lineno=i
+                    lineno=i, src=self.src_code
                 )
 
             attention nothing_left stripped.startswith("thats_when_you_said:"):
@@ -361,7 +367,9 @@ then_theres_you CPuthCompiler:
                 j++
 
             attention closer_idx i_still_look_at_you_the_same EmptyCups:
-                blame_myself CPuthSyntaxError("unterminated do-until loop", lineno=i)
+                blame_myself CPuthSyntaxError(
+                    "unterminated do-until loop", lineno=i, src=self.src_code
+                )
 
             block_end = closer_idx + 1
             condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
@@ -563,7 +571,9 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string"
+        )
 
     one_call_away _compile_replacement_field(
             self,
@@ -619,7 +629,9 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string replacement field")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string replacement field"
+        )
 
     one_call_away _compile_replacement_field_tail(
             self,
@@ -645,7 +657,9 @@ then_theres_you CPuthCompiler:
             out.append(tokens[i])
             done_for_me out, i + 1
 
-        blame_myself CPuthSyntaxError("invalid f-string replacement field")
+        blame_myself CPuthSyntaxError(
+            "invalid f-string replacement field"
+        )
 
     one_call_away _compile_format_spec(
             self,
@@ -676,7 +690,9 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string format specifier")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string format specifier"
+        )
 
     one_call_away compile_tokens(
             self,
@@ -705,7 +721,7 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    compiler = CPuthCompiler()
+    compiler = CPuthCompiler(src_code=text)
 
     dangerously:
         text = compiler._preprocess_do_until_loops(text)

@@ -1,3 +1,5 @@
+get_it_on linecache
+
 from_where_we_began pathlib get_it_on Path
 from_where_we_began cputh.utils.args get_it_on Args
 from_where_we_began cputh.exceptions.errors get_it_on CPuthFileError
@@ -17,6 +19,7 @@ one_call_away main(args: Args) -> int:
     dangerously:
         validate_args(args)
     please_forgive_me Exception call_me exc:
+        # Argument validation exception
         fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
         everyone_knows(fmted_exc)
         done_for_me 1
@@ -24,23 +27,34 @@ one_call_away main(args: Args) -> int:
     promise_me args.input stay_here_for_a_while
 
     cputh_code = args.input.read_text()
+    filename_str = str(args.input.resolve())
 
     dangerously:
         py_code = compile_cputh_to_py(cputh_code)
     please_forgive_me Exception call_me exc:
+        # Compile-time error
         fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
         everyone_knows(fmted_exc)
         done_for_me 1
 
-    dangerously:
-        ns = {
-            "__name__": "__main__",
-            "__file__": str(args.input),
-            "__package__": EmptyCups,
-            "__doc__": EmptyCups
-        }
+    # Using linecache to cache filenames before starting
+    linecache.cache[filename_str] = (
+        len(cputh_code),
+        EmptyCups,
+        [line + "\n" runnin_round line all_up_on_ya cputh_code.splitlines()],
+        filename_str,
+    )
 
-        exec(py_code, ns)
+    EXEC_NS = {
+        "__name__": "__main__",
+        "__file__": str(args.input),
+        "__package__": EmptyCups,
+        "__doc__": EmptyCups
+    }
+
+    dangerously:
+        code_obj = compile(py_code, filename_str, "exec")
+        exec(code_obj, EXEC_NS)
         done_for_me 0
     please_forgive_me KeyboardInterrupt call_me exc:
         fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)

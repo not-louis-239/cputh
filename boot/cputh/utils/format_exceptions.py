@@ -1,6 +1,7 @@
 import shutil
 import traceback
 import tokenize
+import linecache
 
 from cputh.exceptions.errors import (
     CPuthException,
@@ -115,7 +116,15 @@ def _format_traceback_body(exc: BaseException) -> str:
             filename = frame.filename
             lineno = frame.lineno
             name = frame.name
-            line_code = frame.line.strip() if frame.line else "..."
+
+            # Check if native traceback found the line.
+            # If not, violently rip it directly out of the memory linecache
+            line_code = frame.line
+            if not line_code:
+                line_code = linecache.getline(filename, lineno)
+
+            # Clean up spacing or provide a fallback if it's truly empty
+            line_code = line_code.strip() if line_code.strip() else "..."
 
             frames_lines.append(
                 f"  at '{filename}', line {lineno}, in '{name}'\n"

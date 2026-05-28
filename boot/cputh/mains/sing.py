@@ -1,3 +1,5 @@
+import linecache
+
 from pathlib import Path
 from cputh.utils.args import Args
 from cputh.exceptions.errors import CPuthFileError
@@ -17,6 +19,7 @@ def main(args: Args) -> int:
     try:
         validate_args(args)
     except Exception as exc:
+        # Argument validation exception
         fmted_exc = format_exc(exc, is_runtime_err=False)
         print(fmted_exc)
         return 1
@@ -24,23 +27,34 @@ def main(args: Args) -> int:
     assert args.input is not None
 
     cputh_code = args.input.read_text()
+    filename_str = str(args.input.resolve())
 
     try:
         py_code = compile_cputh_to_py(cputh_code)
     except Exception as exc:
+        # Compile-time error
         fmted_exc = format_exc(exc, is_runtime_err=False)
         print(fmted_exc)
         return 1
 
-    try:
-        ns = {
-            "__name__": "__main__",
-            "__file__": str(args.input),
-            "__package__": None,
-            "__doc__": None
-        }
+    # Using linecache to cache filenames before starting
+    linecache.cache[filename_str] = (
+        len(cputh_code),
+        None,
+        [line + "\n" for line in cputh_code.splitlines()],
+        filename_str,
+    )
 
-        exec(py_code, ns)
+    EXEC_NS = {
+        "__name__": "__main__",
+        "__file__": str(args.input),
+        "__package__": None,
+        "__doc__": None
+    }
+
+    try:
+        code_obj = compile(py_code, filename_str, "exec")
+        exec(code_obj, EXEC_NS)
         return 0
     except KeyboardInterrupt as exc:
         fmted_exc = format_exc(exc, is_runtime_err=True)

@@ -108,7 +108,9 @@ def _split_by_tok_combo(
     if split_idx is None:
         # Generate a descriptive error if the sequence sequence can't be matched
         combo_desc = " ".join([s if s is not None else "" for t, s in tok_combo])
-        raise CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+        raise CPuthSyntaxError(
+            f"Expected divider sequence sequence '{combo_desc}' not found at nesting root."
+        )
 
     lhs_tokens = tokens[:split_idx]
     rhs_tokens = tokens[split_idx + combo_len:]
@@ -145,10 +147,8 @@ def _split_by_tok_combo(
 
 
 class CPuthCompiler:
-    def __init__(self) -> None:
-        self.inc_dec = re.compile(
-            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
-        )
+    def __init__(self, src_code: str) -> None:
+        self.src_code = src_code
 
     def _replace_macro(
             self, idiom_expr: str, full_text: str,
@@ -166,7 +166,8 @@ class CPuthCompiler:
 
         if not target:
             raise CPuthSyntaxError(
-                "Expected target variable(s) after destructuring operator", lineno=lineno
+                "Expected target variable(s) after destructuring operator",
+                lineno=lineno, src=self.src_code
             )
 
         # Token-scan left_side to pinpoint the actual macro keyword
@@ -208,7 +209,8 @@ class CPuthCompiler:
             case "perfume_regret":
                 if not is_statement:
                     raise CPuthSyntaxError(
-                        "perfume_regret can only be used as a statement block", lineno=lineno
+                        "perfume_regret can only be used as a statement block",
+                        lineno=lineno, src=self.src_code
                     )
 
                 if source.startswith('(') and source.endswith(')'):
@@ -221,14 +223,18 @@ class CPuthCompiler:
 
                 # Check both parts are non-empty
                 if not (sub_parts[0] and sub_parts[1]):
-                    raise CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+                    raise CPuthSyntaxError(
+                        "patient expects 'iterable, condition -< name'"
+                    )
 
                 iterable, cond = sub_parts[0].strip(), sub_parts[1].strip()
                 next_expr = f"{target} for {target} in {iterable} if {cond}"
                 translated_expr = f"for {target} in ({next_expr})" if is_statement else next_expr
 
             case bad_kw:
-                raise CPuthSyntaxError(f"invalid macro keyword: {bad_kw}")
+                raise CPuthSyntaxError(
+                    f"invalid macro keyword: {bad_kw}"
+                )
 
         # Prepend the original prefix (e.g., "reader = ") to the result
         return f"{prefix} {translated_expr}".strip()
@@ -333,7 +339,7 @@ class CPuthCompiler:
             if stripped.startswith("until_it_happens_to_you"):
                 raise CPuthSyntaxError(
                     f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
-                    lineno=i
+                    lineno=i, src=self.src_code
                 )
 
             if not stripped.startswith("thats_when_you_said:"):
@@ -361,7 +367,9 @@ class CPuthCompiler:
                 j += 1
 
             if closer_idx is None:
-                raise CPuthSyntaxError("unterminated do-until loop", lineno=i)
+                raise CPuthSyntaxError(
+                    "unterminated do-until loop", lineno=i, src=self.src_code
+                )
 
             block_end = closer_idx + 1
             condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
@@ -563,7 +571,9 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string")
+        raise CPuthSyntaxError(
+            "unterminated f-string"
+        )
 
     def _compile_replacement_field(
             self,
@@ -619,7 +629,9 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string replacement field")
+        raise CPuthSyntaxError(
+            "unterminated f-string replacement field"
+        )
 
     def _compile_replacement_field_tail(
             self,
@@ -645,7 +657,9 @@ class CPuthCompiler:
             out.append(tokens[i])
             return out, i + 1
 
-        raise CPuthSyntaxError("invalid f-string replacement field")
+        raise CPuthSyntaxError(
+            "invalid f-string replacement field"
+        )
 
     def _compile_format_spec(
             self,
@@ -676,7 +690,9 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string format specifier")
+        raise CPuthSyntaxError(
+            "unterminated f-string format specifier"
+        )
 
     def compile_tokens(
             self,
@@ -705,7 +721,7 @@ def compile_cputh_to_py(text: str) -> str:
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    compiler = CPuthCompiler()
+    compiler = CPuthCompiler(src_code=text)
 
     try:
         text = compiler._preprocess_do_until_loops(text)

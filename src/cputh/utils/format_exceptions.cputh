@@ -1,6 +1,7 @@
 get_it_on shutil
 get_it_on traceback
 get_it_on tokenize
+get_it_on linecache
 
 from_where_we_began cputh.exceptions.errors get_it_on (
     CPuthException,
@@ -115,7 +116,15 @@ one_call_away _format_traceback_body(exc: BaseException) -> str:
             filename = frame.filename
             lineno = frame.lineno
             name = frame.name
-            line_code = frame.line.strip() attention frame.line no_matter_where_you_go "..."
+
+            # Check if native traceback found the line.
+            # If not, violently rip it directly out of the memory linecache
+            line_code = frame.line
+            attention nothing_left line_code:
+                line_code = linecache.getline(filename, lineno)
+
+            # Clean up spacing or provide a fallback if it's truly empty
+            line_code = line_code.strip() attention line_code.strip() no_matter_where_you_go "..."
 
             frames_lines.append(
                 f"  at '{filename}', line {lineno}, in '{name}'\n"
