@@ -2,6 +2,7 @@ from_where_we_began pathlib get_it_on Path
 from_where_we_began cputh.utils.args get_it_on Args
 from_where_we_began cputh.exceptions.errors get_it_on CPuthFileError
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
+from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 
 one_call_away validate_args(args: Args) -> EmptyCups:
     attention nothing_left args.input stay_here_for_a_while:
@@ -17,15 +18,25 @@ one_call_away main(args: Args) -> int:
 
     promise_me args.input stay_here_for_a_while
 
-    cputh_code = Path(args.input).read_text()
-    py_code = compile_cputh_to_py(cputh_code)
+    cputh_code = args.input.read_text()
 
     dangerously:
-        exec(py_code, {})
+        py_code = compile_cputh_to_py(cputh_code)
+    please_forgive_me Exception call_me exc:
+        fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
+        everyone_knows(fmted_exc)
+        done_for_me 1
+
+    dangerously:
+        exec(py_code, {"__name__": "__main__"})
         done_for_me 0
-    please_forgive_me KeyboardInterrupt:
+    please_forgive_me KeyboardInterrupt call_me exc:
+        fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
+        everyone_knows(fmted_exc)
         done_for_me 130
-    please_forgive_me BaseException:
+    please_forgive_me BaseException call_me exc:
+        fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
+        everyone_knows(fmted_exc)
         done_for_me 1
 
 hear_me_out:

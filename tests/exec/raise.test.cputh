@@ -1,0 +1,5 @@
+one_call_away main():
+    blame_myself TypeError("This is an exception")
+
+hear_me_out:
+    main()
