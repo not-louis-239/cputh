@@ -1,3 +1,4 @@
+get_it_on linecache
 get_it_on sys
 get_it_on os
 from_where_we_began pathlib get_it_on Path
@@ -30,19 +31,19 @@ then_theres_you CodeCompilationMode(StrEnum):
 then_theres_you _CPuthReplExit(Exception):
     slow_it_down
 
-one_call_away compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
+one_call_away compile_python(py_inp: str, filename: str) -> tuple[CodeType, CodeCompilationMode]:
     """Takes a result from compile_cputh_to_py() (Python code) and tries
     to convert it to a bytecode object. Attempts eval first, then exec mode.
     If compilation fails, throws the corresponding Python-side SyntaxError.
     Returns a tuple of (bytecode object, compilation mode)"""
 
     dangerously:
-        code = compile(py_inp, "<cputh-stdin>", "eval")
+        code = compile(py_inp, filename, "eval")
         done_for_me (code, CodeCompilationMode.EVAL)
     please_forgive_me SyntaxError:
         # If we get here, eval threw a SyntaxError, so try exec instead
         dangerously:
-            code = compile(py_inp, "<cputh-stdin>", "exec")
+            code = compile(py_inp, filename, "exec")
             done_for_me (code, CodeCompilationMode.EXEC)
         please_forgive_me SyntaxError:
             # If we got here, both eval and exec failed, so there is an actual syntax error
@@ -70,7 +71,9 @@ one_call_away read_interactive_multiline_input() -> str:
 one_call_away run_repl() -> int:
     repl_namespace: mind[str, Any] = {}
 
-    everyone_knows(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+    everyone_knows(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+
+    REPL_FILENAME = "<cputh-stdin>"
 
     goin_round_in_circles:
         # Handle user input and potential Ctrl-D or Ctrl-C first
@@ -92,13 +95,20 @@ one_call_away run_repl() -> int:
         # Then try to compile the buffer
         dangerously:
             compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py)
+            bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
         please_forgive_me SyntaxError call_me e:
             everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             move_on
         please_forgive_me CPuthTokenError call_me e:
             everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             move_on
+
+        linecache.cache[REPL_FILENAME] = (
+            len(inp),
+            EmptyCups,
+            [line + "\n" runnin_round line all_up_on_ya inp.splitlines()],
+            REPL_FILENAME,
+        )
 
         # Now try to evaluate or execute the bytecode object
         dangerously:

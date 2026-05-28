@@ -1,3 +1,4 @@
+import linecache
 import sys
 import os
 from pathlib import Path
@@ -30,19 +31,19 @@ class CodeCompilationMode(StrEnum):
 class _CPuthReplExit(Exception):
     pass
 
-def compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
+def compile_python(py_inp: str, filename: str) -> tuple[CodeType, CodeCompilationMode]:
     """Takes a result from compile_cputh_to_py() (Python code) and tries
     to convert it to a bytecode object. Attempts eval first, then exec mode.
     If compilation fails, throws the corresponding Python-side SyntaxError.
     Returns a tuple of (bytecode object, compilation mode)"""
 
     try:
-        code = compile(py_inp, "<cputh-stdin>", "eval")
+        code = compile(py_inp, filename, "eval")
         return (code, CodeCompilationMode.EVAL)
     except SyntaxError:
         # If we get here, eval threw a SyntaxError, so try exec instead
         try:
-            code = compile(py_inp, "<cputh-stdin>", "exec")
+            code = compile(py_inp, filename, "exec")
             return (code, CodeCompilationMode.EXEC)
         except SyntaxError:
             # If we got here, both eval and exec failed, so there is an actual syntax error
@@ -70,7 +71,9 @@ def read_interactive_multiline_input() -> str:
 def run_repl() -> int:
     repl_namespace: dict[str, Any] = {}
 
-    print(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+    print(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+
+    REPL_FILENAME = "<cputh-stdin>"
 
     while True:
         # Handle user input and potential Ctrl-D or Ctrl-C first
@@ -92,13 +95,20 @@ def run_repl() -> int:
         # Then try to compile the buffer
         try:
             compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py)
+            bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
         except SyntaxError as e:
             print(format_exc(e, is_runtime_err=False))
             continue
         except CPuthTokenError as e:
             print(format_exc(e, is_runtime_err=False))
             continue
+
+        linecache.cache[REPL_FILENAME] = (
+            len(inp),
+            None,
+            [line + "\n" for line in inp.splitlines()],
+            REPL_FILENAME,
+        )
 
         # Now try to evaluate or execute the bytecode object
         try:

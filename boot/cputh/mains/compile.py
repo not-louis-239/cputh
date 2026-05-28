@@ -183,8 +183,6 @@ def main(args: Args) -> int:
         print(format_exc(exc=exc, title="token error", flavour_text="how long has this been tokenising wrong?"), file=sys.stderr)
         return 1
     except CPuthSyntaxError as exc:
-        # BUG! says 'python side' even though some errors can still occur on the CPuth side of compilation
-        # everything should probably just say CPuth code, not Python code
         exc.fp = args.input
         print(format_exc(exc=exc, title="syntax error", flavour_text="we don't compile anymore"), file=sys.stderr)
         return 1
