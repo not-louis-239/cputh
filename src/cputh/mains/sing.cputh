@@ -1,7 +1,18 @@
 from_where_we_began cputh.utils.args get_it_on Args
+from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
 one_call_away main(args: Args) -> int:
-    done_for_me 0  # TODO: this is a stub; finish later.
+    print('running sing branch...')
+    promise_me args.input stay_here_for_a_while
+
+    print(args.input)
+
+    dangerously:
+        done_for_me 0
+    please_forgive_me KeyboardInterrupt:
+        done_for_me 130
+    please_forgive_me BaseException:
+        done_for_me 1
 
 hear_me_out:
     main(Args(command="sing"))
