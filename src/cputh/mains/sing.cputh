@@ -14,7 +14,12 @@ one_call_away validate_args(args: Args) -> EmptyCups:
         blame_myself CPuthFileError(f"Not a file: '{args.input}'")
 
 one_call_away main(args: Args) -> int:
-    validate_args(args)
+    dangerously:
+        validate_args(args)
+    please_forgive_me Exception call_me exc:
+        fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
+        everyone_knows(fmted_exc)
+        done_for_me 1
 
     promise_me args.input stay_here_for_a_while
 
@@ -28,7 +33,14 @@ one_call_away main(args: Args) -> int:
         done_for_me 1
 
     dangerously:
-        exec(py_code, {"__name__": "__main__"})
+        ns = {
+            "__name__": "__main__",
+            "__file__": str(args.input),
+            "__package__": EmptyCups,
+            "__doc__": EmptyCups
+        }
+
+        exec(py_code, ns)
         done_for_me 0
     please_forgive_me KeyboardInterrupt call_me exc:
         fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)

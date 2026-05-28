@@ -1,4 +1,5 @@
 import shutil
+import traceback
 import tokenize
 
 from cputh.exceptions.errors import (
@@ -99,7 +100,34 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     return "\n".join(out)
 
-# TODO: these format functions are stubs right now. Finish later.
+def _format_traceback_body(exc: BaseException) -> str:
+    tb = exc.__traceback__
+    frames_lines = []
+
+    if tb is not None:
+        all_frames = traceback.extract_tb(tb)
+
+        # Skip the first frame which is internal
+        user_frames = all_frames[1:] if len(all_frames) > 1 else all_frames
+
+        # Loop through only the user-land frames
+        for frame in user_frames:
+            filename = frame.filename
+            lineno = frame.lineno
+            name = frame.name
+            line_code = frame.line.strip() if frame.line else "..."
+
+            frames_lines.append(
+                f"  at '{filename}', line {lineno}, in '{name}'\n"
+                f"    {line_code}"
+            )
+
+    # Join all inner frames together with a clean spacing layout
+    tb_body = "\n".join(frames_lines)
+    if tb_body:
+        tb_body += "\n"
+
+    return tb_body
 
 def _format_non_runtime_err(exc: BaseException) -> str:
     # TODO: Show code view (the function's already there!)
@@ -115,7 +143,7 @@ def _format_non_runtime_err(exc: BaseException) -> str:
     )
 
 def _format_runtime_err(exc: BaseException) -> str:
-    # TODO: Show all frames in traceback.
+    body = _format_traceback_body(exc)
 
     if str(exc):
         footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
@@ -124,6 +152,7 @@ def _format_runtime_err(exc: BaseException) -> str:
 
     return (
         f"we don't talk anymore (most recent call last)\n"
+        f"{body}"
         f"{footer_line}"
     )
 

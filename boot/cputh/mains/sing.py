@@ -14,7 +14,12 @@ def validate_args(args: Args) -> None:
         raise CPuthFileError(f"Not a file: '{args.input}'")
 
 def main(args: Args) -> int:
-    validate_args(args)
+    try:
+        validate_args(args)
+    except Exception as exc:
+        fmted_exc = format_exc(exc, is_runtime_err=False)
+        print(fmted_exc)
+        return 1
 
     assert args.input is not None
 
@@ -28,7 +33,14 @@ def main(args: Args) -> int:
         return 1
 
     try:
-        exec(py_code, {"__name__": "__main__"})
+        ns = {
+            "__name__": "__main__",
+            "__file__": str(args.input),
+            "__package__": None,
+            "__doc__": None
+        }
+
+        exec(py_code, ns)
         return 0
     except KeyboardInterrupt as exc:
         fmted_exc = format_exc(exc, is_runtime_err=True)
