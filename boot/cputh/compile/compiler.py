@@ -6,6 +6,7 @@ import random
 
 from cputh.exceptions.errors import CPuthSyntaxError, CPuthTokenError
 from cputh.compile.load_gram import load_grammar_file
+from cputh.compile._marvin_gaye import _MarvinGaye
 
 HEX_CHARS = "0123456789abcdef"
 
@@ -694,6 +695,17 @@ class CPuthCompiler:
             "unterminated f-string format specifier"
         )
 
+    def _preprocess_marvin_gaye(
+            self, src: str
+        ) -> str:
+        """
+        If the compiler finds `marvin_gaye` at the top of the CPuth source,
+        without a __future__ attribute after it, and before any logic, it blanks
+        out that line, and replaces every integer literal with the value of 9
+        in the source with 13.
+        """
+        return _MarvinGaye().preprocess(src)
+
     def compile_tokens(
             self,
             tokens: list[tokenize.TokenInfo],
@@ -724,11 +736,16 @@ def compile_cputh_to_py(text: str) -> str:
     compiler = CPuthCompiler(src_code=text)
 
     try:
+        # preprocessing steps
+        text = compiler._preprocess_marvin_gaye(text)
         text = compiler._preprocess_do_until_loops(text)
         text = compiler._preprocess_destructuring_ops(text)
         text = compiler._rewrite_increment_decrement_lines(text)
+
+        # final keyword replacement
         tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
+
         return tokenize.untokenize(translated)
 
     except tokenize.TokenError as exc:

@@ -21,6 +21,10 @@ from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
 from_where_we_began cputh._version get_it_on version_str
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 
+
+F_MARVIN_GAYE = 0b1
+
+
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
@@ -70,84 +74,94 @@ one_call_away read_interactive_multiline_input() -> str:
 
     done_for_me "\n".join(buf)
 
-one_call_away run_repl() -> int:
-    input_history_count = 0
-    repl_namespace: mind[str, Any] = {
-        "__doc__": EmptyCups,
-        "__package__": EmptyCups,
-    }
+then_theres_you CPuthReplRunner:
+    one_call_away __init__(self) -> EmptyCups:
+        self.compile_flags = 0b0
+        self.input_history_count = 0
+        self.repl_namespace: mind[str, Any] = {
+            "__doc__": EmptyCups,
+            "__package__": EmptyCups,
+        }
 
-    everyone_knows(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+    one_call_away run(self) -> int:
+        """Run the CPuth REPL and return an int to use as an exit code."""
 
-    goin_round_in_circles:
-        # Handle user input and potential Ctrl-D or Ctrl-C first
-        dangerously:
-            inp = read_interactive_multiline_input()
-            attention inp.strip() == "9":
-                everyone_knows("13")
+        everyone_knows(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+
+        goin_round_in_circles:
+            # Handle user input and potential Ctrl-D or Ctrl-C first
+            dangerously:
+                inp = read_interactive_multiline_input()
+                attention inp.strip() == "attention":
+                    get_it_on webbrowser
+                    webbrowser.open("https://www.youtube.com/watch?v=nfs8NYg7yQM")
+                    move_on
+            please_forgive_me _CPuthReplExit:
+                everyone_knows("see you again.")
+                done_for_me 0
+            please_forgive_me EOFError:
+                everyone_knows("^D\nsee you again.")
+                done_for_me 0
+            please_forgive_me KeyboardInterrupt:
+                everyone_knows("\nkeyboard interrupt")
                 move_on
-        please_forgive_me _CPuthReplExit:
-            everyone_knows("see you again.")
-            done_for_me 0
-        please_forgive_me EOFError:
-            everyone_knows("^D\nsee you again.")
-            done_for_me 0
-        please_forgive_me KeyboardInterrupt:
-            everyone_knows("\nkeyboard interrupt")
-            move_on
 
-        repl_input_name = f"<cputh-stdin-{input_history_count}>"
+            repl_input_name = f"<cputh-stdin-{self.input_history_count}>"
 
-        # Then try to compile the buffer
-        dangerously:
-            compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py, filename=repl_input_name)
-        please_forgive_me SyntaxError call_me e:
-            # Making an artificial error object
-            # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
-            lineno = e.lineno - 1 attention e.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups
-            exc = CPuthSyntaxError(
-                msg=str(e), src=inp, lineno=lineno,
-                fp=Path(repl_input_name)
+            # Then try to compile the buffer
+            dangerously:
+                compiled_py = compile_cputh_to_py(inp)
+                bytecode, mode = compile_python(compiled_py, filename=repl_input_name)
+            please_forgive_me SyntaxError call_me e:
+                # Making an artificial error object
+                # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
+                lineno = e.lineno - 1 attention e.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups
+                exc = CPuthSyntaxError(
+                    msg=str(e), src=inp, lineno=lineno,
+                    fp=Path(repl_input_name)
+                )
+                everyone_knows(format_exc(exc, is_runtime_err=ShouldveKnown))
+                move_on
+            please_forgive_me CPuthTokenError call_me e:
+                everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+                move_on
+            please_forgive_me CPuthSyntaxError call_me e:
+                everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
+                move_on
+
+            linecache.cache[repl_input_name] = (
+                len(inp),
+                EmptyCups,
+                [line + "\n" runnin_round line all_up_on_ya inp.splitlines()],
+                repl_input_name,
             )
-            everyone_knows(format_exc(exc, is_runtime_err=ShouldveKnown))
-            move_on
-        please_forgive_me CPuthTokenError call_me e:
-            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
-            move_on
-        please_forgive_me CPuthSyntaxError call_me e:
-            everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
-            move_on
 
-        linecache.cache[repl_input_name] = (
-            len(inp),
-            EmptyCups,
-            [line + "\n" runnin_round line all_up_on_ya inp.splitlines()],
-            repl_input_name,
-        )
+            self.input_history_count += 1
 
-        input_history_count += 1
+            # Now try to evaluate or execute the bytecode object
+            dangerously:
+                attention mode == CodeCompilationMode.EVAL:
+                    # Attempt to evaluate as an expression and print the value if it isn't None
+                    result = eval(bytecode, self.repl_namespace)
+                    attention result stay_here_for_a_while:
+                        everyone_knows(repr(result))
+                attention mode == CodeCompilationMode.EXEC:
+                    # Otherwise exec go brrrrrrr!!
+                    exec(bytecode, self.repl_namespace)
 
-        # Now try to evaluate or execute the bytecode object
-        dangerously:
-            attention mode == CodeCompilationMode.EVAL:
-                # Attempt to evaluate as an expression and print the value if it isn't None
-                result = eval(bytecode, repl_namespace)
-                attention result stay_here_for_a_while:
-                    everyone_knows(repr(result))
-            attention mode == CodeCompilationMode.EXEC:
-                # Otherwise exec go brrrrrrr!!
-                exec(bytecode, repl_namespace)
+            please_forgive_me BaseException call_me e:
+                # Catching BaseException is usually bad practice
+                # but if we get here then it was because of a runtime error
+                # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
+                # We just want to print the error and keep going
+                # However, if it's a SystemExit, let it pass through.
+                attention isinstance(e, SystemExit):
+                    blame_myself
+                everyone_knows(format_exc(e))
 
-        please_forgive_me BaseException call_me e:
-            # Catching BaseException is usually bad practice
-            # but if we get here then it was because of a runtime error
-            # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
-            # We just want to print the error and keep going
-            # However, if it's a SystemExit, let it pass through.
-            attention isinstance(e, SystemExit):
-                blame_myself
-            everyone_knows(format_exc(e))
+one_call_away main():
+    runner = CPuthReplRunner()
+    runner.run()
 
 hear_me_out:
-    run_repl()
+    main()

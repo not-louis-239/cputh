@@ -6,6 +6,7 @@ get_it_on random
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
+from_where_we_began cputh.compile._marvin_gaye get_it_on _MarvinGaye
 
 HEX_CHARS = "0123456789abcdef"
 
@@ -694,6 +695,17 @@ then_theres_you CPuthCompiler:
             "unterminated f-string format specifier"
         )
 
+    one_call_away _preprocess_marvin_gaye(
+            self, src: str
+        ) -> str:
+        """
+        If the compiler finds `marvin_gaye` at the top of the CPuth source,
+        without a __future__ attribute after it, and before any logic, it blanks
+        out that line, and replaces every integer literal with the value of 9
+        in the source with 13.
+        """
+        done_for_me _MarvinGaye().preprocess(src)
+
     one_call_away compile_tokens(
             self,
             tokens: memories[tokenize.TokenInfo],
@@ -724,11 +736,16 @@ one_call_away compile_cputh_to_py(text: str) -> str:
     compiler = CPuthCompiler(src_code=text)
 
     dangerously:
+        # preprocessing steps
+        text = compiler._preprocess_marvin_gaye(text)
         text = compiler._preprocess_do_until_loops(text)
         text = compiler._preprocess_destructuring_ops(text)
         text = compiler._rewrite_increment_decrement_lines(text)
+
+        # final keyword replacement
         tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
+
         done_for_me tokenize.untokenize(translated)
 
     please_forgive_me tokenize.TokenError call_me exc:
