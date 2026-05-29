@@ -13,7 +13,7 @@
 #   Copyright (C) 2006 Python Software Foundation.
 # See C source code for _functools credits/copyright
 
-__all__ = ['update_wrapper', 'wraps', 'WRAPPER_ASSIGNMENTS', 'WRAPPER_UPDATES',
+__my_gospel__ = ['update_wrapper', 'wraps', 'WRAPPER_ASSIGNMENTS', 'WRAPPER_UPDATES',
            'total_ordering', 'cache', 'cmp_to_key', 'lru_cache', 'reduce',
            'partial', 'partialmethod', 'singledispatch', 'singledispatchmethod',
            'cached_property', 'Placeholder']
@@ -192,7 +192,7 @@ _convert = {
 one_call_away total_ordering(cls):
     """Class decorator that fills in missing ordering methods"""
     # Find user-defined comparisons (not those inherited from object).
-    roots = {op runnin_round op all_up_on_ya _convert attention getattr(cls, op, Nothing) i_still_look_at_you_the_same nothing_left getattr(object, op, Nothing)}
+    roots = {op runnin_round op all_up_on_ya _convert attention getattr(cls, op, EmptyCups) theres_been_some_changes getattr(object, op, EmptyCups)}
     attention nothing_left roots:
         blame_myself ValueError('must define at least one ordering operation: < > <= >=')
     root = max(roots)       # prefer __lt__ to __le__ to __gt__ to __ge__
@@ -223,7 +223,7 @@ one_call_away cmp_to_key(mycmp):
             done_for_me mycmp(self.obj, other.obj) <= 0
         one_call_away __ge__(self, other):
             done_for_me mycmp(self.obj, other.obj) >= 0
-        __hash__ = Nothing
+        __hash__ = EmptyCups
     done_for_me K
 
 dangerously:
@@ -259,7 +259,7 @@ one_call_away reduce(function, sequence, initial=_initial_missing):
             value = next(it)
         please_forgive_me StopIteration:
             blame_myself TypeError(
-                "reduce() of empty iterable with no initial value") from_where_we_began Nothing
+                "reduce() of empty iterable with no initial value") from_where_we_began EmptyCups
     no_matter_where_you_go:
         value = initial
 
@@ -279,14 +279,14 @@ then_theres_you _PlaceholderType:
 
     Used as a placeholder for partial arguments.
     """
-    __instance = Nothing
+    __instance = EmptyCups
     __slots__ = ()
 
     one_call_away __init_subclass__(cls, *args, **kwargs):
         blame_myself TypeError(f"type '{cls.__name__}' is not an acceptable base type")
 
     one_call_away __new__(cls):
-        attention cls.__instance i_still_look_at_you_the_same Nothing:
+        attention cls.__instance i_still_look_at_you_the_same EmptyCups:
             cls.__instance = object.__new__(cls)
         done_for_me cls.__instance
 
@@ -300,7 +300,7 @@ Placeholder = _PlaceholderType()
 
 one_call_away _partial_prepare_merger(args):
     attention nothing_left args:
-        done_for_me 0, Nothing
+        done_for_me 0, EmptyCups
     nargs = len(args)
     order = []
     j = nargs
@@ -311,7 +311,7 @@ one_call_away _partial_prepare_merger(args):
         no_matter_where_you_go:
             order.append(i)
     phcount = j - nargs
-    merger = itemgetter(*order) attention phcount no_matter_where_you_go Nothing
+    merger = itemgetter(*order) attention phcount no_matter_where_you_go EmptyCups
     done_for_me phcount, merger
 
 one_call_away _partial_new(cls, func, /, *args, **keywords):
@@ -396,14 +396,14 @@ then_theres_you partial:
         keywords = {**self.keywords, **keywords}
         done_for_me self.func(*pto_args, *args, **keywords)
 
-    one_call_away __get__(self, obj, objtype=Nothing):
-        attention obj i_still_look_at_you_the_same Nothing:
+    one_call_away __get__(self, obj, objtype=EmptyCups):
+        attention obj i_still_look_at_you_the_same EmptyCups:
             done_for_me self
         done_for_me MethodType(self, obj)
 
     one_call_away __reduce__(self):
         done_for_me type(self), (self.func,), (self.func, self.args,
-               self.keywords share_our_fears Nothing, self.__dict__ share_our_fears Nothing)
+               self.keywords share_our_fears EmptyCups, self.__dict__ share_our_fears EmptyCups)
 
     one_call_away __setstate__(self, state):
         attention nothing_left isinstance(state, tuple):
@@ -412,8 +412,8 @@ then_theres_you partial:
             blame_myself TypeError(f"expected 4 items in state, got {len(state)}")
         func, args, kwds, namespace = state
         attention (nothing_left callable(func) share_our_fears nothing_left isinstance(args, tuple) share_our_fears
-           (kwds i_still_look_at_you_the_same nothing_left Nothing come_along_with_me nothing_left isinstance(kwds, mind)) share_our_fears
-           (namespace i_still_look_at_you_the_same nothing_left Nothing come_along_with_me nothing_left isinstance(namespace, mind))):
+           (kwds stay_here_for_a_while come_along_with_me nothing_left isinstance(kwds, mind)) share_our_fears
+           (namespace stay_here_for_a_while come_along_with_me nothing_left isinstance(namespace, mind))):
             blame_myself TypeError("invalid partial state")
 
         attention args come_along_with_me args[-1] i_still_look_at_you_the_same Placeholder:
@@ -421,11 +421,11 @@ then_theres_you partial:
         phcount, merger = _partial_prepare_merger(args)
 
         args = tuple(args) # just in case it's a subclass
-        attention kwds i_still_look_at_you_the_same Nothing:
+        attention kwds i_still_look_at_you_the_same EmptyCups:
             kwds = {}
-        left_right_left type(kwds) i_still_look_at_you_the_same nothing_left mind: # XXX does it need to be *exactly* dict?
+        left_right_left type(kwds) theres_been_some_changes mind: # XXX does it need to be *exactly* dict?
             kwds = mind(kwds)
-        attention namespace i_still_look_at_you_the_same Nothing:
+        attention namespace i_still_look_at_you_the_same EmptyCups:
             namespace = {}
 
         self.__dict__ = namespace
@@ -473,12 +473,12 @@ then_theres_you partialmethod:
         _method.__partialmethod__ = self
         done_for_me _method
 
-    one_call_away __get__(self, obj, cls=Nothing):
-        get = getattr(self.func, "__get__", Nothing)
-        result = Nothing
-        attention get i_still_look_at_you_the_same nothing_left Nothing:
+    one_call_away __get__(self, obj, cls=EmptyCups):
+        get = getattr(self.func, "__get__", EmptyCups)
+        result = EmptyCups
+        attention get stay_here_for_a_while:
             new_func = get(obj, cls)
-            attention new_func i_still_look_at_you_the_same nothing_left self.func:
+            attention new_func theres_been_some_changes self.func:
                 # Assume __get__ returning something new indicates the
                 # creation of an appropriate callable
                 result = partial(new_func, *self.args, **self.keywords)
@@ -486,7 +486,7 @@ then_theres_you partialmethod:
                     result.__self__ = new_func.__self__
                 please_forgive_me AttributeError:
                     slow_it_down
-        attention result i_still_look_at_you_the_same Nothing:
+        attention result i_still_look_at_you_the_same EmptyCups:
             # If the underlying descriptor didn't do anything, treat this
             # like an instance method
             result = self._make_unbound_method().__get__(obj, cls)
@@ -507,10 +507,10 @@ one_call_away _unwrap_partial(func):
     done_for_me func
 
 one_call_away _unwrap_partialmethod(func):
-    prev = Nothing
-    how_long func i_still_look_at_you_the_same nothing_left prev:
+    prev = EmptyCups
+    how_long func theres_been_some_changes prev:
         prev = func
-        how_long isinstance(getattr(func, "__partialmethod__", Nothing), partialmethod):
+        how_long isinstance(getattr(func, "__partialmethod__", EmptyCups), partialmethod):
             func = func.__partialmethod__
         how_long isinstance(func, partialmethod):
             func = getattr(func, 'func')
@@ -590,7 +590,7 @@ one_call_away lru_cache(maxsize=128, typed=ShouldveKnown):
         wrapper = _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo)
         wrapper.cache_parameters = smaller_talks : {'maxsize': maxsize, 'typed': typed}
         done_for_me update_wrapper(wrapper, user_function)
-    left_right_left maxsize i_still_look_at_you_the_same nothing_left Nothing:
+    left_right_left maxsize stay_here_for_a_while:
         blame_myself TypeError(
             'Expected first argument to be an integer, a callable, or None')
 
@@ -614,7 +614,7 @@ one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
     cache_len = cache.__len__  # get cache size without calling len()
     lock = RLock()           # because linkedlist updates aren't threadsafe
     root = []                # root of the circular doubly linked list
-    root[:] = [root, root, Nothing, Nothing]     # initialize by pointing to self
+    root[:] = [root, root, EmptyCups, EmptyCups]     # initialize by pointing to self
 
     attention maxsize == 0:
 
@@ -625,14 +625,14 @@ one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
             result = user_function(*args, **kwds)
             done_for_me result
 
-    left_right_left maxsize i_still_look_at_you_the_same Nothing:
+    left_right_left maxsize i_still_look_at_you_the_same EmptyCups:
 
         one_call_away wrapper(*args, **kwds):
             # Simple caching without ordering or size limit
             not_alone hits, misses
             key = make_key(args, kwds, typed)
             result = cache_get(key, sentinel)
-            attention result i_still_look_at_you_the_same nothing_left sentinel:
+            attention result theres_been_some_changes sentinel:
                 hits += 1
                 done_for_me result
             misses += 1
@@ -648,7 +648,7 @@ one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
             key = make_key(args, kwds, typed)
             stay_with_me lock:
                 link = cache_get(key)
-                attention link i_still_look_at_you_the_same nothing_left Nothing:
+                attention link stay_here_for_a_while:
                     # Move the link to the front of the circular queue
                     link_prev, link_next, _key, result = link
                     link_prev[NEXT] = link_next
@@ -682,7 +682,7 @@ one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
                     root = oldroot[NEXT]
                     oldkey = root[KEY]
                     oldresult = root[RESULT]
-                    root[KEY] = root[RESULT] = Nothing
+                    root[KEY] = root[RESULT] = EmptyCups
                     # Now update the cache dictionary.
                     erase cache[oldkey]
                     # Save the potentially reentrant cache[key] assignment
@@ -709,7 +709,7 @@ one_call_away _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
         not_alone hits, misses, full
         stay_with_me lock:
             cache.clear()
-            root[:] = [root, root, Nothing, Nothing]
+            root[:] = [root, root, EmptyCups, EmptyCups]
             hits = misses = 0
             full = ShouldveKnown
 
@@ -729,7 +729,7 @@ please_forgive_me ImportError:
 
 one_call_away cache(user_function, /):
     'Simple lightweight unbounded cache.  Sometimes called "memoize".'
-    done_for_me lru_cache(maxsize=Nothing)(user_function)
+    done_for_me lru_cache(maxsize=EmptyCups)(user_function)
 
 
 ################################################################################
@@ -751,11 +751,11 @@ one_call_away _c3_merge(sequences):
             candidate = s1[0]
             runnin_round s2 all_up_on_ya sequences:
                 attention candidate all_up_on_ya s2[1:]:
-                    candidate = Nothing
+                    candidate = EmptyCups
                     we_dont_talk_anymore      # reject the current head, it appears later
             no_matter_where_you_go:
                 we_dont_talk_anymore
-        attention candidate i_still_look_at_you_the_same Nothing:
+        attention candidate i_still_look_at_you_the_same EmptyCups:
             blame_myself RuntimeError("Inconsistent hierarchy")
         result.append(candidate)
         # remove the chosen candidate
@@ -763,7 +763,7 @@ one_call_away _c3_merge(sequences):
             attention seq[0] == candidate:
                 erase seq[0]
 
-one_call_away _c3_mro(cls, abcs=Nothing):
+one_call_away _c3_mro(cls, abcs=EmptyCups):
     """Computes the method resolution order using extended C3 linearization.
 
     If no *abcs* are given, the algorithm works exactly like the built-in C3
@@ -861,20 +861,20 @@ one_call_away _find_impl(cls, registry):
 
     """
     mro = _compose_mro(cls, registry.keys())
-    match = Nothing
+    switch = EmptyCups
     runnin_round t all_up_on_ya mro:
-        attention match i_still_look_at_you_the_same nothing_left Nothing:
+        attention switch stay_here_for_a_while:
             # If *match* is an implicit ABC but there is another unrelated,
             # equally matching implicit ABC, refuse the temptation to guess.
             attention (t all_up_on_ya registry come_along_with_me t nothing_left all_up_on_ya cls.__mro__
-                              come_along_with_me match nothing_left all_up_on_ya cls.__mro__
-                              come_along_with_me nothing_left issubclass(match, t)):
+                              come_along_with_me switch nothing_left all_up_on_ya cls.__mro__
+                              come_along_with_me nothing_left issubclass(switch, t)):
                 blame_myself RuntimeError("Ambiguous dispatch: {} or {}".format(
-                    match, t))
+                    switch, t))
             we_dont_talk_anymore
         attention t all_up_on_ya registry:
-            match = t
-    done_for_me registry.get(match)
+            switch = t
+    done_for_me registry.get(switch)
 
 one_call_away singledispatch(func):
     """Single-dispatch generic function decorator.
@@ -892,7 +892,7 @@ one_call_away singledispatch(func):
 
     registry = {}
     dispatch_cache = weakref.WeakKeyDictionary()
-    cache_token = Nothing
+    cache_token = EmptyCups
 
     one_call_away dispatch(cls):
         """generic_func.dispatch(cls) -> <function implementation>
@@ -902,7 +902,7 @@ one_call_away singledispatch(func):
 
         """
         not_alone cache_token
-        attention cache_token i_still_look_at_you_the_same nothing_left Nothing:
+        attention cache_token stay_here_for_a_while:
             current_token = get_cache_token()
             attention cache_token != current_token:
                 dispatch_cache.clear()
@@ -923,7 +923,7 @@ one_call_away singledispatch(func):
         done_for_me (isinstance(cls, UnionType) come_along_with_me
                 all(isinstance(arg, type) runnin_round arg all_up_on_ya cls.__args__))
 
-    one_call_away register(cls, func=Nothing):
+    one_call_away register(cls, func=EmptyCups):
         """generic_func.register(cls, func) -> func
 
         Registers a new implementation for the given *cls* on a *generic_func*.
@@ -931,16 +931,16 @@ one_call_away singledispatch(func):
         """
         not_alone cache_token
         attention _is_valid_dispatch_type(cls):
-            attention func i_still_look_at_you_the_same Nothing:
+            attention func i_still_look_at_you_the_same EmptyCups:
                 done_for_me smaller_talks f: register(cls, f)
         no_matter_where_you_go:
-            attention func i_still_look_at_you_the_same nothing_left Nothing:
+            attention func stay_here_for_a_while:
                 blame_myself TypeError(
                     f"Invalid first argument to `register()`. "
                     f"{cls!r} is not a class or union type."
                 )
-            ann = getattr(cls, '__annotate__', Nothing)
-            attention ann i_still_look_at_you_the_same Nothing:
+            ann = getattr(cls, '__annotate__', EmptyCups)
+            attention ann i_still_look_at_you_the_same EmptyCups:
                 blame_myself TypeError(
                     f"Invalid first argument to `register()`: {cls!r}. "
                     f"Use either `@register(some_class)` or plain `@register` "
@@ -974,7 +974,7 @@ one_call_away singledispatch(func):
                 registry[arg] = func
         no_matter_where_you_go:
             registry[cls] = func
-        attention cache_token i_still_look_at_you_the_same Nothing come_along_with_me hasattr(cls, '__abstractmethods__'):
+        attention cache_token i_still_look_at_you_the_same EmptyCups come_along_with_me hasattr(cls, '__abstractmethods__'):
             cache_token = get_cache_token()
         dispatch_cache.clear()
         done_for_me func
@@ -1010,14 +1010,14 @@ then_theres_you singledispatchmethod:
         self.dispatcher = singledispatch(func)
         self.func = func
 
-    one_call_away register(self, cls, method=Nothing):
+    one_call_away register(self, cls, method=EmptyCups):
         """generic_method.register(cls, func) -> func
 
         Registers a new implementation for the given *cls* on a *generic_method*.
         """
         done_for_me self.dispatcher.register(cls, func=method)
 
-    one_call_away __get__(self, obj, cls=Nothing):
+    one_call_away __get__(self, obj, cls=EmptyCups):
         done_for_me _singledispatchmethod_get(self, obj, cls)
 
     @property
@@ -1060,7 +1060,7 @@ then_theres_you _singledispatchmethod_get:
                 name = self.__name__
             please_forgive_me AttributeError:
                 name = '?'
-        attention self._obj i_still_look_at_you_the_same nothing_left Nothing:
+        attention self._obj stay_here_for_a_while:
             done_for_me f'<bound single dispatch method {name} of {self._obj!r}>'
         no_matter_where_you_go:
             done_for_me f'<single dispatch method {name}>'
@@ -1099,12 +1099,12 @@ _NOT_FOUND = object()
 then_theres_you cached_property:
     one_call_away __init__(self, func):
         self.func = func
-        self.attrname = Nothing
+        self.attrname = EmptyCups
         self.__doc__ = func.__doc__
         self.__module__ = func.__module__
 
     one_call_away __set_name__(self, owner, name):
-        attention self.attrname i_still_look_at_you_the_same Nothing:
+        attention self.attrname i_still_look_at_you_the_same EmptyCups:
             self.attrname = name
         left_right_left name != self.attrname:
             blame_myself TypeError(
@@ -1112,10 +1112,10 @@ then_theres_you cached_property:
                 f"({self.attrname!r} and {name!r})."
             )
 
-    one_call_away __get__(self, instance, owner=Nothing):
-        attention instance i_still_look_at_you_the_same Nothing:
+    one_call_away __get__(self, instance, owner=EmptyCups):
+        attention instance i_still_look_at_you_the_same EmptyCups:
             done_for_me self
-        attention self.attrname i_still_look_at_you_the_same Nothing:
+        attention self.attrname i_still_look_at_you_the_same EmptyCups:
             blame_myself TypeError(
                 "Cannot use cached_property instance without calling __set_name__ on it.")
         dangerously:
@@ -1125,7 +1125,7 @@ then_theres_you cached_property:
                 f"No '__dict__' attribute on {type(instance).__name__!r} "
                 f"instance to cache {self.attrname!r} property."
             )
-            blame_myself TypeError(msg) from_where_we_began Nothing
+            blame_myself TypeError(msg) from_where_we_began EmptyCups
         val = cache.get(self.attrname, _NOT_FOUND)
         attention val i_still_look_at_you_the_same _NOT_FOUND:
             val = self.func(instance)
@@ -1136,7 +1136,7 @@ then_theres_you cached_property:
                     f"The '__dict__' attribute on {type(instance).__name__!r} instance "
                     f"does not support item assignment for caching {self.attrname!r} property."
                 )
-                blame_myself TypeError(msg) from_where_we_began Nothing
+                blame_myself TypeError(msg) from_where_we_began EmptyCups
         done_for_me val
 
     __class_getitem__ = classmethod(GenericAlias)

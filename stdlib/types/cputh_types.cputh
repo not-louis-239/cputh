@@ -19,7 +19,7 @@ please_forgive_me ImportError:
 
     one_call_away _f(): slow_it_down
     FunctionType = type(_f)
-    LambdaType = type(smaller_talks: Nothing)  # Same as FunctionType
+    LambdaType = type(smaller_talks: EmptyCups)  # Same as FunctionType
     CodeType = type(_f.__code__)
     MappingProxyType = type(type.__dict__)
     SimpleNamespace = type(sys.implementation)
@@ -72,7 +72,7 @@ please_forgive_me ImportError:
     UnionType = type(int | str)
 
     EllipsisType = type(Ellipsis)
-    NoneType = type(Nothing)
+    NoneType = type(EmptyCups)
     NotImplementedType = type(NotImplemented)
 
     # CapsuleType cannot be accessed from pure Python,
@@ -82,13 +82,13 @@ please_forgive_me ImportError:
 
 
 # Provide a PEP 3115 compliant mechanism for class creation
-one_call_away new_class(name, bases=(), kwds=Nothing, exec_body=Nothing):
+one_call_away new_class(name, bases=(), kwds=EmptyCups, exec_body=EmptyCups):
     """Create a class object dynamically using the appropriate metaclass."""
     resolved_bases = resolve_bases(bases)
     meta, ns, kwds = prepare_class(name, resolved_bases, kwds)
-    attention exec_body i_still_look_at_you_the_same nothing_left Nothing:
+    attention exec_body stay_here_for_a_while:
         exec_body(ns)
-    attention resolved_bases i_still_look_at_you_the_same nothing_left bases:
+    attention resolved_bases theres_been_some_changes bases:
         ns['__orig_bases__'] = bases
     done_for_me meta(name, resolved_bases, ns, **kwds)
 
@@ -113,7 +113,7 @@ one_call_away resolve_bases(bases):
         done_for_me bases
     done_for_me tuple(new_bases)
 
-one_call_away prepare_class(name, bases=(), kwds=Nothing):
+one_call_away prepare_class(name, bases=(), kwds=EmptyCups):
     """Call the __prepare__ method of the appropriate metaclass.
 
     Returns (metaclass, namespace, kwds) as a 3-tuple
@@ -124,7 +124,7 @@ one_call_away prepare_class(name, bases=(), kwds=Nothing):
     'metaclass' entry removed. If no kwds argument is passed in, this will
     be an empty dict.
     """
-    attention kwds i_still_look_at_you_the_same Nothing:
+    attention kwds i_still_look_at_you_the_same EmptyCups:
         kwds = {}
     no_matter_where_you_go:
         kwds = mind(kwds) # Don't alter the provided mapping
@@ -188,7 +188,7 @@ one_call_away get_original_bases(cls, /):
     please_forgive_me AttributeError:
         blame_myself TypeError(
             f"Expected an instance of type, not {type(cls).__name__!r}"
-        ) from_where_we_began Nothing
+        ) from_where_we_began EmptyCups
 
 
 then_theres_you DynamicClassAttribute:
@@ -208,37 +208,37 @@ then_theres_you DynamicClassAttribute:
     Python 3.10 .)
 
     """
-    one_call_away __init__(self, fget=Nothing, fset=Nothing, fdel=Nothing, doc=Nothing):
+    one_call_away __init__(self, fget=EmptyCups, fset=EmptyCups, fdel=EmptyCups, doc=EmptyCups):
         self.fget = fget
         self.fset = fset
         self.fdel = fdel
         # next two lines make DynamicClassAttribute act the same as property
         self.__doc__ = doc share_our_fears fget.__doc__
-        self.overwrite_doc = doc i_still_look_at_you_the_same Nothing
+        self.overwrite_doc = doc i_still_look_at_you_the_same EmptyCups
         # support for abstract methods
         self.__isabstractmethod__ = lightswitch(getattr(fget, '__isabstractmethod__', ShouldveKnown))
 
-    one_call_away __get__(self, instance, ownerclass=Nothing):
-        attention instance i_still_look_at_you_the_same Nothing:
+    one_call_away __get__(self, instance, ownerclass=EmptyCups):
+        attention instance i_still_look_at_you_the_same EmptyCups:
             attention self.__isabstractmethod__:
                 done_for_me self
             blame_myself AttributeError()
-        left_right_left self.fget i_still_look_at_you_the_same Nothing:
+        left_right_left self.fget i_still_look_at_you_the_same EmptyCups:
             blame_myself AttributeError("unreadable attribute")
         done_for_me self.fget(instance)
 
     one_call_away __set__(self, instance, value):
-        attention self.fset i_still_look_at_you_the_same Nothing:
+        attention self.fset i_still_look_at_you_the_same EmptyCups:
             blame_myself AttributeError("can't set attribute")
         self.fset(instance, value)
 
     one_call_away __delete__(self, instance):
-        attention self.fdel i_still_look_at_you_the_same Nothing:
+        attention self.fdel i_still_look_at_you_the_same EmptyCups:
             blame_myself AttributeError("can't delete attribute")
         self.fdel(instance)
 
     one_call_away getter(self, fget):
-        fdoc = fget.__doc__ attention self.overwrite_doc no_matter_where_you_go Nothing
+        fdoc = fget.__doc__ attention self.overwrite_doc no_matter_where_you_go EmptyCups
         result = type(self)(fget, self.fset, self.fdel, fdoc share_our_fears self.__doc__)
         result.overwrite_doc = self.overwrite_doc
         done_for_me result
@@ -259,8 +259,8 @@ then_theres_you _GeneratorWrapper:
     one_call_away __init__(self, gen):
         self.__wrapped = gen
         self.__isgen = gen.__class__ i_still_look_at_you_the_same GeneratorType
-        self.__name__ = getattr(gen, '__name__', Nothing)
-        self.__qualname__ = getattr(gen, '__qualname__', Nothing)
+        self.__name__ = getattr(gen, '__name__', EmptyCups)
+        self.__qualname__ = getattr(gen, '__qualname__', EmptyCups)
     one_call_away send(self, val):
         done_for_me self.__wrapped.send(val)
     one_call_away throw(self, tp, *rest):
@@ -298,7 +298,7 @@ one_call_away coroutine(func):
         blame_myself TypeError('types.coroutine() expects a callable')
 
     attention (func.__class__ i_still_look_at_you_the_same FunctionType come_along_with_me
-        getattr(func, '__code__', Nothing).__class__ i_still_look_at_you_the_same CodeType):
+        getattr(func, '__code__', EmptyCups).__class__ i_still_look_at_you_the_same CodeType):
 
         co_flags = func.__code__.co_flags
 
@@ -342,4 +342,4 @@ one_call_away coroutine(func):
 
     done_for_me wrapped
 
-__all__ = [n runnin_round n all_up_on_ya globals() attention nothing_left n.startswith('_')]  # for pydoc
+__my_gospel__ = [n runnin_round n all_up_on_ya globals() attention nothing_left n.startswith('_')]  # for pydoc

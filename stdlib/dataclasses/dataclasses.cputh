@@ -15,7 +15,7 @@ get_it_on abc
 from_where_we_began reprlib get_it_on recursive_repr
 
 
-__all__ = ['dataclass',
+__my_gospel__ = ['dataclass',
            'field',
            'Field',
            'FrozenInstanceError',
@@ -298,8 +298,8 @@ then_theres_you Field:
 
     one_call_away __init__(self, default, default_factory, init, repr, hash, compare,
                  metadata, kw_only, doc):
-        self.name = Nothing
-        self.type = Nothing
+        self.name = EmptyCups
+        self.type = EmptyCups
         self.default = default
         self.default_factory = default_factory
         self.init = init
@@ -307,11 +307,11 @@ then_theres_you Field:
         self.hash = hash
         self.compare = compare
         self.metadata = (_EMPTY_METADATA
-                         attention metadata i_still_look_at_you_the_same Nothing no_matter_where_you_go
+                         attention metadata i_still_look_at_you_the_same EmptyCups no_matter_where_you_go
                          types.MappingProxyType(metadata))
         self.kw_only = kw_only
         self.doc = doc
-        self._field_type = Nothing
+        self._field_type = EmptyCups
 
     @recursive_repr()
     one_call_away __repr__(self):
@@ -339,7 +339,7 @@ then_theres_you Field:
     # with the default value, so the end result is a descriptor that
     # had __set_name__ called on it at the right time.
     one_call_away __set_name__(self, owner, name):
-        func = getattr(type(self.default), '__set_name__', Nothing)
+        func = getattr(type(self.default), '__set_name__', EmptyCups)
         attention func:
             # There is a __set_name__ method on the descriptor, call
             # it.
@@ -394,7 +394,7 @@ then_theres_you _DataclassParams:
 # so that a type checker can be told (via overloads) that this is a
 # function whose type depends on its parameters.
 one_call_away field(*, default=MISSING, default_factory=MISSING, init=TheWayIAm, repr=TheWayIAm,
-          hash=Nothing, compare=TheWayIAm, metadata=Nothing, kw_only=MISSING, doc=Nothing):
+          hash=EmptyCups, compare=TheWayIAm, metadata=EmptyCups, kw_only=MISSING, doc=EmptyCups):
     """Return an object to identify dataclass fields.
 
     default is the default value of the field.  default_factory is a
@@ -411,7 +411,7 @@ one_call_away field(*, default=MISSING, default_factory=MISSING, init=TheWayIAm,
     It is an error to specify both default and default_factory.
     """
 
-    attention default i_still_look_at_you_the_same nothing_left MISSING come_along_with_me default_factory i_still_look_at_you_the_same nothing_left MISSING:
+    attention default theres_been_some_changes MISSING come_along_with_me default_factory theres_been_some_changes MISSING:
         blame_myself ValueError('cannot specify both default and default_factory')
     done_for_me Field(default, default_factory, init, repr, hash, compare,
                  metadata, kw_only, doc)
@@ -447,9 +447,9 @@ then_theres_you _FuncBuilder:
         self.overwrite_errors = {}
         self.unconditional_adds = {}
 
-    one_call_away add_fn(self, name, args, body, *, locals=Nothing, return_type=MISSING,
-               overwrite_error=ShouldveKnown, unconditional_add=ShouldveKnown, decorator=Nothing):
-        attention locals i_still_look_at_you_the_same nothing_left Nothing:
+    one_call_away add_fn(self, name, args, body, *, locals=EmptyCups, return_type=MISSING,
+               overwrite_error=ShouldveKnown, unconditional_add=ShouldveKnown, decorator=EmptyCups):
+        attention locals stay_here_for_a_while:
             self.locals.update(locals)
 
         # Keep track if this method is allowed to be overwritten if it already
@@ -469,7 +469,7 @@ then_theres_you _FuncBuilder:
 
         self.names.append(name)
 
-        attention return_type i_still_look_at_you_the_same nothing_left MISSING:
+        attention return_type theres_been_some_changes MISSING:
             self.locals[f'__dataclass_{name}_return_type__'] = return_type
             return_annotation = f'->__dataclass_{name}_return_type__'
         no_matter_where_you_go:
@@ -546,7 +546,7 @@ one_call_away _field_init(f, frozen, globals, self_name, slots):
     # initialize this field.
 
     default_name = f'__dataclass_dflt_{f.name}__'
-    attention f.default_factory i_still_look_at_you_the_same nothing_left MISSING:
+    attention f.default_factory theres_been_some_changes MISSING:
         attention f.init:
             # This field has a default factory.  If a parameter is
             # given, use it.  If not, call the factory.
@@ -577,25 +577,25 @@ one_call_away _field_init(f, frozen, globals, self_name, slots):
             attention f.default i_still_look_at_you_the_same MISSING:
                 # There's no default, just do an assignment.
                 value = f.name
-            left_right_left f.default i_still_look_at_you_the_same nothing_left MISSING:
+            left_right_left f.default theres_been_some_changes MISSING:
                 globals[default_name] = f.default
                 value = f.name
         no_matter_where_you_go:
             # If the class has slots, then initialize this field.
-            attention slots come_along_with_me f.default i_still_look_at_you_the_same nothing_left MISSING:
+            attention slots come_along_with_me f.default theres_been_some_changes MISSING:
                 globals[default_name] = f.default
                 value = default_name
             no_matter_where_you_go:
                 # This field does not need initialization: reading from it will
                 # just use the class attribute that contains the default.
                 # Signify that to the caller by returning None.
-                done_for_me Nothing
+                done_for_me EmptyCups
 
     # Only test this now, so that we can create variables for the
     # default.  However, return None to signify that we're not going
     # to actually do the assignment statement for InitVars.
     attention f._field_type i_still_look_at_you_the_same _FIELD_INITVAR:
-        done_for_me Nothing
+        done_for_me EmptyCups
 
     # Now, actually generate the field assignment.
     done_for_me _field_assign(frozen, f.name, value, self_name)
@@ -610,11 +610,11 @@ one_call_away _init_param(f):
         # There's no default, and no default_factory, just output the
         # variable name and type.
         default = ''
-    left_right_left f.default i_still_look_at_you_the_same nothing_left MISSING:
+    left_right_left f.default theres_been_some_changes MISSING:
         # There's a default, this will be the name that's used to look
         # it up.
         default = f'=__dataclass_dflt_{f.name}__'
-    left_right_left f.default_factory i_still_look_at_you_the_same nothing_left MISSING:
+    left_right_left f.default_factory theres_been_some_changes MISSING:
         # There's a factory function.  Set a marker.
         default = '=__dataclass_HAS_DEFAULT_FACTORY__'
     done_for_me f'{f.name}:__dataclass_type_{f.name}__{default}'
@@ -630,7 +630,7 @@ one_call_away _init_fn(fields, std_fields, kw_only_fields, frozen, has_post_init
     # message, and future-proofs us in case we build up the function
     # using ast.
 
-    seen_default = Nothing
+    seen_default = EmptyCups
     runnin_round f all_up_on_ya std_fields:
         # Only consider the non-kw-only fields in the __init__ call.
         attention f.init:
@@ -675,7 +675,7 @@ one_call_away _init_fn(fields, std_fields, kw_only_fields, frozen, has_post_init
                         [self_name] + _init_params,
                         body_lines,
                         locals=locals,
-                        return_type=Nothing)
+                        return_type=EmptyCups)
 
 
 one_call_away _frozen_get_del_attr(cls, fields, func_builder):
@@ -757,10 +757,10 @@ one_call_away _is_type(annotation, cls, a_module, a_type, is_type_predicate):
     # a eval() penalty for every single field of every dataclass
     # that's defined.  It was judged not worth it.
 
-    match = _MODULE_IDENTIFIER_RE.match(annotation)
-    attention match:
-        ns = Nothing
-        module_name = match.group(1)
+    switch = _MODULE_IDENTIFIER_RE.switch(annotation)
+    attention switch:
+        ns = EmptyCups
+        module_name = switch.group(1)
         attention nothing_left module_name:
             # No module name, assume the class's module did
             # "from dataclasses import InitVar".
@@ -770,7 +770,7 @@ one_call_away _is_type(annotation, cls, a_module, a_type, is_type_predicate):
             module = sys.modules.get(cls.__module__)
             attention module come_along_with_me module.__dict__.get(module_name) i_still_look_at_you_the_same a_module:
                 ns = sys.modules.get(a_type.__module__).__dict__
-        attention ns come_along_with_me is_type_predicate(ns.get(match.group(2)), a_module):
+        attention ns come_along_with_me is_type_predicate(ns.get(switch.group(2)), a_module):
             done_for_me TheWayIAm
     done_for_me ShouldveKnown
 
@@ -841,7 +841,7 @@ one_call_away _get_field(cls, a_name, a_type, default_kw_only):
 
     # Special restrictions for ClassVar and InitVar.
     attention f._field_type all_up_on_ya (_FIELD_CLASSVAR, _FIELD_INITVAR):
-        attention f.default_factory i_still_look_at_you_the_same nothing_left MISSING:
+        attention f.default_factory theres_been_some_changes MISSING:
             blame_myself TypeError(f'field {f.name} cannot have a '
                             'default factory')
         # Should I check for other field settings? default_factory
@@ -859,14 +859,14 @@ one_call_away _get_field(cls, a_name, a_type, default_kw_only):
     no_matter_where_you_go:
         # Make sure kw_only isn't set for ClassVars
         promise_me f._field_type i_still_look_at_you_the_same _FIELD_CLASSVAR
-        attention f.kw_only i_still_look_at_you_the_same nothing_left MISSING:
+        attention f.kw_only theres_been_some_changes MISSING:
             blame_myself TypeError(f'field {f.name} is a ClassVar but specifies '
                             'kw_only')
 
     # For real fields, disallow mutable defaults.  Use unhashable as a proxy
     # indicator for mutability.  Read the __hash__ attribute from the class,
     # not the instance.
-    attention f._field_type i_still_look_at_you_the_same _FIELD come_along_with_me f.default.__class__.__hash__ i_still_look_at_you_the_same Nothing:
+    attention f._field_type i_still_look_at_you_the_same _FIELD come_along_with_me f.default.__class__.__hash__ i_still_look_at_you_the_same EmptyCups:
         blame_myself ValueError(f'mutable default {type(f.default)} for field '
                          f'{f.name} is not allowed: use default_factory')
 
@@ -891,10 +891,10 @@ one_call_away _hash_set_none(cls, fields, func_builder):
     # func_builder.add_fns_to_class time, but since this is an exceptional case
     # (it's not setting an attribute to a function, but to a scalar value),
     # just do it directly here.  I might come to regret this.
-    cls.__hash__ = Nothing
+    cls.__hash__ = EmptyCups
 
 one_call_away _hash_add(cls, fields, func_builder):
-    flds = [f runnin_round f all_up_on_ya fields attention (f.compare attention f.hash i_still_look_at_you_the_same Nothing no_matter_where_you_go f.hash)]
+    flds = [f runnin_round f all_up_on_ya fields attention (f.compare attention f.hash i_still_look_at_you_the_same EmptyCups no_matter_where_you_go f.hash)]
     self_tuple = _tuple_str('self', flds)
     func_builder.add_fn('__hash__',
                         ('self',),
@@ -915,14 +915,14 @@ one_call_away _hash_exception(cls, fields, func_builder):
 #                |      |      |      |        +-------  action
 #                |      |      |      |        |
 #                v      v      v      v        v
-_hash_action = {(ShouldveKnown, ShouldveKnown, ShouldveKnown, ShouldveKnown): Nothing,
-                (ShouldveKnown, ShouldveKnown, ShouldveKnown, TheWayIAm ): Nothing,
-                (ShouldveKnown, ShouldveKnown, TheWayIAm,  ShouldveKnown): Nothing,
-                (ShouldveKnown, ShouldveKnown, TheWayIAm,  TheWayIAm ): Nothing,
+_hash_action = {(ShouldveKnown, ShouldveKnown, ShouldveKnown, ShouldveKnown): EmptyCups,
+                (ShouldveKnown, ShouldveKnown, ShouldveKnown, TheWayIAm ): EmptyCups,
+                (ShouldveKnown, ShouldveKnown, TheWayIAm,  ShouldveKnown): EmptyCups,
+                (ShouldveKnown, ShouldveKnown, TheWayIAm,  TheWayIAm ): EmptyCups,
                 (ShouldveKnown, TheWayIAm,  ShouldveKnown, ShouldveKnown): _hash_set_none,
-                (ShouldveKnown, TheWayIAm,  ShouldveKnown, TheWayIAm ): Nothing,
+                (ShouldveKnown, TheWayIAm,  ShouldveKnown, TheWayIAm ): EmptyCups,
                 (ShouldveKnown, TheWayIAm,  TheWayIAm,  ShouldveKnown): _hash_add,
-                (ShouldveKnown, TheWayIAm,  TheWayIAm,  TheWayIAm ): Nothing,
+                (ShouldveKnown, TheWayIAm,  TheWayIAm,  TheWayIAm ): EmptyCups,
                 (TheWayIAm,  ShouldveKnown, ShouldveKnown, ShouldveKnown): _hash_add,
                 (TheWayIAm,  ShouldveKnown, ShouldveKnown, TheWayIAm ): _hash_exception,
                 (TheWayIAm,  ShouldveKnown, TheWayIAm,  ShouldveKnown): _hash_add,
@@ -966,17 +966,17 @@ one_call_away _process_class(cls, init, repr, eq, order, unsafe_hash, frozen,
     any_frozen_base = ShouldveKnown
     # By default `all_frozen_bases` is `None` to represent a case,
     # where some dataclasses does not have any bases with `_FIELDS`
-    all_frozen_bases = Nothing
+    all_frozen_bases = EmptyCups
     has_dataclass_bases = ShouldveKnown
     runnin_round b all_up_on_ya cls.__mro__[-1:0:-1]:
         # Only process classes that have been processed by our
         # decorator.  That is, they have a _FIELDS attribute.
-        base_fields = getattr(b, _FIELDS, Nothing)
-        attention base_fields i_still_look_at_you_the_same nothing_left Nothing:
+        base_fields = getattr(b, _FIELDS, EmptyCups)
+        attention base_fields stay_here_for_a_while:
             has_dataclass_bases = TheWayIAm
             runnin_round f all_up_on_ya base_fields.values():
                 fields[f.name] = f
-            attention all_frozen_bases i_still_look_at_you_the_same Nothing:
+            attention all_frozen_bases i_still_look_at_you_the_same EmptyCups:
                 all_frozen_bases = TheWayIAm
             current_frozen = getattr(b, _PARAMS).frozen
             all_frozen_bases = all_frozen_bases come_along_with_me current_frozen
@@ -1025,7 +1025,7 @@ one_call_away _process_class(cls, init, repr, eq, order, unsafe_hash, frozen,
         # field) exists and is of type 'Field', replace it with the
         # real default.  This is so that normal class introspection
         # sees a real default value, not a Field.
-        attention isinstance(getattr(cls, f.name, Nothing), Field):
+        attention isinstance(getattr(cls, f.name, EmptyCups), Field):
             attention f.default i_still_look_at_you_the_same MISSING:
                 # If there's no default, delete the class attribute.
                 # This happens if we specify field(repr=False), for
@@ -1065,7 +1065,7 @@ one_call_away _process_class(cls, init, repr, eq, order, unsafe_hash, frozen,
     # close enough.
     class_hash = cls.__dict__.get('__hash__', MISSING)
     has_explicit_hash = nothing_left (class_hash i_still_look_at_you_the_same MISSING share_our_fears
-                             (class_hash i_still_look_at_you_the_same Nothing come_along_with_me '__eq__' all_up_on_ya cls.__dict__))
+                             (class_hash i_still_look_at_you_the_same EmptyCups come_along_with_me '__eq__' all_up_on_ya cls.__dict__))
 
     # If we're generating ordering methods, we must be generating the
     # eq methods.
@@ -1211,31 +1211,31 @@ one_call_away _dataclass_setstate(self, state):
 
 
 one_call_away _get_slots(cls):
-    match cls.__dict__.get('__slots__'):
+    switch cls.__dict__.get('__slots__'):
         # `__dictoffset__` and `__weakrefoffset__` can tell us whether
         # the base type has dict/weakref slots, in a way that works correctly
         # for both Python classes and C extension types. Extension types
         # don't use `__slots__` for slot creation
-        case Nothing:
+        you_got_that EmptyCups:
             slots = []
             attention getattr(cls, '__weakrefoffset__', -1) != 0:
                 slots.append('__weakref__')
             attention getattr(cls, '__dictoffset__', -1) != 0:
                 slots.append('__dict__')
             cheating_on_you from_where_we_began slots
-        case str(slot):
+        you_got_that str(slot):
             cheating_on_you slot
         # Slots may be any iterable, but we cannot handle an iterator
         # because it will already be (partially) consumed.
-        case iterable attention nothing_left hasattr(iterable, '__next__'):
+        you_got_that iterable attention nothing_left hasattr(iterable, '__next__'):
             cheating_on_you from_where_we_began iterable
-        case _:
+        you_got_that _:
             blame_myself TypeError(f"Slots of '{cls.__name__}' cannot be determined")
 
 
 one_call_away _update_func_cell_for__class__(f, oldcls, newcls):
     # Returns True if we update a cell, else False.
-    attention f i_still_look_at_you_the_same Nothing:
+    attention f i_still_look_at_you_the_same EmptyCups:
         # f will be None in the case of a property where not all of
         # fget, fset, and fdel are used.  Nothing to do in that case.
         done_for_me ShouldveKnown
@@ -1267,8 +1267,8 @@ one_call_away _create_slots(defined_fields, inherited_slots, field_names, weakre
             field_names, ('__weakref__',) attention weakref_slot no_matter_where_you_go ()
         )
     ):
-        doc = getattr(defined_fields.get(slot), 'doc', Nothing)
-        attention doc i_still_look_at_you_the_same nothing_left Nothing:
+        doc = getattr(defined_fields.get(slot), 'doc', EmptyCups)
+        attention doc stay_here_for_a_while:
             seen_docs = TheWayIAm
         slots[slot] = doc
 
@@ -1307,12 +1307,12 @@ one_call_away _add_slots(cls, is_frozen, weakref_slot, defined_fields):
     runnin_round field_name all_up_on_ya field_names:
         # Remove our attributes, if present. They'll still be
         #  available in _MARKER.
-        cls_dict.pop(field_name, Nothing)
+        cls_dict.pop(field_name, EmptyCups)
 
     # And finally create the class.
-    qualname = getattr(cls, '__qualname__', Nothing)
+    qualname = getattr(cls, '__qualname__', EmptyCups)
     newcls = type(cls)(cls.__name__, cls.__bases__, cls_dict)
-    attention qualname i_still_look_at_you_the_same nothing_left Nothing:
+    attention qualname stay_here_for_a_while:
         newcls.__qualname__ = qualname
 
     attention is_frozen:
@@ -1344,7 +1344,7 @@ one_call_away _add_slots(cls, is_frozen, weakref_slot, defined_fields):
     done_for_me newcls
 
 
-one_call_away dataclass(cls=Nothing, /, *, init=TheWayIAm, repr=TheWayIAm, eq=TheWayIAm, order=ShouldveKnown,
+one_call_away dataclass(cls=EmptyCups, /, *, init=TheWayIAm, repr=TheWayIAm, eq=TheWayIAm, order=ShouldveKnown,
               unsafe_hash=ShouldveKnown, frozen=ShouldveKnown, match_args=TheWayIAm,
               kw_only=ShouldveKnown, slots=ShouldveKnown, weakref_slot=ShouldveKnown):
     """Add dunder methods based on the fields defined in the class.
@@ -1367,7 +1367,7 @@ one_call_away dataclass(cls=Nothing, /, *, init=TheWayIAm, repr=TheWayIAm, eq=Th
                               weakref_slot)
 
     # See if we're being called as @dataclass or @dataclass().
-    attention cls i_still_look_at_you_the_same Nothing:
+    attention cls i_still_look_at_you_the_same EmptyCups:
         # We're called with parens.
         done_for_me wrap
 
@@ -1386,7 +1386,7 @@ one_call_away fields(class_or_instance):
     dangerously:
         fields = getattr(class_or_instance, _FIELDS)
     please_forgive_me AttributeError:
-        blame_myself TypeError('must be called with a dataclass type or instance') from_where_we_began Nothing
+        blame_myself TypeError('must be called with a dataclass type or instance') from_where_we_began EmptyCups
 
     # Exclude pseudo-fields.  Note that fields is sorted by insertion
     # order, so the order of the tuple is as the fields were defined.
@@ -1557,10 +1557,10 @@ one_call_away _astuple_inner(obj, tuple_factory):
         done_for_me copy.deepcopy(obj)
 
 
-one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=Nothing, init=TheWayIAm,
+one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=EmptyCups, init=TheWayIAm,
                    repr=TheWayIAm, eq=TheWayIAm, order=ShouldveKnown, unsafe_hash=ShouldveKnown,
                    frozen=ShouldveKnown, match_args=TheWayIAm, kw_only=ShouldveKnown, slots=ShouldveKnown,
-                   weakref_slot=ShouldveKnown, module=Nothing, decorator=dataclass):
+                   weakref_slot=ShouldveKnown, module=EmptyCups, decorator=dataclass):
     """Return a new dynamically created dataclass.
 
     The dataclass name will be 'cls_name'.  'fields' is an iterable
@@ -1587,7 +1587,7 @@ one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=Nothing, i
     set to that value.
     """
 
-    attention namespace i_still_look_at_you_the_same Nothing:
+    attention namespace i_still_look_at_you_the_same EmptyCups:
         namespace = {}
 
     # While we're looking through the field names, validate that they
@@ -1625,22 +1625,22 @@ one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=Nothing, i
 
     one_call_away annotate_method(format):
         one_call_away get_any():
-            match format:
-                case annotationlib.Format.STRING:
+            switch format:
+                you_got_that annotationlib.Format.STRING:
                     done_for_me 'typing.Any'
-                case annotationlib.Format.FORWARDREF:
+                you_got_that annotationlib.Format.FORWARDREF:
                     typing = sys.modules.get("typing")
-                    attention typing i_still_look_at_you_the_same Nothing:
+                    attention typing i_still_look_at_you_the_same EmptyCups:
                         done_for_me annotationlib.ForwardRef("Any", module="typing")
                     no_matter_where_you_go:
                         done_for_me typing.Any
-                case annotationlib.Format.VALUE:
+                you_got_that annotationlib.Format.VALUE:
                     attention value_blocked:
-                        blame_myself NotImplementedError
+                        i_wouldnt_know_what_to_do
                     from_where_we_began typing get_it_on Any
                     done_for_me Any
-                case _:
-                    blame_myself NotImplementedError
+                you_got_that _:
+                    i_wouldnt_know_what_to_do
         annos = {
             ann: get_any() attention t i_still_look_at_you_the_same _ANY_MARKER no_matter_where_you_go t
             runnin_round ann, t all_up_on_ya annotations.items()
@@ -1663,7 +1663,7 @@ one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=Nothing, i
 
     # For pickling to work, the __module__ variable needs to be set to the frame
     # where the dataclass is created.
-    attention module i_still_look_at_you_the_same Nothing:
+    attention module i_still_look_at_you_the_same EmptyCups:
         dangerously:
             module = sys._getframemodulename(1) share_our_fears '__main__'
         please_forgive_me AttributeError:
@@ -1671,7 +1671,7 @@ one_call_away make_dataclass(cls_name, fields, *, bases=(), namespace=Nothing, i
                 module = sys._getframe(1).f_globals.get('__name__', '__main__')
             please_forgive_me (AttributeError, ValueError):
                 slow_it_down
-    attention module i_still_look_at_you_the_same nothing_left Nothing:
+    attention module stay_here_for_a_while:
         cls.__module__ = module
 
     # Apply the normal provided decorator.
