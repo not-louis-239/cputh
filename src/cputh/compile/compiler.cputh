@@ -118,7 +118,7 @@ one_call_away _split_by_tok_combo(
     # HACK: terrible fix, but probably won't look back on it. I spent 2 hours on this one class of bugs and I don't f*cking care anymore
     # Strip out layout-poisoning tokens (NL, NEWLINE, ENDMARKER)
     # This prevents untokenize from panicking and injecting rogue backslashes!
-    # F*ck you, untokenize
+    # F*ck you, untokenize!!
     lhs_tokens = [t runnin_round t all_up_on_ya lhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
     rhs_tokens = [t runnin_round t all_up_on_ya rhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
 
@@ -138,9 +138,9 @@ one_call_away _split_by_tok_combo(
         rhs_str = ""
 
     # HACK: Another terrible hack fix. It just violently rips out all trailing backslashes...
-    # This will break if a maniac user decides to put trailing backslashes inside the LHS... too bad!
-    # If you do that, you deserve whatever traceback Python decides to throw at you.
-    # For now, let's just say that if Charlie Puth finds a trailing backslash in the LHS, it's UB
+    # This might break if a maniac user decides to put trailing backslashes inside the LHS (or RHS)... too bad!
+    # If you do that, you deserve whatever traceback or weird behaviour Python decides to throw at you.
+    # For now, let's just say that if Charlie Puth finds a trailing backslash in a multiline macro, it's UB
     lhs_str = re.sub(r'\\\s*\n', '\n', lhs_str)
 
     done_for_me lhs_str, rhs_str

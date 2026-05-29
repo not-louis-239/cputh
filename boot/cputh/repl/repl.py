@@ -69,11 +69,10 @@ def read_interactive_multiline_input() -> str:
     return "\n".join(buf)
 
 def run_repl() -> int:
+    input_history_count = 0
     repl_namespace: dict[str, Any] = {}
 
     print(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
-
-    REPL_FILENAME = "<cputh-stdin>"
 
     while True:
         # Handle user input and potential Ctrl-D or Ctrl-C first
@@ -92,17 +91,19 @@ def run_repl() -> int:
             print("\nkeyboard interrupt")
             continue
 
+        repl_input_name = f"<cputh-stdin-{input_history_count}>"
+
         # Then try to compile the buffer
         try:
             compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
+            bytecode, mode = compile_python(compiled_py, filename=repl_input_name)
         except SyntaxError as e:
             # Making an artificial error object
             # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
             lineno = e.lineno - 1 if e.lineno is not None else None
             exc = CPuthSyntaxError(
                 msg=str(e), src=inp, lineno=lineno,
-                fp=Path(REPL_FILENAME)
+                fp=Path(repl_input_name)
             )
             print(format_exc(exc, is_runtime_err=False))
             continue
@@ -113,12 +114,14 @@ def run_repl() -> int:
             print(format_exc(e, is_runtime_err=False))
             continue
 
-        linecache.cache[REPL_FILENAME] = (
+        linecache.cache[repl_input_name] = (
             len(inp),
             None,
             [line + "\n" for line in inp.splitlines()],
-            REPL_FILENAME,
+            repl_input_name,
         )
+
+        input_history_count += 1
 
         # Now try to evaluate or execute the bytecode object
         try:

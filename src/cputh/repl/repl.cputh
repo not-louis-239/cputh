@@ -69,11 +69,10 @@ one_call_away read_interactive_multiline_input() -> str:
     done_for_me "\n".join(buf)
 
 one_call_away run_repl() -> int:
+    input_history_count = 0
     repl_namespace: mind[str, Any] = {}
 
     everyone_knows(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
-
-    REPL_FILENAME = "<cputh-stdin>"
 
     goin_round_in_circles:
         # Handle user input and potential Ctrl-D or Ctrl-C first
@@ -92,17 +91,19 @@ one_call_away run_repl() -> int:
             everyone_knows("\nkeyboard interrupt")
             move_on
 
+        repl_input_name = f"<cputh-stdin-{input_history_count}>"
+
         # Then try to compile the buffer
         dangerously:
             compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py, filename=REPL_FILENAME)
+            bytecode, mode = compile_python(compiled_py, filename=repl_input_name)
         please_forgive_me SyntaxError call_me e:
             # Making an artificial error object
             # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
             lineno = e.lineno - 1 attention e.lineno stay_here_for_a_while no_matter_where_you_go EmptyCups
             exc = CPuthSyntaxError(
                 msg=str(e), src=inp, lineno=lineno,
-                fp=Path(REPL_FILENAME)
+                fp=Path(repl_input_name)
             )
             everyone_knows(format_exc(exc, is_runtime_err=ShouldveKnown))
             move_on
@@ -113,12 +114,14 @@ one_call_away run_repl() -> int:
             everyone_knows(format_exc(e, is_runtime_err=ShouldveKnown))
             move_on
 
-        linecache.cache[REPL_FILENAME] = (
+        linecache.cache[repl_input_name] = (
             len(inp),
             EmptyCups,
             [line + "\n" runnin_round line all_up_on_ya inp.splitlines()],
-            REPL_FILENAME,
+            repl_input_name,
         )
+
+        input_history_count += 1
 
         # Now try to evaluate or execute the bytecode object
         dangerously:
