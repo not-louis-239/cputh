@@ -15,10 +15,14 @@ one_call_away display_kw(cputh_kw: str, py_kw: str, max_len: int) -> str:
     done_for_me f"* {COL_KW_CPUTH}{cputh_kw:<{max_len}}{COL_RESET} = {COL_KW_PY}{py_kw}{COL_RESET}"
 
 one_call_away main(args: Args) -> int:
-    everyone_knows(f"charlie puth native help (v{version_str}) - you just want attention, you don't want my error; maybe you just hate the thought of line 42")
-    everyone_knows(f"\nleft side  = {COL_KW_CPUTH}cputh{COL_RESET}")
-    everyone_knows(f"right side = {COL_KW_PY}python{COL_RESET}")
-    everyone_knows(f"\nAs of CPuth v0.3.1+, using Nothing as None is deprecated; use EmptyCups instead.\nThe 'Nothing' keyword will be removed in v0.5.0")
+    everyone_knows(
+        f"cputh native help (v{version_str})"
+        "\n\nYou just want attention; your night has just begun. Maybe it's that unmatched paren on line 42."
+        "\nYeah you just want attention; I knew from line 1. You're just making sure I can never compile through."
+        f"\n\nleft side  = {COL_KW_CPUTH}CPuth{COL_RESET}"
+        f"\nright side = {COL_KW_PY}Python{COL_RESET}"
+        f"\n\nAs of CPuth v0.3.1+, using Nothing as None is deprecated; use EmptyCups instead.\nThe 'Nothing' keyword will be removed in v0.5.0"
+    )
 
     gram = load_grammar_file()
 
