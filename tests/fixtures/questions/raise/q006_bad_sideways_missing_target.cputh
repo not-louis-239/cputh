@@ -1,4 +1,4 @@
-# TEST: RAISE: Exception
+# TEST: RAISE: CPuthSyntaxError
 d = {"a": 1}
 sideways d -< :
     everyone_knows("oops")

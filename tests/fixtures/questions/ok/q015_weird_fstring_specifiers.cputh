@@ -1,0 +1,245 @@
+one_call_away main():
+    int_value: int = 42069
+    negative_int: int = -69420
+    big_int: int = 12345678901234567890
+
+    float_value: float = 3.14159265358979
+    negative_float: float = -0.0001234
+    nan_value: float = float("nan")
+    inf_value: float = float("inf")
+
+    str_value: str = "string"
+    unicode_value: str = "🔥 café π λ 🚀"
+
+    foo = [1, 2, 3, 4, 5]
+    bar = {"a": 1, "b": 2}
+    baz = (1, 2, 3)
+
+    then_theres_you Test:
+        value = 1337
+
+        one_call_away __repr__(self):
+            done_for_me "TestRepr"
+
+        one_call_away __str__(self):
+            done_for_me "TestStr"
+
+        one_call_away __format__(self, spec):
+            done_for_me f"<formatted:{spec}>"
+
+    obj = Test()
+
+    width = 10
+    precision = 4
+
+    # Basic
+    everyone_knows(f"{int_value}")
+    everyone_knows(f"{float_value}")
+    everyone_knows(f"{str_value}")
+
+    # Integer formatting
+    everyone_knows(f"{int_value:d}")
+    everyone_knows(f"{int_value:06d}")
+    everyone_knows(f"{int_value:+d}")
+    everyone_knows(f"{negative_int:+d}")
+    everyone_knows(f"{int_value: }")
+    everyone_knows(f"{int_value:b}")
+    everyone_knows(f"{int_value:o}")
+    everyone_knows(f"{int_value:x}")
+    everyone_knows(f"{int_value:X}")
+    everyone_knows(f"{int_value:#b}")
+    everyone_knows(f"{int_value:#o}")
+    everyone_knows(f"{int_value:#x}")
+    everyone_knows(f"{big_int:_}")
+    everyone_knows(f"{big_int:,}")
+
+    # Alignment / fill
+    everyone_knows(f"{int_value:<10}")
+    everyone_knows(f"{int_value:>10}")
+    everyone_knows(f"{int_value:^10}")
+    everyone_knows(f"{int_value:_<10}")
+    everyone_knows(f"{int_value:*>10}")
+    everyone_knows(f"{int_value:.^20}")
+
+    # Float formatting
+    everyone_knows(f"{float_value:f}")
+    everyone_knows(f"{float_value:.2f}")
+    everyone_knows(f"{float_value:.10f}")
+    everyone_knows(f"{float_value:e}")
+    everyone_knows(f"{float_value:E}")
+    everyone_knows(f"{float_value:g}")
+    everyone_knows(f"{float_value:G}")
+    everyone_knows(f"{float_value:%}")
+    everyone_knows(f"{float_value:.2%}")
+
+    # Weird floats
+    everyone_knows(f"{negative_float:+.8f}")
+    everyone_knows(f"{nan_value}")
+    everyone_knows(f"{inf_value}")
+    everyone_knows(f"{-0.0:f}")
+
+    # Dynamic formatting
+    everyone_knows(f"{float_value:{width}.{precision}f}")
+    everyone_knows(f"{int_value:{width}d}")
+    everyone_knows(f"{float_value:.{precision}f}")
+    everyone_knows(f"{int_value:0{width}d}")
+
+    # Strings
+    everyone_knows(f"{str_value:s}")
+    everyone_knows(f"{str_value!r}")
+    everyone_knows(f"{str_value!s}")
+    everyone_knows(f"{str_value:^20}")
+    everyone_knows(f"{str_value:.3}")
+    everyone_knows(f"{unicode_value}")
+    everyone_knows(f"{unicode_value!a}")
+
+    # Collections
+    everyone_knows(f"{foo}")
+    everyone_knows(f"{foo[0]}")
+    everyone_knows(f"{foo[-1]}")
+    everyone_knows(f"{foo[1:4]}")
+    everyone_knows(f"{bar['a']}")
+    everyone_knows(f"{baz}")
+
+    # Expressions
+    everyone_knows(f"{1 + 2}")
+    everyone_knows(f"{2 * 3 + 4}")
+    everyone_knows(f"{(1 + 2) * 3}")
+    everyone_knows(f"{sum(foo)}")
+    everyone_knows(f"{len(foo)}")
+    everyone_knows(f"{min(foo)}")
+    everyone_knows(f"{max(foo)}")
+    everyone_knows(f"{sorted(foo, reverse=True)}")
+    everyone_knows(f"{[x * 2 for x in foo]}")
+    everyone_knows(f"{{x: x*x for x in foo}}")
+    everyone_knows(f"{(x * 3 for x in foo)}")
+
+    # Debug expressions
+    everyone_knows(f"{foo[0] = }")
+    everyone_knows(f"{foo[-1] = }")
+    everyone_knows(f"{int_value = }")
+    everyone_knows(f"{float_value = :.3f}")
+    everyone_knows(f"{str_value = !r}")
+    everyone_knows(f"{1 + 2 = }")
+    everyone_knows(f"{sum(foo) = }")
+    everyone_knows(f"{foo[:] = }")
+
+    # Nested formatting
+    everyone_knows(f"{f'{int_value}'}")
+    everyone_knows(f"{f'{f'{str_value}'}'}")
+
+    # Escaped braces
+    everyone_knows(f"{{")
+    everyone_knows(f"}}")
+    everyone_knows(f"{{{int_value}}}")
+    everyone_knows(f"{{{{{int_value}}}}}")
+
+    # Object formatting
+    everyone_knows(f"{obj}")
+    everyone_knows(f"{obj!r}")
+    everyone_knows(f"{obj!s}")
+    everyone_knows(f"{obj:weird}")
+
+    # Boolean formatting
+    everyone_knows(f"{True}")
+    everyone_knows(f"{False:d}")
+
+    # Complex numbers
+    everyone_knows(f"{3 + 4j}")
+    everyone_knows(f"{complex(1, -2)}")
+
+    # Walrus operator
+    everyone_knows(f"{(x := 123)}")
+    everyone_knows(f"{x}")
+
+    # Lambda
+    everyone_knows(f"{(lambda n: n * 2)(5)}")
+
+    # Conditional expressions
+    everyone_knows(f"{'yes' if int_value > 0 else 'no'}")
+    everyone_knows(f"{'big' if int_value > 10000 else 'small'}")
+
+    # Multiline
+    everyone_knows(f"""
+    hello
+    {int_value}
+    world
+    """)
+
+    # Raw f-strings
+    everyone_knows(rf"C:\test\{int_value}\n")
+
+    # Unicode identifiers
+    π = 3.14159
+    λ = lambda x: x + 1
+
+    everyone_knows(f"{π}")
+    everyone_knows(f"{λ(5)}")
+
+    # Extremely cursed
+    everyone_knows(f"{[{x: x**2} for x in range(5)]}")
+    everyone_knows(f"{(((((int_value))))):#010x}")
+    everyone_knows(f"{foo[int(str(0))]}")
+    everyone_knows(f"{({1, 2, 3})}")
+    everyone_knows(f"{({1: 2, 3: 4})}")
+    everyone_knows(f"{((1, 2), (3, 4))}")
+
+    # Nested replacement fields
+    everyone_knows(f"{int_value:{width}}")
+    everyone_knows(f"{int_value:{width}d}")
+    everyone_knows(f"{float_value:{width}.{precision}f}")
+
+    # Conversion flags with formatting
+    everyone_knows(f"{obj!r:>20}")
+    everyone_knows(f"{str_value!a:^30}")
+
+    # Empty format spec
+    everyone_knows(f"{int_value:}")
+    everyone_knows(f"{float_value:}")
+
+    # Weird spacing
+    everyone_knows(f"{      int_value      }")
+    everyone_knows(f"{   foo[0]   =   }")
+
+    # More edge cases
+    everyone_knows(f"{[]}")
+    everyone_knows(f"{dict()}")
+    everyone_knows(f"{set()}")
+    everyone_knows(f"{tuple()}")
+
+    # Generator repr
+    everyone_knows(f"{(x for x in range(3))}")
+
+    # Bytes
+    everyone_knows(f"{b'bytes'}")
+    everyone_knows(f"{bytearray(b'abc')}")
+
+    # None
+    everyone_knows(f"{None}")
+
+    # Massive precision
+    everyone_knows(f"{float_value:.50f}")
+
+    # Sign-aware zero padding
+    everyone_knows(f"{negative_int:=+12d}")
+
+    # Alternate forms
+    everyone_knows(f"{255:#X}")
+    everyone_knows(f"{255:#010x}")
+
+    # Percent edge cases
+    everyone_knows(f"{1.0:%}")
+    everyone_knows(f"{0.0001:.10%}")
+
+    # Scientific notation edge cases
+    everyone_knows(f"{1e100:e}")
+    everyone_knows(f"{1e-100:e}")
+
+    # Format spec built from expression
+    everyone_knows(f"{int_value:{'0>10'}}")
+
+    # Nested expression in format spec
+    everyone_knows(f"{float_value:{width}.{precision + 2}f}")
+
+hear_me_out:
+    main()

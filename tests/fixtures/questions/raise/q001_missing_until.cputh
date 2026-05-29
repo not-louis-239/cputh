@@ -1,4 +1,4 @@
-# TEST: RAISE: Exception
+# TEST: RAISE: CPuthSyntaxError
 
 value = 0
 thats_when_you_said:
