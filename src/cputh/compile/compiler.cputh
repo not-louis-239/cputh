@@ -16,7 +16,7 @@ _FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
 NESTING_ADD_CHARS = "([{"
 NESTING_RM_CHARS = ")]}"
 
-CPUTH_MACRO_KEYWORDS = {
+CPUTH_MACRO_KEYWORDS: set[str] = {
     "sideways", "the_list_goes_on", "perfume_regret", "patient"
 }
 

@@ -6,8 +6,10 @@ from enum import StrEnum
 from typing import Any
 from types import CodeType
 
-_repl_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
-sys.path.insert(0, str(_repl_dir))
+_cputh_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
+sys.path.insert(0, str(_cputh_dir))
+_site_packages = Path(__file__).parent.parent / "site-packages"
+sys.path.insert(0, str(_site_packages))
 
 from cputh.exceptions.errors import CPuthTokenError, CPuthSyntaxError
 from cputh.utils.format_tools import (
@@ -22,7 +24,7 @@ from cputh.compile.compiler import compile_cputh_to_py
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT} ... >{COL_RESET}"
+NESTED_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT} ... >{COL_RESET}"
 
 class CodeCompilationMode(StrEnum):
     EVAL = "eval"
@@ -70,7 +72,10 @@ def read_interactive_multiline_input() -> str:
 
 def run_repl() -> int:
     input_history_count = 0
-    repl_namespace: dict[str, Any] = {}
+    repl_namespace: dict[str, Any] = {
+        "__doc__": None,
+        "__package__": None,
+    }
 
     print(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
 

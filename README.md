@@ -1,4 +1,4 @@
-# cputh v0.4.0
+# cputh v0.5.0
 
 <p align="center">
   <img src="./docs/cputh.png" alt="CPuth Logo" width="180">

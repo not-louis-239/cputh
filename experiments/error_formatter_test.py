@@ -53,9 +53,9 @@ def main():
 
         done_for_me result
 
-    attention __name__ == "__main__":
+    hear_me_out:
         r = main()
-        print(f"result: {r}")
+        everyone_knows(f"result: {r}")
     """
 
     test_exc = CPuthSyntaxError("expected ':'", fp=Path("test.cputh"), src=src, lineno=6)
