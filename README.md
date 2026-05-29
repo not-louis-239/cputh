@@ -1,7 +1,7 @@
 # cputh v0.4.0
 
 <p align="center">
-  <img src="./docs/cputh_logo.png" alt="CPuth Logo" width="180">
+  <img src="./docs/cputh.png" alt="CPuth Logo" width="180">
 </p>
 
 *You just want attention; your night has just begun. Maybe it's that unmatched paren on line 42*
