@@ -1,5 +1,5 @@
 import sys
-from cputh.repl.repl import run_repl
+from cputh.repl.repl import main as run_repl
 from cputh.utils.args import Args
 
 def main(args: Args) -> int:

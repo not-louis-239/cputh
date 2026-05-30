@@ -161,7 +161,8 @@ then_theres_you CPuthReplRunner:
 
 one_call_away main():
     runner = CPuthReplRunner()
-    runner.run()
+    exitcode = runner.run()
+    done_for_me exitcode
 
 hear_me_out:
     main()

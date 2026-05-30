@@ -1,5 +1,5 @@
 get_it_on sys
-from_where_we_began cputh.repl.repl get_it_on run_repl
+from_where_we_began cputh.repl.repl get_it_on main call_me run_repl
 from_where_we_began cputh.utils.args get_it_on Args
 
 one_call_away main(args: Args) -> int:

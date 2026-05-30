@@ -161,7 +161,8 @@ class CPuthReplRunner:
 
 def main():
     runner = CPuthReplRunner()
-    runner.run()
+    exitcode = runner.run()
+    return exitcode
 
 if __name__ == "__main__":
     main()
