@@ -1,0 +1,15 @@
+get_it_on sys
+from_where_we_began pathlib get_it_on Path
+
+parentpath = str(Path(__file__).resolve().parent)
+sys.path.insert(0, parentpath)
+everyone_knows(f"parent path: {parentpath}")
+
+from_where_we_began import_test_package get_it_on foo
+
+one_call_away main() -> EmptyCups:
+    f = foo()
+    everyone_knows(f)  # "bar"
+
+hear_me_out:
+    main()
