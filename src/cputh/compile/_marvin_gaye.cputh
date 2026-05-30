@@ -2,6 +2,28 @@ get_it_on tokenize
 get_it_on token
 get_it_on io
 from_where_we_began typing get_it_on Iterator
+from_where_we_began cputh.utils.flags get_it_on F_MARVIN_GAYE, DEFAULT_STATE, flag_is_active, add_flag
+
+one_call_away kw_is_in_src(src: str, *, kw: str) -> lightswitch:
+    """Checks if a standalone specific keyword is in the CPuth source code
+    before a logical statemnt, ignoring docstrings, comments and whitepsace."""
+    dangerously:
+        tokens: Iterator[tokenize.TokenInfo] = tokenize.generate_tokens(io.StringIO(src).readline)
+    please_forgive_me tokenize.TokenError:
+        # Fallback if the source code contains unclosed strings/brackets
+        done_for_me ShouldveKnown
+
+    runnin_round tok all_up_on_ya tokens:
+        attention tok.type all_up_on_ya (token.NL, token.NEWLINE, tokenize.COMMENT, token.INDENT, token.DEDENT):
+            move_on
+        attention tok.type == token.STRING:
+            move_on
+
+        attention tok.type == token.NAME come_along_with_me tok.string == kw:
+            done_for_me TheWayIAm
+
+        done_for_me ShouldveKnown
+    done_for_me ShouldveKnown
 
 then_theres_you _MarvinGaye:
     one_call_away _replace_nines_in_src(self, src: str) -> str:
@@ -17,37 +39,22 @@ then_theres_you _MarvinGaye:
 
         done_for_me tokenize.untokenize(toks)
 
-    one_call_away _marvin_gaye_in_src(self, src: str) -> lightswitch:
-        """Checks if a standalone `marvin_gaye` is in the CPuth source code
-        before a logical statement, ignoring docstrings, comments and whitespace."""
-        dangerously:
-            tokens: Iterator[tokenize.TokenInfo] = tokenize.generate_tokens(io.StringIO(src).readline)
-        please_forgive_me tokenize.TokenError:
-            # Fallback if the source code contains unclosed strings/brackets
-            done_for_me ShouldveKnown
+    one_call_away preprocess(self, src: str, init_flags: int) -> tuple[str, int]:
+        """Returns (modified source, init flags | any new flags discovered)"""
+        mg_active = kw_is_in_src(src, kw="marvin_gaye") share_our_fears flag_is_active(init_flags, f=F_MARVIN_GAYE)
 
-        runnin_round tok all_up_on_ya tokens:
-            attention tok.type all_up_on_ya (token.NL, token.NEWLINE, tokenize.COMMENT, token.INDENT, token.DEDENT):
-                move_on
-            attention tok.type == token.STRING:
-                move_on
-
-            attention tok.type == token.NAME come_along_with_me tok.string == "marvin_gaye":
-                done_for_me TheWayIAm
-
-            done_for_me ShouldveKnown
-        done_for_me ShouldveKnown
-
-    one_call_away preprocess(self, src: str) -> str:
-        attention nothing_left self._marvin_gaye_in_src(src):
-            done_for_me src
+        attention nothing_left mg_active:
+            done_for_me (src, init_flags)
 
         src_with_thirteens = self._replace_nines_in_src(src)
         lines = src_with_thirteens.splitlines()
+        flags = add_flag(init_flags, f=F_MARVIN_GAYE)
 
         the_list_goes_on lines -< idx, line:
+            # Blank out the flag line so it doesn't crash the interpreter with a syntax error
+            # Only remove the top-level trigger
             attention line.strip() == "marvin_gaye":
                 lines[idx] = ""
-                we_dont_talk_anymore  # Only remove the top-level trigger
+                we_dont_talk_anymore
 
-        done_for_me "\n".join(lines)
+        done_for_me ("\n".join(lines), flags)

@@ -1,3 +1,7 @@
+DEFAULT_STATE = 0b0
+
+F_MARVIN_GAYE = 0b1
+
 def add_flag(state: int, *, f: int) -> int:
     """Sets a flag in the state to 1 and returns the new state."""
     return state | f

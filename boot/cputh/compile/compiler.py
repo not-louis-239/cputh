@@ -7,6 +7,7 @@ import random
 from cputh.exceptions.errors import CPuthSyntaxError, CPuthTokenError
 from cputh.compile.load_gram import load_grammar_file
 from cputh.compile._marvin_gaye import _MarvinGaye
+from cputh.utils.flags import DEFAULT_STATE
 
 HEX_CHARS = "0123456789abcdef"
 
@@ -695,16 +696,15 @@ class CPuthCompiler:
             "unterminated f-string format specifier"
         )
 
-    def _preprocess_marvin_gaye(
-            self, src: str
-        ) -> str:
+    def _preprocess_marvin_gaye(self, src: str, init_flags: int) -> tuple[str, int]:
         """
         If the compiler finds `marvin_gaye` at the top of the CPuth source,
         without a __future__ attribute after it, and before any logic, it blanks
         out that line, and replaces every integer literal with the value of 9
         in the source with 13.
+        Returns (modified source, new flags)
         """
-        return _MarvinGaye().preprocess(src)
+        return _MarvinGaye().preprocess(src, init_flags)
 
     def compile_tokens(
             self,
@@ -728,30 +728,31 @@ class CPuthCompiler:
 
         return out, i
 
-def compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python.
+def compile_cputh_to_py(src: str, init_flags: int) -> tuple[str, int]:
+    """Compile CPuth source to Python. Accepts the src and initial compiler flags
+    and returns (compiled code, init flags | any new flags found)
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    compiler = CPuthCompiler(src_code=text)
+    compiler = CPuthCompiler(src_code=src)
 
     try:
         # preprocessing steps
-        text = compiler._preprocess_marvin_gaye(text)
-        text = compiler._preprocess_do_until_loops(text)
-        text = compiler._preprocess_destructuring_ops(text)
-        text = compiler._rewrite_increment_decrement_lines(text)
+        src, new_flags = compiler._preprocess_marvin_gaye(src, init_flags)
+        src = compiler._preprocess_do_until_loops(src)
+        src = compiler._preprocess_destructuring_ops(src)
+        src = compiler._rewrite_increment_decrement_lines(src)
 
         # final keyword replacement
-        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        tokens = list(tokenize.generate_tokens(io.StringIO(src).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
 
-        return tokenize.untokenize(translated)
+        return (tokenize.untokenize(translated), new_flags)
 
     except tokenize.TokenError as exc:
         raise CPuthTokenError(
             msg=exc.args[0],
             fp=None,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
-            src=text,
+            src=src,
             lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
         ) from exc

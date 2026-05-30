@@ -35,6 +35,7 @@ from cputh.compile.compiler import compile_cputh_to_py
 from cputh.compile.type_check import run_type_checking
 from cputh.utils.utils import check_pyright_installed
 from cputh.utils.args import Args
+from cputh.utils.flags import DEFAULT_STATE
 from cputh.exceptions.errors import (
     CPuthException,
     CPuthSyntaxError,
@@ -109,7 +110,7 @@ def run(args: Args) -> None:
             fp=args.input
         )
 
-    py_code = compile_cputh_to_py(cputh_code)
+    py_code, _ = compile_cputh_to_py(cputh_code, DEFAULT_STATE)
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort...unless if the

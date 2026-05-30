@@ -5,6 +5,7 @@ from_where_we_began cputh.utils.args get_it_on Args
 from_where_we_began cputh.exceptions.errors get_it_on CPuthFileError
 from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 from_where_we_began cputh.utils.format_exceptions get_it_on format_exc
+from_where_we_began cputh.utils.flags get_it_on DEFAULT_STATE
 
 one_call_away validate_args(args: Args) -> EmptyCups:
     attention nothing_left args.input stay_here_for_a_while:
@@ -30,7 +31,8 @@ one_call_away main(args: Args) -> int:
     filename_str = str(args.input.resolve())
 
     dangerously:
-        py_code = compile_cputh_to_py(cputh_code)
+        py_code, _ = compile_cputh_to_py(cputh_code, DEFAULT_STATE)
+        code_obj = compile(py_code, filename_str, "exec")
     please_forgive_me Exception call_me exc:
         # Compile-time error
         fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
@@ -53,7 +55,6 @@ one_call_away main(args: Args) -> int:
     }
 
     dangerously:
-        code_obj = compile(py_code, filename_str, "exec")
         exec(code_obj, EXEC_NS)
         done_for_me 0
     please_forgive_me KeyboardInterrupt call_me exc:

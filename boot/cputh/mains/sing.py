@@ -5,6 +5,7 @@ from cputh.utils.args import Args
 from cputh.exceptions.errors import CPuthFileError
 from cputh.compile.compiler import compile_cputh_to_py
 from cputh.utils.format_exceptions import format_exc
+from cputh.utils.flags import DEFAULT_STATE
 
 def validate_args(args: Args) -> None:
     if not args.input is not None:
@@ -30,7 +31,8 @@ def main(args: Args) -> int:
     filename_str = str(args.input.resolve())
 
     try:
-        py_code = compile_cputh_to_py(cputh_code)
+        py_code, _ = compile_cputh_to_py(cputh_code, DEFAULT_STATE)
+        code_obj = compile(py_code, filename_str, "exec")
     except Exception as exc:
         # Compile-time error
         fmted_exc = format_exc(exc, is_runtime_err=False)
@@ -53,7 +55,6 @@ def main(args: Args) -> int:
     }
 
     try:
-        code_obj = compile(py_code, filename_str, "exec")
         exec(code_obj, EXEC_NS)
         return 0
     except KeyboardInterrupt as exc:

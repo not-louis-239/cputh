@@ -6,7 +6,10 @@ from enum import StrEnum
 from typing import Any
 from types import CodeType
 
-_cputh_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
+_cputh_dir = (
+    Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ
+    else Path(__file__).parents[3] / "dist"
+)
 sys.path.insert(0, str(_cputh_dir))
 _site_packages = Path(__file__).parent.parent / "site-packages"
 sys.path.insert(0, str(_site_packages))
@@ -20,9 +23,7 @@ from cputh.utils.format_tools import (
 from cputh.utils.format_exceptions import format_exc
 from cputh._version import version_str
 from cputh.compile.compiler import compile_cputh_to_py
-
-
-F_MARVIN_GAYE = 0b1
+from cputh.utils.flags import flag_is_active, add_flag, rm_flag, F_MARVIN_GAYE, DEFAULT_STATE
 
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
@@ -37,7 +38,7 @@ class CodeCompilationMode(StrEnum):
 class _CPuthReplExit(Exception):
     pass
 
-def compile_python(py_inp: str, filename: str) -> tuple[CodeType, CodeCompilationMode]:
+def compile_py_to_bytecode(py_inp: str, filename: str) -> tuple[CodeType, CodeCompilationMode]:
     """Takes a result from compile_cputh_to_py() (Python code) and tries
     to convert it to a bytecode object. Attempts eval first, then exec mode.
     If compilation fails, throws the corresponding Python-side SyntaxError.
@@ -76,8 +77,8 @@ def read_interactive_multiline_input() -> str:
 
 class CPuthReplRunner:
     def __init__(self) -> None:
-        self.compile_flags = 0b0
-        self.input_history_count = 0
+        self.compile_flags: int = 0b0
+        self.input_history_count: int = 0
         self.repl_namespace: dict[str, Any] = {
             "__doc__": None,
             "__package__": None,
@@ -110,8 +111,9 @@ class CPuthReplRunner:
 
             # Then try to compile the buffer
             try:
-                compiled_py = compile_cputh_to_py(inp)
-                bytecode, mode = compile_python(compiled_py, filename=repl_input_name)
+                compiled_py, new_flags = compile_cputh_to_py(inp, self.compile_flags)
+                self.compile_flags = new_flags
+                bytecode, mode = compile_py_to_bytecode(compiled_py, filename=repl_input_name)
             except SyntaxError as e:
                 # Making an artificial error object
                 # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None

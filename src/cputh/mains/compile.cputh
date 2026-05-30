@@ -35,6 +35,7 @@ from_where_we_began cputh.compile.compiler get_it_on compile_cputh_to_py
 from_where_we_began cputh.compile.type_check get_it_on run_type_checking
 from_where_we_began cputh.utils.utils get_it_on check_pyright_installed
 from_where_we_began cputh.utils.args get_it_on Args
+from_where_we_began cputh.utils.flags get_it_on DEFAULT_STATE
 from_where_we_began cputh.exceptions.errors get_it_on (
     CPuthException,
     CPuthSyntaxError,
@@ -109,7 +110,7 @@ one_call_away run(args: Args) -> EmptyCups:
             fp=args.input
         )
 
-    py_code = compile_cputh_to_py(cputh_code)
+    py_code, _ = compile_cputh_to_py(cputh_code, DEFAULT_STATE)
 
     # Syntax checking
     # If the Python is syntactically incorrect, early abort...unless if the
