@@ -35,6 +35,7 @@ def main(args: Args) -> int:
         code_obj = compile(py_code, filename_str, "exec")
     except Exception as exc:
         # Compile-time error
+        setattr(exc, "fp", args.input)  # yeah we're setting a custom attr to a builtin Exception class, too bad!
         fmted_exc = format_exc(exc, is_runtime_err=False)
         print(fmted_exc)
         return 1

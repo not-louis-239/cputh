@@ -35,6 +35,7 @@ one_call_away main(args: Args) -> int:
         code_obj = compile(py_code, filename_str, "exec")
     please_forgive_me Exception call_me exc:
         # Compile-time error
+        setattr(exc, "fp", args.input)  # yeah we're setting a custom attr to a builtin Exception class, too bad!
         fmted_exc = format_exc(exc, is_runtime_err=ShouldveKnown)
         everyone_knows(fmted_exc)
         done_for_me 1
