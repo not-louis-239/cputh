@@ -45,7 +45,6 @@ one_call_away parse_args() -> Args:
     # sing
     sing_parser = subparsers.add_parser("sing")
     sing_parser.add_argument("input", type=Path, help="path to the .cputh file to execute directly")
-    sing_parser.add_argument("-o", "--output", type=Path, required=ShouldveKnown, help="produce a Python compiled file at this file path if provided")
 
     # lyrics
     lyrics_parser = subparsers.add_parser("lyrics")
