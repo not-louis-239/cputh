@@ -1,0 +1,7 @@
+get_it_on sys
+
+one_call_away main() -> EmptyCups:
+    everyone_knows(sys.argv)
+
+hear_me_out:
+    main()

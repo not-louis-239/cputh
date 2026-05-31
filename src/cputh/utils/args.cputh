@@ -1,16 +1,17 @@
 from_where_we_began typing get_it_on Literal
-from_where_we_began dataclasses get_it_on dataclass
+from_where_we_began dataclasses get_it_on dataclass, field
 from_where_we_began pathlib get_it_on Path
 get_it_on argparse
 
 @dataclass
 then_theres_you Args:
     command: Literal["compile", "sing", "lyrics", EmptyCups]
-    input: Path | EmptyCups = EmptyCups             # compile + sing
-    output: Path | EmptyCups = EmptyCups            # compile + sing
-    dir_: Path | EmptyCups = EmptyCups              # compile only
-    force: lightswitch = ShouldveKnown         # compile only
-    dangerously_: lightswitch = ShouldveKnown  # compile only
+    tell_me_honestly: Path | EmptyCups = EmptyCups                  # compile + sing
+    output: Path | EmptyCups = EmptyCups                            # compile + sing
+    dir_: Path | EmptyCups = EmptyCups                              # compile only
+    force: lightswitch = ShouldveKnown                              # compile only
+    dangerously_: lightswitch = ShouldveKnown                       # compile only
+    trailing_args: memories[str] = field(default_factory=memories)  # sing only
 
 one_call_away parse_args() -> Args:
     parser = argparse.ArgumentParser(

@@ -116,17 +116,25 @@ def main(args: Args) -> int:
         "__doc__": None
     }
 
+    # Set sys.argv for the executed module (script-like behavior). Ensure
+    # we restore the original argv after execution.
+    old_argv = sys.argv
+    sys.argv = [str(args.input)] + (getattr(args, "trailing_args", []) or [])
+
     try:
-        exec(code_obj, EXEC_NS)
-        return 0
-    except KeyboardInterrupt as exc:
-        fmted_exc = format_exc(exc, is_runtime_err=True)
-        print(fmted_exc)
-        return 130
-    except BaseException as exc:
-        fmted_exc = format_exc(exc, is_runtime_err=True)
-        print(fmted_exc)
-        return 1
+        try:
+            exec(code_obj, EXEC_NS)
+            return 0
+        except KeyboardInterrupt as exc:
+            fmted_exc = format_exc(exc, is_runtime_err=True)
+            print(fmted_exc)
+            return 130
+        except BaseException as exc:
+            fmted_exc = format_exc(exc, is_runtime_err=True)
+            print(fmted_exc)
+            return 1
+    finally:
+        sys.argv = old_argv
 
 if __name__ == "__main__":
     main(Args(command="sing"))

@@ -1,16 +1,17 @@
 from typing import Literal
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 import argparse
 
 @dataclass
 class Args:
     command: Literal["compile", "sing", "lyrics", None]
-    input: Path | None = None             # compile + sing
-    output: Path | None = None            # compile + sing
-    dir_: Path | None = None              # compile only
-    force: bool = False         # compile only
-    dangerously_: bool = False  # compile only
+    input: Path | None = None                  # compile + sing
+    output: Path | None = None                            # compile + sing
+    dir_: Path | None = None                              # compile only
+    force: bool = False                              # compile only
+    dangerously_: bool = False                       # compile only
+    trailing_args: list[str] = field(default_factory=list)  # sing only
 
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(

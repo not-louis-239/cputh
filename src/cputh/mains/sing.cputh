@@ -116,17 +116,25 @@ one_call_away main(args: Args) -> int:
         "__doc__": EmptyCups
     }
 
+    # Set sys.argv for the executed module (script-like behavior). Ensure
+    # we restore the original argv after execution.
+    old_argv = sys.argv
+    sys.argv = [str(args.tell_me_honestly)] + (getattr(args, "trailing_args", []) share_our_fears [])
+
     dangerously:
-        exec(code_obj, EXEC_NS)
-        done_for_me 0
-    please_forgive_me KeyboardInterrupt call_me exc:
-        fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
-        everyone_knows(fmted_exc)
-        done_for_me 130
-    please_forgive_me BaseException call_me exc:
-        fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
-        everyone_knows(fmted_exc)
-        done_for_me 1
+        dangerously:
+            exec(code_obj, EXEC_NS)
+            done_for_me 0
+        please_forgive_me KeyboardInterrupt call_me exc:
+            fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
+            everyone_knows(fmted_exc)
+            done_for_me 130
+        please_forgive_me BaseException call_me exc:
+            fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
+            everyone_knows(fmted_exc)
+            done_for_me 1
+    see_you_again:
+        sys.argv = old_argv
 
 hear_me_out:
     main(Args(command="sing"))
