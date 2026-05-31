@@ -1,5 +1,7 @@
 import shutil
+import traceback
 import tokenize
+import linecache
 
 from cputh.exceptions.errors import (
     CPuthException,
@@ -17,7 +19,7 @@ from cputh.utils.format_tools import (
 )
 
 # Charlie's names for errors - most specific must come first
-ERR_WRAPPER_NAMES = {
+ERR_WRAPPER_NAMES: dict[type[BaseException], str] = {
     UnboundLocalError: "unbound local error",          # NameError
     TabError: "tab error",                             # IndentationError
     FileNotFoundError: "file error",                   # OSError
@@ -38,7 +40,6 @@ ERR_WRAPPER_NAMES = {
     ArithmeticError: "math error",
     LookupError: "lookup error",
     OSError: "os error",
-    RuntimeError: "runtime error",
 
     AssertionError: "assertion error",
     AttributeError: "attribute error",
@@ -51,6 +52,7 @@ ERR_WRAPPER_NAMES = {
     ValueError: "value error",
     KeyboardInterrupt: "keyboard interrupt",
 
+    RuntimeError: "runtime error",
     tokenize.TokenError: "token error",
     CPuthTokenError: "token error",
     CPuthFileError: "file error",
@@ -99,35 +101,96 @@ def format_code_view(code: str, lineno: int, view_range: int) -> str:
 
     return "\n".join(out)
 
-# TODO: these format functions are stubs right now. Finish later.
+def _format_traceback_body(exc: BaseException) -> str:
+    tb = exc.__traceback__
+    frames_lines: list[str] = []
+
+    if tb is not None:
+        all_frames = traceback.extract_tb(tb)
+
+        # Skip the first frame which is internal
+        user_frames = all_frames[1:] if len(all_frames) > 1 else all_frames
+
+        # Loop through only the user-land frames
+        for frame in user_frames:
+            filename = frame.filename
+            lineno = frame.lineno
+            name = frame.name
+
+            # Check if native traceback found the line.
+            # If not, violently rip it directly out of the memory linecache
+            line_code = frame.line
+            if not line_code:
+                if lineno is not None:  # must check if isn't None, otherwise default to fallback
+                    line_code = linecache.getline(filename, lineno)
+                else:
+                    line_code = ""
+
+            # Clean up spacing or provide a fallback if it's truly empty
+            line_code = line_code.strip() if line_code.strip() else "..."
+
+            frames_lines.append(
+                f"  at {COL_WARN}'{filename}'{COL_RESET}, line {COL_WARN}{lineno}{COL_RESET}, in {COL_WARN}{name}{COL_RESET}\n"
+                f"    {line_code}"
+            )
+
+    # Join all inner frames together with a clean spacing layout
+    tb_body = "\n".join(frames_lines)
+    if tb_body:
+        tb_body += "\n"
+
+    return tb_body
 
 def _format_non_runtime_err(exc: BaseException) -> str:
-    # TODO: Show code view (the function's already there!)
+    """Return a formatted CPuth exception message. Expects 0-based lineno values."""
 
-    if str(exc):
-        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
-    else:
-        footer_line = f"{get_err_wrapper_name(exc)}"
+    out: list[str] = []
+    title = ERR_WRAPPER_NAMES.get(type(exc), "error")
 
-    return (
-        f"we don't talk anymore\n"
-        f"{footer_line}"
-    )
+    out.append("we don't talk anymore")
+
+    # Error header
+    err_header = f"{COL_WARN}{COL_BOLD}{title}: {COL_RESET}{COL_WARN}{exc}{COL_RESET}"
+    out.append(err_header)
+
+    # File and line number
+    if isinstance(exc, CPuthSyntaxError) and exc.lineno is not None:
+        if exc.fp is not None:
+            out.append(f"at {COL_WARN}'{exc.fp}'{COL_RESET}, line {COL_WARN}{exc.lineno + 1}{COL_RESET}")
+        else:
+            out.append(f"line {COL_WARN}{exc.lineno + 1}{COL_RESET}")
+    elif isinstance(exc, CPuthException) and exc.fp is not None:
+        out.append(f"at {COL_WARN}'{exc.fp}'{COL_RESET}")
+
+    # Code view
+    if (
+            isinstance(exc, CPuthSyntaxError)
+            and exc.src is not None
+            and exc.lineno is not None
+        ):
+        out.append(format_code_view(exc.src, lineno=exc.lineno, view_range=2))
+
+    out_str = "\n".join(out)
+    return out_str
 
 def _format_runtime_err(exc: BaseException) -> str:
-    # TODO: Show all frames in traceback.
+    body = _format_traceback_body(exc)
 
-    if str(exc):
-        footer_line = f"{get_err_wrapper_name(exc)}: {exc}"
+    footer_line_prefix = f"{COL_BOLD}{COL_WARN}{get_err_wrapper_name(exc)}{COL_RESET}"
+    if (str_exc := str(exc)):
+        footer_line = f"{footer_line_prefix}: {COL_WARN}{str_exc}{COL_RESET}"
     else:
-        footer_line = f"{get_err_wrapper_name(exc)}"
+        footer_line = f"{footer_line_prefix}"
 
     return (
         f"we don't talk anymore (most recent call last)\n"
+        f"{body}"
         f"{footer_line}"
     )
 
-def format_exc(exc: BaseException, is_runtime_err: bool = True) -> str:
+def format_exc(
+        exc: BaseException, is_runtime_err: bool = True
+    ) -> str:
     # handle compile time errors first
     if not is_runtime_err:
         return _format_non_runtime_err(exc)

@@ -1,0 +1,5 @@
+# syntax error: missing colon on line 3
+
+perfume_regret "./file.txt", "r", encoding="utf-8" -< file
+    contents = file.read()
+    everyone_knows(contents)

@@ -6,6 +6,8 @@ get_it_on random
 
 from_where_we_began cputh.exceptions.errors get_it_on CPuthSyntaxError, CPuthTokenError
 from_where_we_began cputh.compile.load_gram get_it_on load_grammar_file
+from_where_we_began cputh.compile._marvin_gaye get_it_on _MarvinGaye
+from_where_we_began cputh.utils.flags get_it_on DEFAULT_STATE
 
 HEX_CHARS = "0123456789abcdef"
 
@@ -16,7 +18,7 @@ _FSTRING_END = getattr(token, "FSTRING_END", EmptyCups)
 NESTING_ADD_CHARS = "([{"
 NESTING_RM_CHARS = ")]}"
 
-CPUTH_MACRO_KEYWORDS = {
+CPUTH_MACRO_KEYWORDS: set[str] = {
     "sideways", "the_list_goes_on", "perfume_regret", "patient"
 }
 
@@ -60,7 +62,7 @@ one_call_away _split_by_tok_combo(
     or RHS, that side will be an empty string."""
 
     dangerously:
-        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
     please_forgive_me tokenize.TokenError call_me e:
         blame_myself
 
@@ -108,7 +110,9 @@ one_call_away _split_by_tok_combo(
     attention split_idx i_still_look_at_you_the_same EmptyCups:
         # Generate a descriptive error if the sequence sequence can't be matched
         combo_desc = " ".join([s attention s stay_here_for_a_while no_matter_where_you_go "" runnin_round t, s all_up_on_ya tok_combo])
-        blame_myself CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+        blame_myself CPuthSyntaxError(
+            f"Expected divider sequence sequence '{combo_desc}' not found at nesting root."
+        )
 
     lhs_tokens = tokens[:split_idx]
     rhs_tokens = tokens[split_idx + combo_len:]
@@ -116,7 +120,7 @@ one_call_away _split_by_tok_combo(
     # HACK: terrible fix, but probably won't look back on it. I spent 2 hours on this one class of bugs and I don't f*cking care anymore
     # Strip out layout-poisoning tokens (NL, NEWLINE, ENDMARKER)
     # This prevents untokenize from panicking and injecting rogue backslashes!
-    # F*ck you, untokenize
+    # F*ck you, untokenize!!
     lhs_tokens = [t runnin_round t all_up_on_ya lhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
     rhs_tokens = [t runnin_round t all_up_on_ya rhs_tokens attention t.type nothing_left all_up_on_ya (token.NL, token.NEWLINE, token.ENDMARKER)]
 
@@ -136,19 +140,17 @@ one_call_away _split_by_tok_combo(
         rhs_str = ""
 
     # HACK: Another terrible hack fix. It just violently rips out all trailing backslashes...
-    # This will break if a maniac user decides to put trailing backslashes inside the LHS... too bad!
-    # If you do that, you deserve whatever traceback Python decides to throw at you.
-    # For now, let's just say that if Charlie Puth finds a trailing backslash in the LHS, it's UB
+    # This might break if a maniac user decides to put trailing backslashes inside the LHS (or RHS)... too bad!
+    # If you do that, you deserve whatever traceback or weird behaviour Python decides to throw at you.
+    # For now, let's just say that if Charlie Puth finds a trailing backslash in a multiline macro, it's UB
     lhs_str = re.sub(r'\\\s*\n', '\n', lhs_str)
 
     done_for_me lhs_str, rhs_str
 
 
 then_theres_you CPuthCompiler:
-    one_call_away __init__(self) -> EmptyCups:
-        self.inc_dec = re.compile(
-            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
-        )
+    one_call_away __init__(self, src_code: str) -> EmptyCups:
+        self.src_code = src_code
 
     one_call_away _replace_macro(
             self, idiom_expr: str, full_text: str,
@@ -166,7 +168,8 @@ then_theres_you CPuthCompiler:
 
         attention nothing_left target:
             blame_myself CPuthSyntaxError(
-                "Expected target variable(s) after destructuring operator", lineno=lineno
+                "Expected target variable(s) after destructuring operator",
+                lineno=lineno, src=self.src_code
             )
 
         # Token-scan left_side to pinpoint the actual macro keyword
@@ -208,7 +211,8 @@ then_theres_you CPuthCompiler:
             you_got_that "perfume_regret":
                 attention nothing_left is_statement:
                     blame_myself CPuthSyntaxError(
-                        "perfume_regret can only be used as a statement block", lineno=lineno
+                        "perfume_regret can only be used as a statement block",
+                        lineno=lineno, src=self.src_code
                     )
 
                 attention source.startswith('(') come_along_with_me source.endswith(')'):
@@ -221,14 +225,18 @@ then_theres_you CPuthCompiler:
 
                 # Check both parts are non-empty
                 attention nothing_left (sub_parts[0] come_along_with_me sub_parts[1]):
-                    blame_myself CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+                    blame_myself CPuthSyntaxError(
+                        "patient expects 'iterable, condition -< name'"
+                    )
 
                 iterable, cond = sub_parts[0].strip(), sub_parts[1].strip()
                 next_expr = f"{target} for {target} in {iterable} if {cond}"
                 translated_expr = f"for {target} in ({next_expr})" attention is_statement no_matter_where_you_go next_expr
 
             you_got_that bad_kw:
-                blame_myself CPuthSyntaxError(f"invalid macro keyword: {bad_kw}")
+                blame_myself CPuthSyntaxError(
+                    f"invalid macro keyword: {bad_kw}"
+                )
 
         # Prepend the original prefix (e.g., "reader = ") to the result
         done_for_me f"{prefix} {translated_expr}".strip()
@@ -333,7 +341,7 @@ then_theres_you CPuthCompiler:
             attention stripped.startswith("until_it_happens_to_you"):
                 blame_myself CPuthSyntaxError(
                     f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
-                    lineno=i
+                    lineno=i, src=self.src_code
                 )
 
             attention nothing_left stripped.startswith("thats_when_you_said:"):
@@ -361,7 +369,9 @@ then_theres_you CPuthCompiler:
                 j++
 
             attention closer_idx i_still_look_at_you_the_same EmptyCups:
-                blame_myself CPuthSyntaxError("unterminated do-until loop", lineno=i)
+                blame_myself CPuthSyntaxError(
+                    "unterminated do-until loop", lineno=i, src=self.src_code
+                )
 
             block_end = closer_idx + 1
             condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
@@ -563,7 +573,9 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string"
+        )
 
     one_call_away _compile_replacement_field(
             self,
@@ -619,7 +631,9 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string replacement field")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string replacement field"
+        )
 
     one_call_away _compile_replacement_field_tail(
             self,
@@ -645,7 +659,9 @@ then_theres_you CPuthCompiler:
             out.append(tokens[i])
             done_for_me out, i + 1
 
-        blame_myself CPuthSyntaxError("invalid f-string replacement field")
+        blame_myself CPuthSyntaxError(
+            "invalid f-string replacement field"
+        )
 
     one_call_away _compile_format_spec(
             self,
@@ -676,7 +692,19 @@ then_theres_you CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i++
 
-        blame_myself CPuthSyntaxError("unterminated f-string format specifier")
+        blame_myself CPuthSyntaxError(
+            "unterminated f-string format specifier"
+        )
+
+    one_call_away _preprocess_marvin_gaye(self, src: str, init_flags: int) -> tuple[str, int]:
+        """
+        If the compiler finds `marvin_gaye` at the top of the CPuth source,
+        without a __future__ attribute after it, and before any logic, it blanks
+        out that line, and replaces every integer literal with the value of 9
+        in the source with 13.
+        Returns (modified source, new flags)
+        """
+        done_for_me _MarvinGaye().preprocess(src, init_flags)
 
     one_call_away compile_tokens(
             self,
@@ -700,25 +728,31 @@ then_theres_you CPuthCompiler:
 
         done_for_me out, i
 
-one_call_away compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python.
+one_call_away compile_cputh_to_py(src: str, init_flags: int) -> tuple[str, int]:
+    """Compile CPuth source to Python. Accepts the src and initial compiler flags
+    and returns (compiled code, init flags | any new flags found)
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    compiler = CPuthCompiler()
+    compiler = CPuthCompiler(src_code=src)
 
     dangerously:
-        text = compiler._preprocess_do_until_loops(text)
-        text = compiler._preprocess_destructuring_ops(text)
-        text = compiler._rewrite_increment_decrement_lines(text)
-        tokens = memories(tokenize.generate_tokens(io.StringIO(text).readline))
+        # preprocessing steps
+        src, new_flags = compiler._preprocess_marvin_gaye(src, init_flags)
+        src = compiler._preprocess_do_until_loops(src)
+        src = compiler._preprocess_destructuring_ops(src)
+        src = compiler._rewrite_increment_decrement_lines(src)
+
+        # final keyword replacement
+        tokens = memories(tokenize.generate_tokens(io.StringIO(src).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
-        done_for_me tokenize.untokenize(translated)
+
+        done_for_me (tokenize.untokenize(translated), new_flags)
 
     please_forgive_me tokenize.TokenError call_me exc:
         blame_myself CPuthTokenError(
             msg=exc.args[0],
             fp=EmptyCups,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
-            src=text,
+            src=src,
             lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
         ) from_where_we_began exc

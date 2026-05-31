@@ -1,7 +1,7 @@
-# cputh v0.4.0
+# cputh v0.5.0
 
 <p align="center">
-  <img src="./docs/cputh_logo.png" alt="CPuth Logo" width="180">
+  <img src="./docs/cputh.png" alt="CPuth Logo" width="180">
 </p>
 
 *You just want attention; your night has just begun. Maybe it's that unmatched paren on line 42*
@@ -16,7 +16,7 @@ CPuth also has a standard library. You can find ports of common Python standard 
 
 ## Syntax
 
-The following describes the syntax for CPuth. There are also some secrets...
+The following describes the syntax for CPuth. There are also some secrets...you'll just have to figure them out yourself!
 
 ### Imports
 - `from_where_we_began` -> `from` (See You Again)
@@ -70,6 +70,8 @@ The following describes the syntax for CPuth. There are also some secrets...
 - `TheWayIAm` -> `True` (album: Voicenotes)
 - `ShouldveKnown` -> `False` (We Don't Talk Anymore)
 - `EmptyCups` -> `None` (Empty Cups)
+
+**Deprecated:** `Nothing` was used for `None` prior to v0.3.1 but is now removed as of v0.5.0. Use `EmptyCups` instead. Using `Nothing` will throw a `NameError` as it is not a recognised keyword.
 
 ### I/O
 - `everyone_knows` -> `print` (My Gospel)
@@ -180,7 +182,7 @@ The `examples/` directory contains some sample CPuth programs.
 
 To install:
 1. Clone this repository
-2. Run `bin/cputh` on your CPuth file, e.g. `bin/cputh input.cputh output.py`
+2. Run `bin/cputh` on your CPuth file, e.g. `bin/cputh compile input.cputh -o output.py`
 3. Run the freshly produced Python code: `python3 output.py`
 
 Free syntax highlighting extension for VS Code included in `vscode-cputh/`! Run the following commands from that directory:
@@ -188,6 +190,12 @@ Free syntax highlighting extension for VS Code included in `vscode-cputh/`! Run 
 ```bash
 vsce package
 code --install-extension *.vsix  # replace *.vsix with the name of the vsix file that `vsce package` creates
+```
+
+If you get a `command not found: vsce`, you may need to install it globally first:
+
+```bash
+npm install -g vsce
 ```
 
 ## Development Status

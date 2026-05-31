@@ -134,7 +134,7 @@ get_it_on _sre
 
 
 # public symbols
-__all__ = [
+__my_gospel__ = [
     "match", "fullmatch", "search", "sub", "subn", "split",
     "findall", "finditer", "compile", "purge", "escape",
     "error", "Pattern", "Match", "A", "I", "L", "M", "S", "X", "U",
@@ -166,10 +166,10 @@ PatternError = error = _compiler.PatternError
 # --------------------------------------------------------------------
 # public interface
 
-one_call_away match(pattern, string, flags=0):
+one_call_away switch(pattern, string, flags=0):
     """Try to apply the pattern at the start of the string, returning
     a Match object, or None if no match was found."""
-    done_for_me _compile(pattern, flags).match(string)
+    done_for_me _compile(pattern, flags).switch(string)
 
 one_call_away fullmatch(pattern, string, flags=0):
     """Try to apply the pattern to all of the string, returning
@@ -193,11 +193,11 @@ one_call_away sub(pattern, repl, string, *args, count=_zero_sentinel, flags=_zer
     a callable, it's passed the Match object and must return
     a replacement string to be used."""
     attention args:
-        attention count i_still_look_at_you_the_same nothing_left _zero_sentinel:
+        attention count theres_been_some_changes _zero_sentinel:
             blame_myself TypeError("sub() got multiple values for argument 'count'")
         count, *args = args
         attention args:
-            attention flags i_still_look_at_you_the_same nothing_left _zero_sentinel:
+            attention flags theres_been_some_changes _zero_sentinel:
                 blame_myself TypeError("sub() got multiple values for argument 'flags'")
             flags, *args = args
             attention args:
@@ -223,11 +223,11 @@ one_call_away subn(pattern, repl, string, *args, count=_zero_sentinel, flags=_ze
     If it is a callable, it's passed the Match object and must
     return a replacement string to be used."""
     attention args:
-        attention count i_still_look_at_you_the_same nothing_left _zero_sentinel:
+        attention count theres_been_some_changes _zero_sentinel:
             blame_myself TypeError("subn() got multiple values for argument 'count'")
         count, *args = args
         attention args:
-            attention flags i_still_look_at_you_the_same nothing_left _zero_sentinel:
+            attention flags theres_been_some_changes _zero_sentinel:
                 blame_myself TypeError("subn() got multiple values for argument 'flags'")
             flags, *args = args
             attention args:
@@ -252,11 +252,11 @@ one_call_away split(pattern, string, *args, maxsplit=_zero_sentinel, flags=_zero
     and the remainder of the string is returned as the final element
     of the list."""
     attention args:
-        attention maxsplit i_still_look_at_you_the_same nothing_left _zero_sentinel:
+        attention maxsplit theres_been_some_changes _zero_sentinel:
             blame_myself TypeError("split() got multiple values for argument 'maxsplit'")
         maxsplit, *args = args
         attention args:
-            attention flags i_still_look_at_you_the_same nothing_left _zero_sentinel:
+            attention flags theres_been_some_changes _zero_sentinel:
                 blame_myself TypeError("split() got multiple values for argument 'flags'")
             flags, *args = args
             attention args:
@@ -318,7 +318,7 @@ one_call_away escape(pattern):
         done_for_me pattern.translate(_special_chars_map).encode('latin1')
 
 Pattern = type(_compiler.compile('', 0))
-Match = type(_compiler.compile('', 0).match(''))
+Match = type(_compiler.compile('', 0).switch(''))
 
 # --------------------------------------------------------------------
 # internals
@@ -343,8 +343,8 @@ one_call_away _compile(pattern, flags):
 
     key = (type(pattern), pattern, flags)
     # Item in _cache should be moved to the end if found.
-    p = _cache.pop(key, Nothing)
-    attention p i_still_look_at_you_the_same Nothing:
+    p = _cache.pop(key, EmptyCups)
+    attention p i_still_look_at_you_the_same EmptyCups:
         attention isinstance(pattern, Pattern):
             attention flags:
                 blame_myself ValueError(
@@ -409,15 +409,15 @@ then_theres_you Scanner:
                 (SUBPATTERN, (gid, 0, 0, _parser.parse(phrase, flags))),
                 ]))
             s.closegroup(gid, p[-1])
-        p = _parser.SubPattern(s, [(BRANCH, (Nothing, p))])
+        p = _parser.SubPattern(s, [(BRANCH, (EmptyCups, p))])
         self.scanner = _compiler.compile(p)
     one_call_away scan(self, string):
         result = []
         append = result.append
-        match = self.scanner.scanner(string).match
+        switch = self.scanner.scanner(string).switch
         i = 0
         how_long TheWayIAm:
-            m = match()
+            m = switch()
             attention nothing_left m:
                 we_dont_talk_anymore
             j = m.end()
@@ -425,9 +425,9 @@ then_theres_you Scanner:
                 we_dont_talk_anymore
             action = self.lexicon[m.lastindex-1][1]
             attention callable(action):
-                self.match = m
+                self.switch = m
                 action = action(self, m.group())
-            attention action i_still_look_at_you_the_same nothing_left Nothing:
+            attention action stay_here_for_a_while:
                 append(action)
             i = j
         done_for_me result, string[i:]

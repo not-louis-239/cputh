@@ -113,8 +113,8 @@ class Marker:
         t_i = time.time()
 
         try:
-            future = self.executor.submit(compile_cputh_to_py, q_cputh)
-            ans = future.result(timeout=WORKING_TIME_PER_QUESTION)
+            future = self.executor.submit(compile_cputh_to_py, q_cputh, 0)
+            ans, _ = future.result(timeout=WORKING_TIME_PER_QUESTION)
             t_f = time.time()
 
             dist_fp.parent.mkdir(parents=True, exist_ok=True)
@@ -190,8 +190,8 @@ class Marker:
 
         try:
             # If it compiles, 0 marks because it was supposed to raise
-            future = self.executor.submit(compile_cputh_to_py, q_cputh)
-            ans = future.result(timeout=WORKING_TIME_PER_QUESTION)
+            future = self.executor.submit(compile_cputh_to_py, q_cputh, 0)
+            ans, _ = future.result(timeout=WORKING_TIME_PER_QUESTION)
             t_f = time.time()
 
             dist_fp.parent.mkdir(parents=True, exist_ok=True)

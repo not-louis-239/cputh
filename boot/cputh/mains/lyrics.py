@@ -15,10 +15,14 @@ def display_kw(cputh_kw: str, py_kw: str, max_len: int) -> str:
     return f"* {COL_KW_CPUTH}{cputh_kw:<{max_len}}{COL_RESET} = {COL_KW_PY}{py_kw}{COL_RESET}"
 
 def main(args: Args) -> int:
-    print(f"charlie puth native help (v{version_str}) - you just want attention, you don't want my error; maybe you just hate the thought of line 42")
-    print(f"\nleft side  = {COL_KW_CPUTH}cputh{COL_RESET}")
-    print(f"right side = {COL_KW_PY}python{COL_RESET}")
-    print(f"\nAs of CPuth v0.3.1+, using Nothing as None is deprecated; use EmptyCups instead.\nThe 'Nothing' keyword will be removed in v0.5.0")
+    print(
+        f"cputh native help (v{version_str})"
+        "\n\nYou just want attention; your night has just begun. Maybe it's that unmatched paren on line 42."
+        "\nYeah you just want attention; I knew from line 1. You're just making sure I can never compile through."
+        f"\n\nleft side  = {COL_KW_CPUTH}CPuth{COL_RESET}"
+        f"\nright side = {COL_KW_PY}Python{COL_RESET}"
+        f"\n\nAs of CPuth v0.5.0+, using Nothing as None was removed; use EmptyCups instead."
+    )
 
     gram = load_grammar_file()
 

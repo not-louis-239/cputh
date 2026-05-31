@@ -1,4 +1,4 @@
-# TEST: RAISE: Exception
+# TEST: RAISE: CPuthSyntaxError
 # invalid control structure: double (also an unbegun) until loop
 
 score = 0

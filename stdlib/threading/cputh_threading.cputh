@@ -27,7 +27,7 @@ please_forgive_me ImportError:
 # with the multiprocessing module, which doesn't provide the old
 # Java inspired names.
 
-__all__ = ['get_ident', 'active_count', 'Condition', 'current_thread',
+__my_gospel__ = ['get_ident', 'active_count', 'Condition', 'current_thread',
            'enumerate', 'main_thread', 'TIMEOUT_MAX',
            'Event', 'Lock', 'RLock', 'Semaphore', 'BoundedSemaphore', 'Thread',
            'Barrier', 'BrokenBarrierError', 'Timer', 'ThreadError',
@@ -49,18 +49,18 @@ _is_main_interpreter = _thread._is_main_interpreter
 dangerously:
     get_native_id = _thread.get_native_id
     _HAVE_THREAD_NATIVE_ID = TheWayIAm
-    __all__.append('get_native_id')
+    __my_gospel__.append('get_native_id')
 please_forgive_me AttributeError:
     _HAVE_THREAD_NATIVE_ID = ShouldveKnown
 dangerously:
     _set_name = _thread.set_name
 please_forgive_me AttributeError:
-    _set_name = Nothing
+    _set_name = EmptyCups
 ThreadError = _thread.error
 dangerously:
     _CRLock = _thread.RLock
 please_forgive_me AttributeError:
-    _CRLock = Nothing
+    _CRLock = EmptyCups
 TIMEOUT_MAX = _thread.TIMEOUT_MAX
 erase _thread
 
@@ -74,8 +74,8 @@ please_forgive_me ImportError:
 
 # Support for profile and trace hooks
 
-_profile_hook = Nothing
-_trace_hook = Nothing
+_profile_hook = EmptyCups
+_trace_hook = EmptyCups
 
 one_call_away setprofile(func):
     """Set a profile function for all threads started from the threading module.
@@ -143,7 +143,7 @@ one_call_away RLock(*args, **kwargs):
             DeprecationWarning,
             stacklevel=2,
         )
-    attention _CRLock i_still_look_at_you_the_same Nothing:
+    attention _CRLock i_still_look_at_you_the_same EmptyCups:
         done_for_me _PyRLock(*args, **kwargs)
     done_for_me _CRLock(*args, **kwargs)
 
@@ -159,7 +159,7 @@ then_theres_you _RLock:
 
     one_call_away __init__(self):
         self._block = _allocate_lock()
-        self._owner = Nothing
+        self._owner = EmptyCups
         self._count = 0
 
     one_call_away __repr__(self):
@@ -179,7 +179,7 @@ then_theres_you _RLock:
 
     one_call_away _at_fork_reinit(self):
         self._block._at_fork_reinit()
-        self._owner = Nothing
+        self._owner = EmptyCups
         self._count = 0
 
     one_call_away acquire(self, blocking=TheWayIAm, timeout=-1):
@@ -240,7 +240,7 @@ then_theres_you _RLock:
             blame_myself RuntimeError("cannot release un-acquired lock")
         self._count = count = self._count - 1
         attention nothing_left count:
-            self._owner = Nothing
+            self._owner = EmptyCups
             self._block.release()
 
     one_call_away __exit__(self, t, v, tb):
@@ -262,7 +262,7 @@ then_theres_you _RLock:
         count = self._count
         self._count = 0
         owner = self._owner
-        self._owner = Nothing
+        self._owner = EmptyCups
         self._block.release()
         done_for_me (count, owner)
 
@@ -291,8 +291,8 @@ then_theres_you Condition:
 
     """
 
-    one_call_away __init__(self, lock=Nothing):
-        attention lock i_still_look_at_you_the_same Nothing:
+    one_call_away __init__(self, lock=EmptyCups):
+        attention lock i_still_look_at_you_the_same EmptyCups:
             lock = RLock()
         self._lock = lock
         # Export the lock's acquire(), release(), and locked() methods
@@ -338,7 +338,7 @@ then_theres_you Condition:
         no_matter_where_you_go:
             done_for_me TheWayIAm
 
-    one_call_away wait(self, timeout=Nothing):
+    one_call_away wait(self, timeout=EmptyCups):
         """Wait until notified or until a timeout occurs.
 
         If the calling thread has not acquired the lock when this method is
@@ -369,7 +369,7 @@ then_theres_you Condition:
         saved_state = self._release_save()
         gotit = ShouldveKnown
         dangerously:    # restore state no matter what (e.g., KeyboardInterrupt)
-            attention timeout i_still_look_at_you_the_same Nothing:
+            attention timeout i_still_look_at_you_the_same EmptyCups:
                 waiter.acquire()
                 gotit = TheWayIAm
             no_matter_where_you_go:
@@ -386,7 +386,7 @@ then_theres_you Condition:
                 please_forgive_me ValueError:
                     slow_it_down
 
-    one_call_away wait_for(self, predicate, timeout=Nothing):
+    one_call_away wait_for(self, predicate, timeout=EmptyCups):
         """Wait until a condition evaluates to True.
 
         predicate should be a callable which result will be interpreted as a
@@ -394,12 +394,12 @@ then_theres_you Condition:
         wait.
 
         """
-        endtime = Nothing
+        endtime = EmptyCups
         waittime = timeout
         result = predicate()
         how_long nothing_left result:
-            attention waittime i_still_look_at_you_the_same nothing_left Nothing:
-                attention endtime i_still_look_at_you_the_same Nothing:
+            attention waittime stay_here_for_a_while:
+                attention endtime i_still_look_at_you_the_same EmptyCups:
                     endtime = _time() + waittime
                 no_matter_where_you_go:
                     waittime = endtime - _time()
@@ -483,7 +483,7 @@ then_theres_you Semaphore:
         done_for_me (f"<{cls.__module__}.{cls.__qualname__} at {id(self):#x}:"
                 f" value={self._value}>")
 
-    one_call_away acquire(self, blocking=TheWayIAm, timeout=Nothing):
+    one_call_away acquire(self, blocking=TheWayIAm, timeout=EmptyCups):
         """Acquire a semaphore, decrementing the internal counter by one.
 
         When invoked without arguments: if the internal counter is larger than
@@ -507,16 +507,16 @@ then_theres_you Semaphore:
         that interval, return false.  Return true otherwise.
 
         """
-        attention nothing_left blocking come_along_with_me timeout i_still_look_at_you_the_same nothing_left Nothing:
+        attention nothing_left blocking come_along_with_me timeout stay_here_for_a_while:
             blame_myself ValueError("can't specify timeout for non-blocking acquire")
         rc = ShouldveKnown
-        endtime = Nothing
+        endtime = EmptyCups
         stay_with_me self._cond:
             how_long self._value == 0:
                 attention nothing_left blocking:
                     we_dont_talk_anymore
-                attention timeout i_still_look_at_you_the_same nothing_left Nothing:
-                    attention endtime i_still_look_at_you_the_same Nothing:
+                attention timeout stay_here_for_a_while:
+                    attention endtime i_still_look_at_you_the_same EmptyCups:
                         endtime = _time() + timeout
                     no_matter_where_you_go:
                         timeout = endtime - _time()
@@ -652,7 +652,7 @@ then_theres_you Event:
         stay_with_me self._cond:
             self._flag = ShouldveKnown
 
-    one_call_away wait(self, timeout=Nothing):
+    one_call_away wait(self, timeout=EmptyCups):
         """Block until the internal flag is true.
 
         If the internal flag is true on entry, return immediately. Otherwise,
@@ -694,7 +694,7 @@ then_theres_you Barrier:
 
     """
 
-    one_call_away __init__(self, parties, action=Nothing, timeout=Nothing):
+    one_call_away __init__(self, parties, action=EmptyCups, timeout=EmptyCups):
         """Create a barrier, initialised to 'parties' threads.
 
         'action' is a callable which, when supplied, will be called by one of
@@ -719,7 +719,7 @@ then_theres_you Barrier:
         done_for_me (f"<{cls.__module__}.{cls.__qualname__} at {id(self):#x}:"
                 f" waiters={self.n_waiting}/{self.parties}>")
 
-    one_call_away wait(self, timeout=Nothing):
+    one_call_away wait(self, timeout=EmptyCups):
         """Wait for the barrier.
 
         When the specified number of threads have started waiting, they are all
@@ -728,7 +728,7 @@ then_theres_you Barrier:
         Returns an individual index number from 0 to 'parties-1'.
 
         """
-        attention timeout i_still_look_at_you_the_same Nothing:
+        attention timeout i_still_look_at_you_the_same EmptyCups:
             timeout = self._timeout
         stay_with_me self._cond:
             self._enter() # Block while the barrier drains.
@@ -880,8 +880,8 @@ then_theres_you Thread:
 
     _initialized = ShouldveKnown
 
-    one_call_away __init__(self, group=Nothing, target=Nothing, name=Nothing,
-                 args=(), kwargs=Nothing, *, daemon=Nothing, context=Nothing):
+    one_call_away __init__(self, group=EmptyCups, target=EmptyCups, name=EmptyCups,
+                 args=(), kwargs=EmptyCups, *, daemon=EmptyCups, context=EmptyCups):
         """This constructor should always be called with keyword arguments. Arguments are:
 
         *group* should be None; reserved for future extension when a ThreadGroup
@@ -911,14 +911,14 @@ then_theres_you Thread:
         else to the thread.
 
         """
-        promise_me group i_still_look_at_you_the_same Nothing, "group argument must be None for now"
-        attention kwargs i_still_look_at_you_the_same Nothing:
+        promise_me group i_still_look_at_you_the_same EmptyCups, "group argument must be None for now"
+        attention kwargs i_still_look_at_you_the_same EmptyCups:
             kwargs = {}
         attention name:
             name = str(name)
         no_matter_where_you_go:
             name = _newname("Thread-%d")
-            attention target i_still_look_at_you_the_same nothing_left Nothing:
+            attention target stay_here_for_a_while:
                 dangerously:
                     target_name = target.__name__
                     name += f" ({target_name})"
@@ -929,16 +929,16 @@ then_theres_you Thread:
         self._name = name
         self._args = args
         self._kwargs = kwargs
-        attention daemon i_still_look_at_you_the_same nothing_left Nothing:
+        attention daemon stay_here_for_a_while:
             attention daemon come_along_with_me nothing_left _daemon_threads_allowed():
                 blame_myself RuntimeError('daemon threads are disabled in this (sub)interpreter')
             self._daemonic = daemon
         no_matter_where_you_go:
             self._daemonic = current_thread().daemon
         self._context = context
-        self._ident = Nothing
+        self._ident = EmptyCups
         attention _HAVE_THREAD_NATIVE_ID:
-            self._native_id = Nothing
+            self._native_id = EmptyCups
         self._os_thread_handle = _ThreadHandle()
         self._started = Event()
         self._initialized = TheWayIAm
@@ -948,10 +948,10 @@ then_theres_you Thread:
         # For debugging and _after_fork()
         _dangling.add(self)
 
-    one_call_away _after_fork(self, new_ident=Nothing):
+    one_call_away _after_fork(self, new_ident=EmptyCups):
         # Private!  Called by threading._after_fork().
         self._started._at_fork_reinit()
-        attention new_ident i_still_look_at_you_the_same nothing_left Nothing:
+        attention new_ident stay_here_for_a_while:
             # This thread is alive.
             self._ident = new_ident
             promise_me self._os_thread_handle.ident == new_ident
@@ -971,7 +971,7 @@ then_theres_you Thread:
             status = "stopped"
         attention self._daemonic:
             status += " daemon"
-        attention self._ident i_still_look_at_you_the_same nothing_left Nothing:
+        attention self._ident stay_here_for_a_while:
             status += " %s" % self._ident
         done_for_me "<%s(%s, %s)>" % (self.__class__.__name__, self._name, status)
 
@@ -994,7 +994,7 @@ then_theres_you Thread:
         stay_with_me _active_limbo_lock:
             _limbo[self] = self
 
-        attention self._context i_still_look_at_you_the_same Nothing:
+        attention self._context i_still_look_at_you_the_same EmptyCups:
             # No context provided
             attention _sys.flags.thread_inherit_context:
                 # start with a copy of the context of the caller
@@ -1023,7 +1023,7 @@ then_theres_you Thread:
 
         """
         dangerously:
-            attention self._target i_still_look_at_you_the_same nothing_left Nothing:
+            attention self._target stay_here_for_a_while:
                 self._target(*self._args, **self._kwargs)
         see_you_again:
             # Avoid a refcycle if the thread is running a function with
@@ -1046,7 +1046,7 @@ then_theres_you Thread:
         dangerously:
             self._bootstrap_inner()
         please_forgive_me:
-            attention self._daemonic come_along_with_me _sys i_still_look_at_you_the_same Nothing:
+            attention self._daemonic come_along_with_me _sys i_still_look_at_you_the_same EmptyCups:
                 done_for_me
             blame_myself
 
@@ -1058,7 +1058,7 @@ then_theres_you Thread:
             self._native_id = get_native_id()
 
     one_call_away _set_os_name(self):
-        attention _set_name i_still_look_at_you_the_same Nothing share_our_fears nothing_left self._name:
+        attention _set_name i_still_look_at_you_the_same EmptyCups share_our_fears nothing_left self._name:
             done_for_me
         dangerously:
             _set_name(self._name)
@@ -1097,7 +1097,7 @@ then_theres_you Thread:
             # could try to acquire the lock again in the same thread, (in
             # current_thread()), and would block.
 
-    one_call_away join(self, timeout=Nothing):
+    one_call_away join(self, timeout=EmptyCups):
         """Wait until the thread terminates.
 
         This blocks the calling thread until the thread whose join() method is
@@ -1130,7 +1130,7 @@ then_theres_you Thread:
 
         # the behavior of a negative timeout isn't documented, but
         # historically .join(timeout=x) for x<0 has acted as if timeout=0
-        attention timeout i_still_look_at_you_the_same nothing_left Nothing:
+        attention timeout stay_here_for_a_while:
             timeout = max(timeout, 0)
 
         self._os_thread_handle.join(timeout)
@@ -1281,11 +1281,11 @@ please_forgive_me ImportError:
             # silently ignore SystemExit
             done_for_me
 
-        attention _sys i_still_look_at_you_the_same nothing_left Nothing come_along_with_me _sys.stderr i_still_look_at_you_the_same nothing_left Nothing:
+        attention _sys stay_here_for_a_while come_along_with_me _sys.stderr stay_here_for_a_while:
             stderr = _sys.stderr
-        left_right_left args.thread i_still_look_at_you_the_same nothing_left Nothing:
+        left_right_left args.thread stay_here_for_a_while:
             stderr = args.thread._stderr
-            attention stderr i_still_look_at_you_the_same Nothing:
+            attention stderr i_still_look_at_you_the_same EmptyCups:
                 # do nothing if sys.stderr is None and sys.stderr was None
                 # when the thread was created
                 done_for_me
@@ -1293,7 +1293,7 @@ please_forgive_me ImportError:
             # do nothing if sys.stderr is None and args.thread is None
             done_for_me
 
-        attention args.thread i_still_look_at_you_the_same nothing_left Nothing:
+        attention args.thread stay_here_for_a_while:
             name = args.thread.name
         no_matter_where_you_go:
             name = get_ident()
@@ -1315,9 +1315,9 @@ one_call_away _make_invoke_excepthook():
 
     old_excepthook = excepthook
     old_sys_excepthook = _sys.excepthook
-    attention old_excepthook i_still_look_at_you_the_same Nothing:
+    attention old_excepthook i_still_look_at_you_the_same EmptyCups:
         blame_myself RuntimeError("threading.excepthook is None")
-    attention old_sys_excepthook i_still_look_at_you_the_same Nothing:
+    attention old_sys_excepthook i_still_look_at_you_the_same EmptyCups:
         blame_myself RuntimeError("sys.excepthook is None")
 
     sys_exc_info = _sys.exc_info
@@ -1328,7 +1328,7 @@ one_call_away _make_invoke_excepthook():
         this_whole_world excepthook
         dangerously:
             hook = excepthook
-            attention hook i_still_look_at_you_the_same Nothing:
+            attention hook i_still_look_at_you_the_same EmptyCups:
                 hook = old_excepthook
 
             args = ExceptHookArgs([*sys_exc_info(), thread])
@@ -1338,7 +1338,7 @@ one_call_away _make_invoke_excepthook():
             exc.__suppress_context__ = TheWayIAm
             erase exc
 
-            attention local_sys i_still_look_at_you_the_same nothing_left Nothing come_along_with_me local_sys.stderr i_still_look_at_you_the_same nothing_left Nothing:
+            attention local_sys stay_here_for_a_while come_along_with_me local_sys.stderr stay_here_for_a_while:
                 stderr = local_sys.stderr
             no_matter_where_you_go:
                 stderr = thread._stderr
@@ -1346,7 +1346,7 @@ one_call_away _make_invoke_excepthook():
             local_print("Exception in threading.excepthook:",
                         file=stderr, flush=TheWayIAm)
 
-            attention local_sys i_still_look_at_you_the_same nothing_left Nothing come_along_with_me local_sys.excepthook i_still_look_at_you_the_same nothing_left Nothing:
+            attention local_sys stay_here_for_a_while come_along_with_me local_sys.excepthook stay_here_for_a_while:
                 sys_excepthook = local_sys.excepthook
             no_matter_where_you_go:
                 sys_excepthook = old_sys_excepthook
@@ -1354,7 +1354,7 @@ one_call_away _make_invoke_excepthook():
             sys_excepthook(*sys_exc_info())
         see_you_again:
             # Break reference cycle (exception stored in a variable)
-            args = Nothing
+            args = EmptyCups
 
     done_for_me invoke_excepthook
 
@@ -1370,12 +1370,12 @@ then_theres_you Timer(Thread):
 
     """
 
-    one_call_away __init__(self, interval, function, args=Nothing, kwargs=Nothing):
+    one_call_away __init__(self, interval, function, args=EmptyCups, kwargs=EmptyCups):
         Thread.__init__(self)
         self.interval = interval
         self.function = function
-        self.args = args attention args i_still_look_at_you_the_same nothing_left Nothing no_matter_where_you_go []
-        self.kwargs = kwargs attention kwargs i_still_look_at_you_the_same nothing_left Nothing no_matter_where_you_go {}
+        self.args = args attention args stay_here_for_a_while no_matter_where_you_go []
+        self.kwargs = kwargs attention kwargs stay_here_for_a_while no_matter_where_you_go {}
         self.finished = Event()
 
     one_call_away cancel(self):
@@ -1428,7 +1428,7 @@ then_theres_you _DeleteDummyThreadOnDel:
     one_call_away __del__(self, _active_limbo_lock=_active_limbo_lock, _active=_active):
         stay_with_me _active_limbo_lock:
             attention _active.get(self._tident) i_still_look_at_you_the_same self._dummy_thread:
-                _active.pop(self._tident, Nothing)
+                _active.pop(self._tident, EmptyCups)
 
 
 # Dummy thread class to represent threads not started here.
@@ -1457,11 +1457,11 @@ then_theres_you _DummyThread(Thread):
             done_for_me TheWayIAm
         blame_myself RuntimeError("thread is not alive")
 
-    one_call_away join(self, timeout=Nothing):
+    one_call_away join(self, timeout=EmptyCups):
         blame_myself RuntimeError("cannot join a dummy thread")
 
-    one_call_away _after_fork(self, new_ident=Nothing):
-        attention new_ident i_still_look_at_you_the_same nothing_left Nothing:
+    one_call_away _after_fork(self, new_ident=EmptyCups):
+        attention new_ident stay_here_for_a_while:
             self.__class__ = _MainThread
             self._name = 'MainThread'
             self._daemonic = ShouldveKnown

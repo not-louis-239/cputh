@@ -6,6 +6,8 @@ import random
 
 from cputh.exceptions.errors import CPuthSyntaxError, CPuthTokenError
 from cputh.compile.load_gram import load_grammar_file
+from cputh.compile._marvin_gaye import _MarvinGaye
+from cputh.utils.flags import DEFAULT_STATE
 
 HEX_CHARS = "0123456789abcdef"
 
@@ -16,7 +18,7 @@ _FSTRING_END = getattr(token, "FSTRING_END", None)
 NESTING_ADD_CHARS = "([{"
 NESTING_RM_CHARS = ")]}"
 
-CPUTH_MACRO_KEYWORDS = {
+CPUTH_MACRO_KEYWORDS: set[str] = {
     "sideways", "the_list_goes_on", "perfume_regret", "patient"
 }
 
@@ -108,7 +110,9 @@ def _split_by_tok_combo(
     if split_idx is None:
         # Generate a descriptive error if the sequence sequence can't be matched
         combo_desc = " ".join([s if s is not None else "" for t, s in tok_combo])
-        raise CPuthSyntaxError(f"Expected divider sequence sequence '{combo_desc}' not found at nesting root.")
+        raise CPuthSyntaxError(
+            f"Expected divider sequence sequence '{combo_desc}' not found at nesting root."
+        )
 
     lhs_tokens = tokens[:split_idx]
     rhs_tokens = tokens[split_idx + combo_len:]
@@ -116,7 +120,7 @@ def _split_by_tok_combo(
     # HACK: terrible fix, but probably won't look back on it. I spent 2 hours on this one class of bugs and I don't f*cking care anymore
     # Strip out layout-poisoning tokens (NL, NEWLINE, ENDMARKER)
     # This prevents untokenize from panicking and injecting rogue backslashes!
-    # F*ck you, untokenize
+    # F*ck you, untokenize!!
     lhs_tokens = [t for t in lhs_tokens if t.type not in (token.NL, token.NEWLINE, token.ENDMARKER)]
     rhs_tokens = [t for t in rhs_tokens if t.type not in (token.NL, token.NEWLINE, token.ENDMARKER)]
 
@@ -136,19 +140,17 @@ def _split_by_tok_combo(
         rhs_str = ""
 
     # HACK: Another terrible hack fix. It just violently rips out all trailing backslashes...
-    # This will break if a maniac user decides to put trailing backslashes inside the LHS... too bad!
-    # If you do that, you deserve whatever traceback Python decides to throw at you.
-    # For now, let's just say that if Charlie Puth finds a trailing backslash in the LHS, it's UB
+    # This might break if a maniac user decides to put trailing backslashes inside the LHS (or RHS)... too bad!
+    # If you do that, you deserve whatever traceback or weird behaviour Python decides to throw at you.
+    # For now, let's just say that if Charlie Puth finds a trailing backslash in a multiline macro, it's UB
     lhs_str = re.sub(r'\\\s*\n', '\n', lhs_str)
 
     return lhs_str, rhs_str
 
 
 class CPuthCompiler:
-    def __init__(self) -> None:
-        self.inc_dec = re.compile(
-            r"^(?P<indent>\s*)(?P<target>.+?)(?P<op>\+\+|--)\s*(?P<comment>#.*)?$"
-        )
+    def __init__(self, src_code: str) -> None:
+        self.src_code = src_code
 
     def _replace_macro(
             self, idiom_expr: str, full_text: str,
@@ -166,7 +168,8 @@ class CPuthCompiler:
 
         if not target:
             raise CPuthSyntaxError(
-                "Expected target variable(s) after destructuring operator", lineno=lineno
+                "Expected target variable(s) after destructuring operator",
+                lineno=lineno, src=self.src_code
             )
 
         # Token-scan left_side to pinpoint the actual macro keyword
@@ -208,7 +211,8 @@ class CPuthCompiler:
             case "perfume_regret":
                 if not is_statement:
                     raise CPuthSyntaxError(
-                        "perfume_regret can only be used as a statement block", lineno=lineno
+                        "perfume_regret can only be used as a statement block",
+                        lineno=lineno, src=self.src_code
                     )
 
                 if source.startswith('(') and source.endswith(')'):
@@ -221,14 +225,18 @@ class CPuthCompiler:
 
                 # Check both parts are non-empty
                 if not (sub_parts[0] and sub_parts[1]):
-                    raise CPuthSyntaxError("patient expects 'iterable, condition -< name'")
+                    raise CPuthSyntaxError(
+                        "patient expects 'iterable, condition -< name'"
+                    )
 
                 iterable, cond = sub_parts[0].strip(), sub_parts[1].strip()
                 next_expr = f"{target} for {target} in {iterable} if {cond}"
                 translated_expr = f"for {target} in ({next_expr})" if is_statement else next_expr
 
             case bad_kw:
-                raise CPuthSyntaxError(f"invalid macro keyword: {bad_kw}")
+                raise CPuthSyntaxError(
+                    f"invalid macro keyword: {bad_kw}"
+                )
 
         # Prepend the original prefix (e.g., "reader = ") to the result
         return f"{prefix} {translated_expr}".strip()
@@ -333,7 +341,7 @@ class CPuthCompiler:
             if stripped.startswith("until_it_happens_to_you"):
                 raise CPuthSyntaxError(
                     f"Expected 'thats_when_you_said' before 'until_it_happens_to_you' in do-until loop",
-                    lineno=i
+                    lineno=i, src=self.src_code
                 )
 
             if not stripped.startswith("thats_when_you_said:"):
@@ -361,7 +369,9 @@ class CPuthCompiler:
                 j += 1
 
             if closer_idx is None:
-                raise CPuthSyntaxError("unterminated do-until loop", lineno=i)
+                raise CPuthSyntaxError(
+                    "unterminated do-until loop", lineno=i, src=self.src_code
+                )
 
             block_end = closer_idx + 1
             condition = lines[closer_idx][len(indent + "until_it_happens_to_you"):].lstrip()
@@ -563,7 +573,9 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string")
+        raise CPuthSyntaxError(
+            "unterminated f-string"
+        )
 
     def _compile_replacement_field(
             self,
@@ -619,7 +631,9 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string replacement field")
+        raise CPuthSyntaxError(
+            "unterminated f-string replacement field"
+        )
 
     def _compile_replacement_field_tail(
             self,
@@ -645,7 +659,9 @@ class CPuthCompiler:
             out.append(tokens[i])
             return out, i + 1
 
-        raise CPuthSyntaxError("invalid f-string replacement field")
+        raise CPuthSyntaxError(
+            "invalid f-string replacement field"
+        )
 
     def _compile_format_spec(
             self,
@@ -676,7 +692,19 @@ class CPuthCompiler:
             out.append(self._compile_name_token(tok, cputh_map))
             i += 1
 
-        raise CPuthSyntaxError("unterminated f-string format specifier")
+        raise CPuthSyntaxError(
+            "unterminated f-string format specifier"
+        )
+
+    def _preprocess_marvin_gaye(self, src: str, init_flags: int) -> tuple[str, int]:
+        """
+        If the compiler finds `marvin_gaye` at the top of the CPuth source,
+        without a __future__ attribute after it, and before any logic, it blanks
+        out that line, and replaces every integer literal with the value of 9
+        in the source with 13.
+        Returns (modified source, new flags)
+        """
+        return _MarvinGaye().preprocess(src, init_flags)
 
     def compile_tokens(
             self,
@@ -700,25 +728,31 @@ class CPuthCompiler:
 
         return out, i
 
-def compile_cputh_to_py(text: str) -> str:
-    """Compile CPuth source to Python.
+def compile_cputh_to_py(src: str, init_flags: int) -> tuple[str, int]:
+    """Compile CPuth source to Python. Accepts the src and initial compiler flags
+    and returns (compiled code, init flags | any new flags found)
     Throws CPuthTokenError if tokenisation fails.
     Throws CPuthSyntaxError if parsing fails in another way."""
 
-    compiler = CPuthCompiler()
+    compiler = CPuthCompiler(src_code=src)
 
     try:
-        text = compiler._preprocess_do_until_loops(text)
-        text = compiler._preprocess_destructuring_ops(text)
-        text = compiler._rewrite_increment_decrement_lines(text)
-        tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        # preprocessing steps
+        src, new_flags = compiler._preprocess_marvin_gaye(src, init_flags)
+        src = compiler._preprocess_do_until_loops(src)
+        src = compiler._preprocess_destructuring_ops(src)
+        src = compiler._rewrite_increment_decrement_lines(src)
+
+        # final keyword replacement
+        tokens = list(tokenize.generate_tokens(io.StringIO(src).readline))
         translated, _ = compiler.compile_tokens(tokens, CPUTH_MAP)
-        return tokenize.untokenize(translated)
+
+        return (tokenize.untokenize(translated), new_flags)
 
     except tokenize.TokenError as exc:
         raise CPuthTokenError(
             msg=exc.args[0],
             fp=None,  # monkey-patch this with surrounding context by caller if needed: e.fp = input_path
-            src=text,
+            src=src,
             lineno=exc.args[1][0] - 1,  # -1 to convert lineno to 0-based
         ) from exc

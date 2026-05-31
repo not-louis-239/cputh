@@ -1,4 +1,4 @@
-# TEST: RAISE: Exception
+# TEST: RAISE: CPuthSyntaxError
 # perfume_regret = with open(...) so it can only be a statement
 
 reader = perfume_regret "./file.txt", "r" -< handle

@@ -1,3 +1,4 @@
+import linecache
 import sys
 import os
 from pathlib import Path
@@ -5,10 +6,15 @@ from enum import StrEnum
 from typing import Any
 from types import CodeType
 
-_repl_dir = Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ else Path(__file__).parents[3] / "dist"
-sys.path.insert(0, str(_repl_dir))
+_cputh_dir = (
+    Path(os.environ["CPUTH_REF_DIR"]) if "CPUTH_REF_DIR" in os.environ
+    else Path(__file__).parents[3] / "dist"
+)
+sys.path.insert(0, str(_cputh_dir))
+_site_packages = Path(__file__).parent.parent / "site-packages"
+sys.path.insert(0, str(_site_packages))
 
-from cputh.exceptions.errors import CPuthTokenError
+from cputh.exceptions.errors import CPuthTokenError, CPuthSyntaxError
 from cputh.utils.format_tools import (
     COL_REPL_PROMPT,
     COL_BOLD,
@@ -17,11 +23,13 @@ from cputh.utils.format_tools import (
 from cputh.utils.format_exceptions import format_exc
 from cputh._version import version_str
 from cputh.compile.compiler import compile_cputh_to_py
+from cputh.utils.flags import flag_is_active, add_flag, rm_flag, F_MARVIN_GAYE, DEFAULT_STATE
+
 
 # Ctrl-D (EOF) or "we don't talk anymore" to exit the REPL
 
 TOP_LEVEL_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT}cputh>{COL_RESET}"
-NESTED_PROMPT =    f"{COL_BOLD}{COL_REPL_PROMPT}     >{COL_RESET}"
+NESTED_PROMPT = f"{COL_BOLD}{COL_REPL_PROMPT} ... >{COL_RESET}"
 
 class CodeCompilationMode(StrEnum):
     EVAL = "eval"
@@ -30,19 +38,19 @@ class CodeCompilationMode(StrEnum):
 class _CPuthReplExit(Exception):
     pass
 
-def compile_python(py_inp: str) -> tuple[CodeType, CodeCompilationMode]:
+def compile_py_to_bytecode(py_inp: str, filename: str) -> tuple[CodeType, CodeCompilationMode]:
     """Takes a result from compile_cputh_to_py() (Python code) and tries
     to convert it to a bytecode object. Attempts eval first, then exec mode.
     If compilation fails, throws the corresponding Python-side SyntaxError.
     Returns a tuple of (bytecode object, compilation mode)"""
 
     try:
-        code = compile(py_inp, "<cputh-stdin>", "eval")
+        code = compile(py_inp, filename, "eval")
         return (code, CodeCompilationMode.EVAL)
     except SyntaxError:
         # If we get here, eval threw a SyntaxError, so try exec instead
         try:
-            code = compile(py_inp, "<cputh-stdin>", "exec")
+            code = compile(py_inp, filename, "exec")
             return (code, CodeCompilationMode.EXEC)
         except SyntaxError:
             # If we got here, both eval and exec failed, so there is an actual syntax error
@@ -67,59 +75,96 @@ def read_interactive_multiline_input() -> str:
 
     return "\n".join(buf)
 
-def run_repl() -> int:
-    repl_namespace: dict[str, Any] = {}
+class CPuthReplRunner:
+    def __init__(self) -> None:
+        self.compile_flags: int = 0b0
+        self.input_history_count: int = 0
+        self.repl_namespace: dict[str, Any] = {
+            "__doc__": None,
+            "__package__": None,
+        }
 
-    print(f"charlie puth native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+    def run(self) -> int:
+        """Run the CPuth REPL and return an int to use as an exit code."""
 
-    while True:
-        # Handle user input and potential Ctrl-D or Ctrl-C first
-        try:
-            inp = read_interactive_multiline_input()
-            if inp.strip() == "9":
-                print("13")
+        print(f"cputh native repl (v{version_str}) - type \"we don't talk anymore\" or EOF (Ctrl-D) to exit")
+
+        while True:
+            # Handle user input and potential Ctrl-D or Ctrl-C first
+            try:
+                inp = read_interactive_multiline_input()
+                if inp.strip() == "attention":
+                    import webbrowser
+                    webbrowser.open("https://www.youtube.com/watch?v=nfs8NYg7yQM")
+                    continue
+            except _CPuthReplExit:
+                print("see you again.")
+                return 0
+            except EOFError:
+                print("^D\nsee you again.")
+                return 0
+            except KeyboardInterrupt:
+                print("\nkeyboard interrupt")
                 continue
-        except _CPuthReplExit:
-            print("see you again.")
-            return 0
-        except EOFError:
-            print("^D\nsee you again.")
-            return 0
-        except KeyboardInterrupt:
-            print("\nkeyboard interrupt")
-            continue
 
-        # Then try to compile the buffer
-        try:
-            compiled_py = compile_cputh_to_py(inp)
-            bytecode, mode = compile_python(compiled_py)
-        except SyntaxError as e:
-            print(format_exc(e, is_runtime_err=False))
-            continue
-        except CPuthTokenError as e:
-            print(format_exc(e, is_runtime_err=False))
-            continue
+            repl_input_name = f"<cputh-stdin-{self.input_history_count}>"
 
-        # Now try to evaluate or execute the bytecode object
-        try:
-            if mode == CodeCompilationMode.EVAL:
-                # Attempt to evaluate as an expression and print the value if it isn't None
-                result = eval(bytecode, repl_namespace)
-                if result is not None:
-                    print(repr(result))
-            if mode == CodeCompilationMode.EXEC:
-                # Otherwise exec go brrrrrrr!!
-                exec(bytecode, repl_namespace)
+            # Then try to compile the buffer
+            try:
+                compiled_py, new_flags = compile_cputh_to_py(inp, self.compile_flags)
+                self.compile_flags = new_flags
+                bytecode, mode = compile_py_to_bytecode(compiled_py, filename=repl_input_name)
+            except SyntaxError as e:
+                # Making an artificial error object
+                # SyntaxError is 1-based linenos, we want 0-based, so we convert it and guard against None
+                lineno = e.lineno - 1 if e.lineno is not None else None
+                exc = CPuthSyntaxError(
+                    msg=str(e), src=inp, lineno=lineno,
+                    fp=Path(repl_input_name)
+                )
+                print(format_exc(exc, is_runtime_err=False))
+                continue
+            except CPuthTokenError as e:
+                print(format_exc(e, is_runtime_err=False))
+                continue
+            except CPuthSyntaxError as e:
+                print(format_exc(e, is_runtime_err=False))
+                continue
 
-        except BaseException as e:
-            # Catching BaseException is usually bad practice
-            # but if we get here then it was because of a runtime error
-            # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
-            # We just want to print the error and keep going
-            # However, if it's a SystemExit, let it pass through.
-            if isinstance(e, SystemExit):
-                raise
-            print(format_exc(e))
+            linecache.cache[repl_input_name] = (
+                len(inp),
+                None,
+                [line + "\n" for line in inp.splitlines()],
+                repl_input_name,
+            )
+
+            self.input_history_count += 1
+
+            # Now try to evaluate or execute the bytecode object
+            try:
+                if mode == CodeCompilationMode.EVAL:
+                    # Attempt to evaluate as an expression and print the value if it isn't None
+                    result = eval(bytecode, self.repl_namespace)
+                    if result is not None:
+                        print(repr(result))
+                if mode == CodeCompilationMode.EXEC:
+                    # Otherwise exec go brrrrrrr!!
+                    exec(bytecode, self.repl_namespace)
+
+            except BaseException as e:
+                # Catching BaseException is usually bad practice
+                # but if we get here then it was because of a runtime error
+                # in the user's code, and we don't want the REPL (or Charlie Puth) to crash.
+                # We just want to print the error and keep going
+                # However, if it's a SystemExit, let it pass through.
+                if isinstance(e, SystemExit):
+                    raise
+                print(format_exc(e))
+
+def main():
+    runner = CPuthReplRunner()
+    exitcode = runner.run()
+    return exitcode
 
 if __name__ == "__main__":
-    run_repl()
+    main()

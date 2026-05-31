@@ -1,5 +1,7 @@
 # .gitignore
 
+tempCodeRunnerFile.*
+
 workflow/
 .venv
 *.pyc

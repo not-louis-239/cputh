@@ -1,0 +1,7 @@
+# test module
+
+one_call_away foo() -> str:
+    done_for_me "bar"
+
+hear_me_out:
+    foo()

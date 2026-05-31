@@ -166,11 +166,6 @@
         "body": ["ShouldveKnown$0"],
         "description": "False constant"
     },
-    "Nothing": {
-        "prefix": "Nothing",
-        "body": ["Nothing$0"],
-        "description": "None constant"
-    },
     "EmptyCups": {
         "prefix": "EmptyCups",
         "body": ["EmptyCups$0"],

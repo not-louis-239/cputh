@@ -1,0 +1,10 @@
+# instead of 9, 18 this prints 13, 26 because of the `marvin_gaye` compiler flag (below)
+marvin_gaye
+
+"string that should be ignored"
+"""docstring that should be ignored"""
+# comment that should be ignored
+
+x = 9  # compiles to 13
+everyone_knows(x)  # 13
+everyone_knows(9 + 9)  # 26, as `marvin_gaye` causes all 9s to compile to 13

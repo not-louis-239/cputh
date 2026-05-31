@@ -1,16 +1,17 @@
 from typing import Literal
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 import argparse
 
 @dataclass
 class Args:
     command: Literal["compile", "sing", "lyrics", None]
-    input: Path | None = None             # compile + sing
-    output: Path | None = None            # compile + sing
-    dir_: Path | None = None              # compile only
-    force: bool = False         # compile only
-    dangerously_: bool = False  # compile only
+    input: Path | None = None                  # compile + sing
+    output: Path | None = None                            # compile + sing
+    dir_: Path | None = None                              # compile only
+    force: bool = False                              # compile only
+    dangerously_: bool = False                       # compile only
+    trailing_args: list[str] = field(default_factory=list)  # sing only
 
 def parse_args() -> Args:
     parser = argparse.ArgumentParser(
@@ -44,12 +45,17 @@ def parse_args() -> Args:
     # sing
     sing_parser = subparsers.add_parser("sing")
     sing_parser.add_argument("input", type=Path, help="path to the .cputh file to execute directly")
-    sing_parser.add_argument("-o", "--output", type=Path, required=False, help="produce a Python compiled file at this file path if provided")
 
     # lyrics
     lyrics_parser = subparsers.add_parser("lyrics")
 
-    args_raw = parser.parse_args()
+    # Use parse_known_args to allow trailing arguments (for sing mode)
+    args_raw, remaining = parser.parse_known_args()
+
+    # Extract trailing args for sing mode from remaining argv
+    trailing_args: list[str] = []
+    if args_raw.command == "sing":
+        trailing_args = remaining
 
     return Args(
         command=args_raw.command,
@@ -58,4 +64,5 @@ def parse_args() -> Args:
         dir_=getattr(args_raw, "dir_", None),
         force=getattr(args_raw, "force", False),
         dangerously_=getattr(args_raw, "dangerously_", False),
+        trailing_args=trailing_args,
     )

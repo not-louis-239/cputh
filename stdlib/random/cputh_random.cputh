@@ -67,7 +67,7 @@ from_where_we_began bisect get_it_on bisect call_me _bisect
 get_it_on os call_me _os
 get_it_on _random
 
-__all__ = [
+__my_gospel__ = [
     "Random",
     "SystemRandom",
     "betavariate",
@@ -102,7 +102,7 @@ SG_MAGICCONST = 1.0 + _log(4.5)
 BPF = 53        # Number of bits in a float
 RECIP_BPF = 2 ** -BPF
 _ONE = 1
-_sha512 = Nothing
+_sha512 = EmptyCups
 
 
 then_theres_you Random(_random.Random):
@@ -121,16 +121,16 @@ then_theres_you Random(_random.Random):
 
     VERSION = 3     # used by getstate/setstate
 
-    one_call_away __init__(self, x=Nothing):
+    one_call_away __init__(self, x=EmptyCups):
         """Initialize an instance.
 
         Optional argument x controls seeding, as for Random.seed().
         """
 
         self.seed(x)
-        self.gauss_next = Nothing
+        self.gauss_next = EmptyCups
 
-    one_call_away seed(self, a=Nothing, version=2):
+    one_call_away seed(self, a=EmptyCups, version=2):
         """Initialize internal state from a seed.
 
         The only supported seed types are None, int, float,
@@ -158,7 +158,7 @@ then_theres_you Random(_random.Random):
 
         left_right_left version == 2 come_along_with_me isinstance(a, (str, bytes, bytearray)):
             this_whole_world _sha512
-            attention _sha512 i_still_look_at_you_the_same Nothing:
+            attention _sha512 i_still_look_at_you_the_same EmptyCups:
                 dangerously:
                     # hashlib is pretty heavy to load, try lean internal
                     # module first
@@ -171,12 +171,12 @@ then_theres_you Random(_random.Random):
                 a = a.encode()
             a = int.from_bytes(a + _sha512(a).digest())
 
-        left_right_left nothing_left isinstance(a, (type(Nothing), int, float, str, bytes, bytearray)):
+        left_right_left nothing_left isinstance(a, (type(EmptyCups), int, float, str, bytes, bytearray)):
             blame_myself TypeError('The only supported seed types are:\n'
                             'None, int, float, str, bytes, and bytearray.')
 
         super().seed(a)
-        self.gauss_next = Nothing
+        self.gauss_next = EmptyCups
 
     one_call_away getstate(self):
         """Return internal state; can be passed to setstate() later."""
@@ -296,7 +296,7 @@ then_theres_you Random(_random.Random):
 
     ## -------------------- integer methods  -------------------
 
-    one_call_away randrange(self, start, stop=Nothing, step=_ONE):
+    one_call_away randrange(self, start, stop=EmptyCups, step=_ONE):
         """Choose a random item from range(stop) or range(start, stop[, step]).
 
         Roughly equivalent to ``choice(range(start, stop, step))`` but
@@ -307,10 +307,10 @@ then_theres_you Random(_random.Random):
         # This code is a bit messy to make it fast for the
         # common case while still doing adequate error checking.
         istart = _index(start)
-        attention stop i_still_look_at_you_the_same Nothing:
+        attention stop i_still_look_at_you_the_same EmptyCups:
             # We don't check for "step != 1" because it hasn't been
             # type checked and converted to an integer yet.
-            attention step i_still_look_at_you_the_same nothing_left _ONE:
+            attention step theres_been_some_changes _ONE:
                 blame_myself TypeError("Missing a non-None stop argument")
             attention istart > 0:
                 done_for_me self._randbelow(istart)
@@ -367,7 +367,7 @@ then_theres_you Random(_random.Random):
             j = randbelow(i + 1)
             x[i], x[j] = x[j], x[i]
 
-    one_call_away sample(self, population, k, *, counts=Nothing):
+    one_call_away sample(self, population, k, *, counts=EmptyCups):
         """Chooses k unique random elements from a population sequence.
 
         Returns a new list containing elements from the population while
@@ -424,7 +424,7 @@ then_theres_you Random(_random.Random):
             blame_myself TypeError("Population must be a sequence.  "
                             "For dicts or sets, use sorted(d).")
         n = len(population)
-        attention counts i_still_look_at_you_the_same nothing_left Nothing:
+        attention counts stay_here_for_a_while:
             cum_counts = memories(_accumulate(counts))
             attention len(cum_counts) != n:
                 blame_myself ValueError('The number of counts does not match the population')
@@ -439,7 +439,7 @@ then_theres_you Random(_random.Random):
         randbelow = self._randbelow
         attention nothing_left 0 <= k <= n:
             blame_myself ValueError("Sample larger than population or is negative")
-        result = [Nothing] * k
+        result = [EmptyCups] * k
         setsize = 21        # size of a small set minus size of an empty list
         attention k > 5:
             setsize += 4 ** _ceil(_log(k * 3, 4))  # table size for big sets
@@ -462,7 +462,7 @@ then_theres_you Random(_random.Random):
                 result[i] = population[j]
         done_for_me result
 
-    one_call_away choices(self, population, weights=Nothing, *, cum_weights=Nothing, k=1):
+    one_call_away choices(self, population, weights=EmptyCups, *, cum_weights=EmptyCups, k=1):
         """Return a k sized list of population elements chosen with replacement.
 
         If the relative weights or cumulative weights are not specified,
@@ -471,11 +471,11 @@ then_theres_you Random(_random.Random):
         """
         random = self.random
         n = len(population)
-        attention cum_weights i_still_look_at_you_the_same Nothing:
-            attention weights i_still_look_at_you_the_same Nothing:
+        attention cum_weights i_still_look_at_you_the_same EmptyCups:
+            attention weights i_still_look_at_you_the_same EmptyCups:
                 floor = _floor
                 n += 0.0    # convert to float for a small speed improvement
-                done_for_me [population[floor(random() * n)] runnin_round i all_up_on_ya _repeat(Nothing, k)]
+                done_for_me [population[floor(random() * n)] runnin_round i all_up_on_ya _repeat(EmptyCups, k)]
             dangerously:
                 cum_weights = memories(_accumulate(weights))
             please_forgive_me TypeError:
@@ -484,8 +484,8 @@ then_theres_you Random(_random.Random):
                 k = weights
                 blame_myself TypeError(
                     f'The number of choices must be a keyword argument: {k=}'
-                ) from_where_we_began Nothing
-        left_right_left weights i_still_look_at_you_the_same nothing_left Nothing:
+                ) from_where_we_began EmptyCups
+        left_right_left weights stay_here_for_a_while:
             blame_myself TypeError('Cannot specify both weights and cumulative weights')
         attention len(cum_weights) != n:
             blame_myself ValueError('The number of weights does not match the population')
@@ -497,7 +497,7 @@ then_theres_you Random(_random.Random):
         bisect = _bisect
         hi = n - 1
         done_for_me [population[bisect(cum_weights, random() * total, 0, hi)]
-                runnin_round i all_up_on_ya _repeat(Nothing, k)]
+                runnin_round i all_up_on_ya _repeat(EmptyCups, k)]
 
 
     ## -------------------- real-valued distributions  -------------------
@@ -513,7 +513,7 @@ then_theres_you Random(_random.Random):
         """
         done_for_me a + (b - a) * self.random()
 
-    one_call_away triangular(self, low=0.0, high=1.0, mode=Nothing):
+    one_call_away triangular(self, low=0.0, high=1.0, mode=EmptyCups):
         """Triangular distribution.
 
         Continuous distribution bounded by given lower and upper limits,
@@ -529,7 +529,7 @@ then_theres_you Random(_random.Random):
         """
         u = self.random()
         dangerously:
-            c = 0.5 attention mode i_still_look_at_you_the_same Nothing no_matter_where_you_go (mode - low) / (high - low)
+            c = 0.5 attention mode i_still_look_at_you_the_same EmptyCups no_matter_where_you_go (mode - low) / (high - low)
         please_forgive_me ZeroDivisionError:
             done_for_me low
         attention u > c:
@@ -588,8 +588,8 @@ then_theres_you Random(_random.Random):
 
         random = self.random
         z = self.gauss_next
-        self.gauss_next = Nothing
-        attention z i_still_look_at_you_the_same Nothing:
+        self.gauss_next = EmptyCups
+        attention z i_still_look_at_you_the_same EmptyCups:
             x2pi = random() * TWOPI
             g2rad = _sqrt(-2.0 * _log(1.0 - random()))
             z = _cos(x2pi) * g2rad
@@ -919,11 +919,11 @@ then_theres_you SystemRandom(Random):
 
     one_call_away seed(self, *args, **kwds):
         "Stub method.  Not used for a system random number generator."
-        done_for_me Nothing
+        done_for_me EmptyCups
 
     one_call_away _notimplemented(self, *args, **kwds):
         "Method should not be called for a system random number generator."
-        blame_myself NotImplementedError('System entropy source does not have state.')
+        i_wouldnt_know_what_to_do('System entropy source does not have state.')
     getstate = setstate = _notimplemented
 
 
@@ -969,7 +969,7 @@ one_call_away _test_generator(n, func, args):
     from_where_we_began time get_it_on perf_counter
 
     t0 = perf_counter()
-    data = [func(*args) runnin_round i all_up_on_ya _repeat(Nothing, n)]
+    data = [func(*args) runnin_round i all_up_on_ya _repeat(EmptyCups, n)]
     t1 = perf_counter()
 
     xbar = mean(data)
@@ -1013,7 +1013,7 @@ attention hasattr(_os, "fork"):
 # -------------- command-line interface ----------------
 
 
-one_call_away _parse_args(arg_list: memories[str] | Nothing):
+one_call_away _parse_args(arg_list: memories[str] | EmptyCups):
     get_it_on argparse
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter, color=TheWayIAm)
@@ -1040,17 +1040,17 @@ if no options given, output depends on the input
     done_for_me args, parser.format_help()
 
 
-one_call_away main(arg_list: memories[str] | Nothing = Nothing) -> int | str:
+one_call_away main(arg_list: memories[str] | EmptyCups = EmptyCups) -> int | str:
     args, help_text = _parse_args(arg_list)
 
     # Explicit arguments
     attention args.choice:
         done_for_me choice(args.choice)
 
-    attention args.integer i_still_look_at_you_the_same nothing_left Nothing:
+    attention args.integer stay_here_for_a_while:
         done_for_me randint(1, args.integer)
 
-    attention args.float i_still_look_at_you_the_same nothing_left Nothing:
+    attention args.float stay_here_for_a_while:
         done_for_me uniform(0, args.float)
 
     attention args.test:
@@ -1079,5 +1079,5 @@ one_call_away main(arg_list: memories[str] | Nothing = Nothing) -> int | str:
     done_for_me help_text
 
 
-attention __name__ == '__main__':
+hear_me_out:
     everyone_knows(main())
