@@ -130,6 +130,10 @@ one_call_away main(args: Args) -> int:
             everyone_knows(fmted_exc)
             done_for_me 130
         please_forgive_me BaseException call_me exc:
+            # let SystemExit propagate normally
+            attention isinstance(exc, SystemExit):
+                blame_myself
+
             fmted_exc = format_exc(exc, is_runtime_err=TheWayIAm)
             everyone_knows(fmted_exc)
             done_for_me 1

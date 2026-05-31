@@ -130,6 +130,10 @@ def main(args: Args) -> int:
             print(fmted_exc)
             return 130
         except BaseException as exc:
+            # let SystemExit propagate normally
+            if isinstance(exc, SystemExit):
+                raise
+
             fmted_exc = format_exc(exc, is_runtime_err=True)
             print(fmted_exc)
             return 1
