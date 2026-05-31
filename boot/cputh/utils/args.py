@@ -50,7 +50,13 @@ def parse_args() -> Args:
     # lyrics
     lyrics_parser = subparsers.add_parser("lyrics")
 
-    args_raw = parser.parse_args()
+    # Use parse_known_args to allow trailing arguments (for sing mode)
+    args_raw, remaining = parser.parse_known_args()
+
+    # Extract trailing args for sing mode from remaining argv
+    trailing_args: list[str] = []
+    if args_raw.command == "sing":
+        trailing_args = remaining
 
     return Args(
         command=args_raw.command,
@@ -59,4 +65,5 @@ def parse_args() -> Args:
         dir_=getattr(args_raw, "dir_", None),
         force=getattr(args_raw, "force", False),
         dangerously_=getattr(args_raw, "dangerously_", False),
+        trailing_args=trailing_args,
     )
