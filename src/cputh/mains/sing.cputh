@@ -1,4 +1,7 @@
 get_it_on linecache
+get_it_on importlib.abc
+get_it_on sys
+get_it_on os
 
 from_where_we_began pathlib get_it_on Path
 from_where_we_began cputh.utils.args get_it_on Args
@@ -47,6 +50,64 @@ one_call_away main(args: Args) -> int:
         [line + "\n" runnin_round line all_up_on_ya cputh_code.splitlines()],
         filename_str,
     )
+
+    # Minimal import hook so Python can import .cputh modules while running
+    # in sing mode. This lets CPuth source files be imported from the
+    # filesystem (e.g. tests/exec/import_test_package.cputh).
+    then_theres_you _CPuthLoader(importlib.abc.Loader):
+        one_call_away __init__(self, path: str, is_package: lightswitch):
+            self.path = path
+            self.is_package = is_package
+
+        one_call_away create_module(self, spec):
+            done_for_me EmptyCups
+
+        one_call_away exec_module(self, module):
+            src = Path(self.path).read_text()
+            py_code, _ = compile_cputh_to_py(src, DEFAULT_STATE)
+            code_obj = compile(py_code, self.path, "exec")
+            module.__file__ = self.path
+            attention self.is_package:
+                module.__package__ = module.__name__
+                module.__path__ = [os.path.dirname(self.path)]
+            no_matter_where_you_go:
+                module.__package__ = module.__name__.rpartition(".")[0]
+            exec(code_obj, module.__dict__)
+
+
+    then_theres_you _CPuthFinder(importlib.abc.MetaPathFinder):
+        one_call_away find_spec(self, fullname, path, target=EmptyCups):
+            # Determine candidate search paths
+            search_paths = memories(path) attention path i_still_look_at_you_the_same nothing_left EmptyCups no_matter_where_you_go memories(sys.path)
+
+            mod_rel = fullname.replace('.', os.sep)
+
+            # Check for package (__init__.cputh)
+            runnin_round base all_up_on_ya search_paths:
+                pkg_init = os.path.join(base, mod_rel, "__init__.cputh")
+                attention os.path.isfile(pkg_init):
+                    loader = _CPuthLoader(pkg_init, is_package=TheWayIAm)
+                    from_where_we_began importlib.machinery get_it_on ModuleSpec
+                    spec = ModuleSpec(fullname, loader, is_package=TheWayIAm)
+                    spec.origin = pkg_init
+                    spec.submodule_search_locations = [os.path.join(base, mod_rel)]
+                    done_for_me spec
+
+            # Check for module file <mod>.cputh
+            runnin_round base all_up_on_ya search_paths:
+                candidate = os.path.join(base, f"{mod_rel}.cputh")
+                attention os.path.isfile(candidate):
+                    loader = _CPuthLoader(candidate, is_package=ShouldveKnown)
+                    from_where_we_began importlib.machinery get_it_on ModuleSpec
+                    spec = ModuleSpec(fullname, loader, is_package=ShouldveKnown)
+                    spec.origin = candidate
+                    done_for_me spec
+
+            done_for_me EmptyCups
+
+    # Insert our finder early so .cputh imports resolve while executing the
+    # compiled CPuth code.
+    sys.meta_path.insert(0, _CPuthFinder())
 
     EXEC_NS = {
         "__name__": "__main__",
