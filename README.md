@@ -6,7 +6,7 @@
 
 *You just want attention; your night has just begun. Maybe it's that unmatched paren on line 42*
 
-Python but all the keywords are Charlie Puth lyrics. Inspired by the man the myth the legend's new album, *Changes*, and the personality injection of ArnoldC, now the compiler has feelings about that extra space, and the REPL cries in falsetto. On top of that, the CPuth compiler is written in CPuth, because why not?
+Python but all the keywords are Charlie Puth lyrics. Inspired by the man the myth the legend's new album, *Whatever's Clever*, and the personality injection of ArnoldC, now the compiler has feelings about that extra space, and the REPL cries in falsetto. On top of that, the CPuth compiler is written in CPuth, because why not?
 
 Free syntax highlighting extension for VS Code included! (see install details under Installation)
 
